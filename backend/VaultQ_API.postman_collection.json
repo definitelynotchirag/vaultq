@@ -1,0 +1,509 @@
+{
+	"info": {
+		"_postman_id": "vaultq-api-collection",
+		"name": "VaultQ API Collection",
+		"description": "Complete API collection for VaultQ backend with demo data",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Check if the server is running"
+					}
+				}
+			]
+		},
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Initiate Google OAuth",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/google",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"google"
+							]
+						},
+						"description": "Initiates Google OAuth authentication flow. This will redirect to Google's login page. Note: In Postman, you'll need to follow redirects or use a browser."
+					}
+				},
+				{
+					"name": "Google OAuth Callback",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/google/callback?code=4/0AeanRq...&scope=email%20profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"google",
+								"callback"
+							],
+							"query": [
+								{
+									"key": "code",
+									"value": "4/0AeanRq...",
+									"description": "Authorization code from Google (automatically provided)"
+								},
+								{
+									"key": "scope",
+									"value": "email profile",
+									"description": "OAuth scopes"
+								}
+							]
+						},
+						"description": "OAuth callback endpoint. This is called by Google after authentication. Note: Requires session cookies from the initial OAuth request."
+					}
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						},
+						"description": "Get the currently authenticated user. Requires authentication (session cookie)."
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Logout the current user. Requires authentication (session cookie)."
+					}
+				},
+				{
+					"name": "Auth Success",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/success",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"success"
+							]
+						},
+						"description": "Success endpoint after OAuth authentication"
+					}
+				},
+				{
+					"name": "Auth Failure",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/failure",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"failure"
+							]
+						},
+						"description": "Failure endpoint after OAuth authentication"
+					}
+				}
+			]
+		},
+		{
+			"name": "Files",
+			"item": [
+				{
+					"name": "Get Upload URL",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"originalName\": \"example-document.pdf\",\n  \"size\": 5242880\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/files/upload-url",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"files",
+								"upload-url"
+							]
+						},
+						"description": "Get a presigned URL for uploading a file to S3. Requires authentication. Max file size: 100MB (104857600 bytes)."
+					}
+				},
+				{
+					"name": "Confirm Upload",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"originalName\": \"example-document.pdf\",\n  \"storageName\": \"files/abc123def456/example-document.pdf\",\n  \"url\": \"https://your-bucket.s3.amazonaws.com/files/abc123def456/example-document.pdf\",\n  \"size\": 5242880\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/files/confirm-upload",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"files",
+								"confirm-upload"
+							]
+						},
+						"description": "Confirm file upload and save file metadata to database. Call this after successfully uploading to S3 using the presigned URL. Requires authentication."
+					}
+				},
+				{
+					"name": "List Files",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/files?search=document",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"files"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "document",
+									"description": "Optional search query to filter files by name",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get list of all accessible files (owned, shared, or public). Optional search parameter to filter by filename. Requires authentication."
+					}
+				},
+				{
+					"name": "List Files (No Search)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/files",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"files"
+							]
+						},
+						"description": "Get list of all accessible files without search filter. Requires authentication."
+					}
+				},
+				{
+					"name": "Update File (Rename)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"originalName\": \"renamed-document.pdf\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/files/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"files",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "507f1f77bcf86cd799439011",
+									"description": "File ID (MongoDB ObjectId)"
+								}
+							]
+						},
+						"description": "Rename a file. Requires authentication and write access to the file."
+					}
+				},
+				{
+					"name": "Delete File",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/files/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"files",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "507f1f77bcf86cd799439011",
+									"description": "File ID (MongoDB ObjectId)"
+								}
+							]
+						},
+						"description": "Delete a file from both database and S3. Requires authentication and write access to the file."
+					}
+				},
+				{
+					"name": "Get Download URL",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/files/:id/download",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"files",
+								":id",
+								"download"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "507f1f77bcf86cd799439011",
+									"description": "File ID (MongoDB ObjectId)"
+								}
+							]
+						},
+						"description": "Get a presigned download URL for a file. URL expires in 15 minutes. Requires authentication and read access to the file."
+					}
+				}
+			]
+		},
+		{
+			"name": "Sharing",
+			"item": [
+				{
+					"name": "Share File with User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"507f1f77bcf86cd799439012\",\n  \"level\": \"read\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/files/:id/share",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"files",
+								":id",
+								"share"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "507f1f77bcf86cd799439011",
+									"description": "File ID (MongoDB ObjectId)"
+								}
+							]
+						},
+						"description": "Share a file with another user. Level can be 'read' or 'write'. Requires authentication and write access to the file."
+					}
+				},
+				{
+					"name": "Share File with Write Access",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"507f1f77bcf86cd799439012\",\n  \"level\": \"write\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/files/:id/share",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"files",
+								":id",
+								"share"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "507f1f77bcf86cd799439011",
+									"description": "File ID (MongoDB ObjectId)"
+								}
+							]
+						},
+						"description": "Share a file with write access. Requires authentication and write access to the file."
+					}
+				},
+				{
+					"name": "Make File Public",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/files/:id/public",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"files",
+								":id",
+								"public"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "507f1f77bcf86cd799439011",
+									"description": "File ID (MongoDB ObjectId)"
+								}
+							]
+						},
+						"description": "Make a file publicly accessible (read-only for all users). Requires authentication and write access to the file."
+					}
+				},
+				{
+					"name": "Make File Private",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/files/:id/private",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"files",
+								":id",
+								"private"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "507f1f77bcf86cd799439011",
+									"description": "File ID (MongoDB ObjectId)"
+								}
+							]
+						},
+						"description": "Make a file private (only owner and users with explicit permissions can access). Requires authentication and write access to the file."
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	]
+}
+
