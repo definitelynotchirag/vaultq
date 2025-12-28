@@ -103,15 +103,25 @@ export function FileCard({
         {getFileIcon()}
         
         {showCheckbox && (
-          <div className="absolute top-2 left-2">
-            <div className={`w-[18px] h-[18px] rounded border-2 flex items-center justify-center transition-colors ${
+          <div className="absolute top-3 left-3">
+            <div className={`w-5 h-5 rounded-sm border-2 flex items-center justify-center transition-colors ${
               selected
                 ? 'bg-[#1a73e8] border-[#1a73e8]'
                 : 'bg-white border-[#5f6368] hover:border-[#1a73e8]'
             }`}>
-              {selected && <Check size={12} color="white" />}
+              {selected && <Check size={14} color="white" strokeWidth={3} />}
             </div>
           </div>
+        )}
+        
+        {!showCheckbox && onStar && isStarred && (
+          <button
+            onClick={handleStarClick}
+            className="absolute top-3 left-3 w-8 h-8 bg-transparent rounded-full flex items-center justify-center text-[#f4b400] transition-colors"
+            aria-label="Starred"
+          >
+            <Star size={20} className="fill-current" />
+          </button>
         )}
         
         {hovered && (
@@ -119,36 +129,29 @@ export function FileCard({
             {onStar && (
               <button
                 onClick={handleStarClick}
-                className={`absolute top-2 right-10 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                className={`absolute top-3 right-12 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
                   isStarred
-                    ? 'bg-yellow-400 hover:bg-yellow-500 text-white'
-                    : 'bg-white hover:bg-gray-100 text-[#5f6368] shadow-sm'
+                    ? 'bg-[#feefc3] hover:bg-[#fde293] text-[#f4b400]'
+                    : 'bg-white hover:bg-[#f1f3f4] text-[#5f6368] shadow-[0_1px_2px_rgba(0,0,0,.3),0_1px_3px_1px_rgba(0,0,0,.15)]'
                 }`}
+                aria-label={isStarred ? 'Remove star' : 'Add star'}
               >
-                <Star size={16} className={isStarred ? 'fill-current' : ''} />
+                <Star size={18} className={isStarred ? 'fill-current' : ''} />
               </button>
             )}
             <button
               onClick={handleMenuClick}
-              className="absolute top-2 right-2 w-8 h-8 bg-white hover:bg-gray-100 rounded-full flex items-center justify-center text-[#5f6368] shadow-sm transition-colors"
+              className="absolute top-3 right-3 w-8 h-8 bg-white hover:bg-[#f1f3f4] rounded-full flex items-center justify-center text-[#5f6368] shadow-[0_1px_2px_rgba(0,0,0,.3),0_1px_3px_1px_rgba(0,0,0,.15)] transition-colors"
+              aria-label="More actions"
             >
-              <MoreVertical size={16} />
+              <MoreVertical size={18} />
             </button>
           </>
-        )}
-        
-        {!hovered && onStar && isStarred && (
-          <button
-            onClick={handleStarClick}
-            className="absolute top-2 left-2 w-8 h-8 bg-yellow-400 hover:bg-yellow-500 rounded-full flex items-center justify-center text-white transition-colors"
-          >
-            <Star size={16} className="fill-current" />
-          </button>
         )}
       </div>
       
       <div className="p-4">
-        <div className="text-sm text-[#202124] font-normal overflow-hidden text-ellipsis whitespace-nowrap mb-2">
+        <div className="text-sm text-[#202124] font-normal overflow-hidden text-ellipsis whitespace-nowrap mb-1.5">
           {file.originalName}
         </div>
         <div className="text-xs text-[#5f6368] flex items-center gap-1.5">
