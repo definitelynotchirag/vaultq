@@ -49,23 +49,26 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
   };
 
   return (
-    <div className="fixed right-0 top-16 w-full sm:w-[360px] h-[calc(100vh-64px)] bg-white border-l border-[#e5e5e5] overflow-y-auto z-40">
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-normal text-[#202124]">Details</h2>
+    <div className="fixed right-0 top-16 w-full sm:w-[340px] md:w-[360px] h-[calc(100vh-64px)] bg-white border-l border-[#e5e5e5] overflow-y-auto z-40 shadow-lg sm:shadow-none">
+      <div className="p-4 sm:p-5 md:p-6">
+        <div className="flex items-center justify-between mb-4 sm:mb-5 md:mb-6">
+          <h2 className="text-base sm:text-lg font-normal text-[#202124]">Details</h2>
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-full hover:bg-[#f1f3f4] flex items-center justify-center transition-colors"
+            aria-label="Close details"
           >
             <X size={18} className="text-[#5f6368]" />
           </button>
         </div>
 
-        <div className="w-full h-[200px] bg-[#f1f3f4] rounded-lg flex items-center justify-center mb-6">
-          {getFileIcon()}
+        <div className="w-full h-[160px] sm:h-[180px] md:h-[200px] bg-[#f1f3f4] rounded-lg flex items-center justify-center mb-4 sm:mb-5 md:mb-6">
+          <div className="scale-90 sm:scale-100">
+            {getFileIcon()}
+          </div>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-5 md:mb-6">
           <div className="text-[11px] font-medium text-[#5f6368] uppercase tracking-wide mb-2">
             Name
           </div>
@@ -74,7 +77,7 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
           </div>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-5 md:mb-6">
           <div className="text-[11px] font-medium text-[#5f6368] uppercase tracking-wide mb-2">
             Size
           </div>
@@ -83,7 +86,7 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
           </div>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-5 md:mb-6">
           <div className="text-[11px] font-medium text-[#5f6368] uppercase tracking-wide mb-2">
             Modified
           </div>
@@ -92,7 +95,7 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
           </div>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-5 md:mb-6">
           <div className="text-[11px] font-medium text-[#5f6368] uppercase tracking-wide mb-2">
             Created
           </div>
@@ -101,7 +104,7 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
           </div>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-5 md:mb-6">
           <div className="text-[11px] font-medium text-[#5f6368] uppercase tracking-wide mb-2">
             Owner
           </div>
@@ -111,7 +114,7 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
         </div>
 
         {file.public && (
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-5 md:mb-6">
             <div className="text-[11px] font-medium text-[#5f6368] uppercase tracking-wide mb-2">
               Sharing
             </div>

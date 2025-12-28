@@ -245,48 +245,50 @@ export default function HomePage() {
                 }
               }}
             >
-              <div className="px-4 md:px-8 py-6 md:py-8 mt-0">
-                <div className="flex items-center justify-between mb-4 md:mb-6">
-                  <h1 className="text-xl md:text-[22px] font-normal text-[#202124]">My Drive</h1>
+              <div className="px-3 sm:px-4 md:px-8 py-4 sm:py-5 md:py-6 lg:py-8 mt-0">
+                <div className="flex items-center justify-between mb-3 sm:mb-4 md:mb-6">
+                  <h1 className="text-lg sm:text-xl md:text-[22px] font-normal text-[#202124]">My Drive</h1>
                   
                   <div className="flex items-center gap-2">
                     <div className="flex items-center border border-[#dadce0] rounded">
                       <button
                         onClick={() => setViewMode('grid')}
-                        className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center transition-colors ${
+                        className={`w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 flex items-center justify-center transition-colors ${
                           viewMode === 'grid'
                             ? 'bg-[#e8eaed]'
                             : 'bg-white hover:bg-[#f1f3f4]'
                         }`}
+                        aria-label="Grid view"
                       >
-                        <Grid3x3 size={16} className="md:w-[18px] md:h-[18px] text-[#5f6368]" />
+                        <Grid3x3 size={16} className="sm:w-[17px] sm:h-[17px] md:w-[18px] md:h-[18px] text-[#5f6368]" />
                       </button>
                       <button
                         onClick={() => setViewMode('list')}
-                        className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center border-l border-[#dadce0] transition-colors ${
+                        className={`w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 flex items-center justify-center border-l border-[#dadce0] transition-colors ${
                           viewMode === 'list'
                             ? 'bg-[#e8eaed]'
                             : 'bg-white hover:bg-[#f1f3f4]'
                         }`}
+                        aria-label="List view"
                       >
-                        <List size={16} className="md:w-[18px] md:h-[18px] text-[#5f6368]" />
+                        <List size={16} className="sm:w-[17px] sm:h-[17px] md:w-[18px] md:h-[18px] text-[#5f6368]" />
                       </button>
                     </div>
                   </div>
                 </div>
 
-                <div className="h-12 flex items-center border-b border-[#e5e5e5] mb-4 md:mb-6 gap-3 md:gap-4 overflow-x-auto">
-                  <button className="h-8 px-3 rounded flex items-center gap-2 text-sm text-[#5f6368] hover:bg-gray-100 transition-colors whitespace-nowrap">
+                <div className="h-10 sm:h-11 md:h-12 flex items-center border-b border-[#e5e5e5] mb-3 sm:mb-4 md:mb-6 gap-2 sm:gap-3 md:gap-4 overflow-x-auto hide-scrollbar">
+                  <button className="h-7 sm:h-8 px-2.5 sm:px-3 rounded flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-[#5f6368] hover:bg-gray-100 transition-colors whitespace-nowrap flex-shrink-0">
                     Type
-                    <ChevronDown size={16} />
+                    <ChevronDown size={14} className="sm:w-4 sm:h-4" />
                   </button>
-                  <button className="h-8 px-3 rounded flex items-center gap-2 text-sm text-[#5f6368] hover:bg-gray-100 transition-colors whitespace-nowrap">
+                  <button className="h-7 sm:h-8 px-2.5 sm:px-3 rounded flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-[#5f6368] hover:bg-gray-100 transition-colors whitespace-nowrap flex-shrink-0">
                     People
-                    <ChevronDown size={16} />
+                    <ChevronDown size={14} className="sm:w-4 sm:h-4" />
                   </button>
-                  <button className="h-8 px-3 rounded flex items-center gap-2 text-sm text-[#5f6368] hover:bg-gray-100 transition-colors whitespace-nowrap">
+                  <button className="h-7 sm:h-8 px-2.5 sm:px-3 rounded flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-[#5f6368] hover:bg-gray-100 transition-colors whitespace-nowrap flex-shrink-0">
                     Modified
-                    <ChevronDown size={16} />
+                    <ChevronDown size={14} className="sm:w-4 sm:h-4" />
                   </button>
                 </div>
 

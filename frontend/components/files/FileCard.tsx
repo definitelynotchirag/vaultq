@@ -99,19 +99,31 @@ export function FileCard({
       onClick={handleClick}
       onDoubleClick={() => onDoubleClick && onDoubleClick(file)}
     >
-      <div className="h-[180px] bg-[#f1f3f4] rounded-t-lg flex items-center justify-center relative">
-        {getFileIcon()}
+      <div className="h-[140px] sm:h-[160px] md:h-[180px] bg-[#f1f3f4] rounded-t-lg flex items-center justify-center relative">
+        <div className="scale-75 sm:scale-90 md:scale-100">
+          {getFileIcon()}
+        </div>
         
         {showCheckbox && (
-          <div className="absolute top-2 left-2">
-            <div className={`w-[18px] h-[18px] rounded border-2 flex items-center justify-center transition-colors ${
+          <div className="absolute top-2 sm:top-3 left-2 sm:left-3">
+            <div className={`w-5 h-5 rounded-sm border-2 flex items-center justify-center transition-colors ${
               selected
                 ? 'bg-[#1a73e8] border-[#1a73e8]'
                 : 'bg-white border-[#5f6368] hover:border-[#1a73e8]'
             }`}>
-              {selected && <Check size={12} color="white" />}
+              {selected && <Check size={14} color="white" strokeWidth={3} />}
             </div>
           </div>
+        )}
+        
+        {!showCheckbox && onStar && isStarred && (
+          <button
+            onClick={handleStarClick}
+            className="absolute top-2 sm:top-3 left-2 sm:left-3 w-7 h-7 sm:w-8 sm:h-8 bg-transparent rounded-full flex items-center justify-center text-[#f4b400] transition-colors"
+            aria-label="Starred"
+          >
+            <Star size={18} className="sm:w-5 sm:h-5 fill-current" />
+          </button>
         )}
         
         {hovered && (
@@ -119,40 +131,33 @@ export function FileCard({
             {onStar && (
               <button
                 onClick={handleStarClick}
-                className={`absolute top-2 right-10 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                className={`absolute top-2 sm:top-3 right-10 sm:right-12 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-colors ${
                   isStarred
-                    ? 'bg-yellow-400 hover:bg-yellow-500 text-white'
-                    : 'bg-white hover:bg-gray-100 text-[#5f6368] shadow-sm'
+                    ? 'bg-[#feefc3] hover:bg-[#fde293] text-[#f4b400]'
+                    : 'bg-white hover:bg-[#f1f3f4] text-[#5f6368] shadow-[0_1px_2px_rgba(0,0,0,.3),0_1px_3px_1px_rgba(0,0,0,.15)]'
                 }`}
+                aria-label={isStarred ? 'Remove star' : 'Add star'}
               >
-                <Star size={16} className={isStarred ? 'fill-current' : ''} />
+                <Star size={16} className={`sm:w-[18px] sm:h-[18px] ${isStarred ? 'fill-current' : ''}`} />
               </button>
             )}
             <button
               onClick={handleMenuClick}
-              className="absolute top-2 right-2 w-8 h-8 bg-white hover:bg-gray-100 rounded-full flex items-center justify-center text-[#5f6368] shadow-sm transition-colors"
+              className="absolute top-2 sm:top-3 right-2 sm:right-3 w-7 h-7 sm:w-8 sm:h-8 bg-white hover:bg-[#f1f3f4] rounded-full flex items-center justify-center text-[#5f6368] shadow-[0_1px_2px_rgba(0,0,0,.3),0_1px_3px_1px_rgba(0,0,0,.15)] transition-colors"
+              aria-label="More actions"
             >
-              <MoreVertical size={16} />
+              <MoreVertical size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
           </>
         )}
-        
-        {!hovered && onStar && isStarred && (
-          <button
-            onClick={handleStarClick}
-            className="absolute top-2 left-2 w-8 h-8 bg-yellow-400 hover:bg-yellow-500 rounded-full flex items-center justify-center text-white transition-colors"
-          >
-            <Star size={16} className="fill-current" />
-          </button>
-        )}
       </div>
       
-      <div className="p-4">
-        <div className="text-sm text-[#202124] font-normal overflow-hidden text-ellipsis whitespace-nowrap mb-2">
+      <div className="p-3 sm:p-3.5 md:p-4">
+        <div className="text-xs sm:text-sm text-[#202124] font-normal overflow-hidden text-ellipsis whitespace-nowrap mb-1 sm:mb-1.5">
           {file.originalName}
         </div>
-        <div className="text-xs text-[#5f6368] flex items-center gap-1.5">
-          <span>{formatDate(file.updatedAt)}</span>
+        <div className="text-[11px] sm:text-xs text-[#5f6368] flex items-center gap-1 sm:gap-1.5">
+          <span className="truncate">{formatDate(file.updatedAt)}</span>
           <span>•</span>
           <span>{formatFileSize(file.size)}</span>
         </div>
