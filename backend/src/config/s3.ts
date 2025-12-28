@@ -17,3 +17,4 @@ export const s3 = new AWS.S3({
 export const S3_BUCKET = process.env.S3_BUCKET_NAME;
 
 
+

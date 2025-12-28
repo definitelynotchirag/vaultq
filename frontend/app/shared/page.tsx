@@ -1,22 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { DeleteDialog } from '@/components/files/DeleteDialog';
+import { FileContextMenu } from '@/components/files/FileContextMenu';
+import { FileInfoDialog } from '@/components/files/FileInfoDialog';
+import { FileViewer } from '@/components/files/FileViewer';
+import { RenameDialog } from '@/components/files/RenameDialog';
+import { ShareDialog } from '@/components/files/ShareDialog';
+import { UploadDialog } from '@/components/files/UploadDialog';
+import { FileGrid } from '@/components/layout/FileGrid';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
-import { FileGrid } from '@/components/layout/FileGrid';
-import { UploadDialog } from '@/components/files/UploadDialog';
-import { FileContextMenu } from '@/components/files/FileContextMenu';
-import { RenameDialog } from '@/components/files/RenameDialog';
-import { DeleteDialog } from '@/components/files/DeleteDialog';
-import { ShareDialog } from '@/components/files/ShareDialog';
-import { FileViewer } from '@/components/files/FileViewer';
-import { FileInfoDialog } from '@/components/files/FileInfoDialog';
-import { useFiles } from '@/hooks/useFiles';
 import { useAuth } from '@/hooks/useAuth';
-import { File } from '@/types';
+import { useFiles } from '@/hooks/useFiles';
 import { api } from '@/lib/api';
-import { ChevronDown } from 'lucide-react';
+import { File } from '@/types';
+import { useEffect, useState } from 'react';
 
 export default function SharedPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -108,7 +107,7 @@ export default function SharedPage() {
       <div className="h-screen bg-white text-[#202124] overflow-hidden relative flex flex-col">
         <TopBar onSearch={setSearchQuery} searchQuery={searchQuery} />
         
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden pt-16">
           <Sidebar onNewClick={() => setShowUploadDialog(true)} />
           
           <main 
@@ -118,7 +117,7 @@ export default function SharedPage() {
             <div 
               className="flex-1 overflow-y-auto transition-all w-full"
             >
-              <div className="px-4 md:px-8 py-6 md:py-8 mt-0">
+              <div className="px-4 md:px-8 py-6 md:py-8">
                 <div className="mb-4 md:mb-6">
                   <h1 className="text-xl md:text-[22px] font-normal text-[#202124] mb-4 md:mb-6">Shared with me</h1>
                   <div className="h-12 flex items-center border-b border-[#e5e5e5] mb-4 md:mb-6 gap-3 md:gap-4 overflow-x-auto">

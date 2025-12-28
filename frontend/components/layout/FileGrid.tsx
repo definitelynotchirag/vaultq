@@ -1,7 +1,7 @@
 'use client';
 
-import { File } from '@/types';
 import { FileCard } from '@/components/files/FileCard';
+import { File } from '@/types';
 
 interface FileGridProps {
   files: File[];
@@ -24,7 +24,7 @@ export function FileGrid({
 }: FileGridProps) {
   if (loading) {
     return (
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3 md:gap-4 lg:gap-5">
+      <div className="grid gap-3 md:gap-4 lg:gap-5">
         {[...Array(10)].map((_, i) => (
           <div
             key={i}
@@ -52,7 +52,7 @@ export function FileGrid({
   }
 
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3 md:gap-4 lg:gap-5 w-full">
+    <div className="grid mt-20 grid-cols-[repeat(auto-fill,minmax(160px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3 md:gap-4 lg:gap-5 w-full">
       {files.map((file) => (
         <FileCard
           key={file._id}

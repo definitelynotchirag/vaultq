@@ -98,7 +98,7 @@ export default function StarredPage() {
       <div className="h-screen bg-white text-[#202124] overflow-hidden relative flex flex-col">
         <TopBar onSearch={setSearchQuery} searchQuery={searchQuery} />
         
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden pt-16">
           <Sidebar onNewClick={() => setShowUploadDialog(true)} />
           
           <main 
@@ -108,7 +108,7 @@ export default function StarredPage() {
             <div 
               className="flex-1 overflow-y-auto transition-all w-full"
             >
-              <div className="px-4 md:px-8 py-6 md:py-8 mt-0">
+              <div className="px-4 md:px-8 py-6 md:py-8">
                 <div className="mb-4 md:mb-6">
                   <h1 className="text-xl md:text-[22px] font-normal text-[#202124] mb-4 md:mb-6">Starred</h1>
                   <div className="h-12 flex items-center border-b border-[#e5e5e5] mb-4 md:mb-6 gap-3 md:gap-4 overflow-x-auto">

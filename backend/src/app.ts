@@ -23,15 +23,18 @@ import sharedRoutes from './routes/shared';
 const app: Application = express();
 
 // Trust proxy - required when running behind a reverse proxy (Docker, nginx, etc.)
-// This allows express-rate-limit to correctly identify users via X-Forwarded-For header
-app.set('trust proxy', true);
+app.set('trust proxy', 1);
 
 // CORS origin must be set via FRONTEND_URL environment variable
-// Remove trailing slash to match browser origin format
 const frontendUrl = process.env.FRONTEND_URL?.replace(/\/$/, '');
 if (!frontendUrl) {
   throw new Error('FRONTEND_URL environment variable is required');
 }
+
+console.log('--- Production Config Check ---');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('FRONTEND_URL:', frontendUrl);
+console.log('------------------------------');
 
 app.use(cors({
   origin: frontendUrl,

@@ -1,20 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { DeleteDialog } from '@/components/files/DeleteDialog';
+import { FileContextMenu } from '@/components/files/FileContextMenu';
+import { FileInfoDialog } from '@/components/files/FileInfoDialog';
+import { FileViewer } from '@/components/files/FileViewer';
+import { RenameDialog } from '@/components/files/RenameDialog';
+import { ShareDialog } from '@/components/files/ShareDialog';
+import { UploadDialog } from '@/components/files/UploadDialog';
+import { FileGrid } from '@/components/layout/FileGrid';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
-import { FileGrid } from '@/components/layout/FileGrid';
-import { UploadDialog } from '@/components/files/UploadDialog';
-import { FileContextMenu } from '@/components/files/FileContextMenu';
-import { RenameDialog } from '@/components/files/RenameDialog';
-import { DeleteDialog } from '@/components/files/DeleteDialog';
-import { ShareDialog } from '@/components/files/ShareDialog';
-import { FileViewer } from '@/components/files/FileViewer';
-import { FileInfoDialog } from '@/components/files/FileInfoDialog';
 import { useFiles } from '@/hooks/useFiles';
 import { File } from '@/types';
-import { ChevronDown } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export default function RecentPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -84,7 +83,7 @@ export default function RecentPage() {
       <div className="h-screen bg-white text-[#202124] overflow-hidden relative flex flex-col">
         <TopBar onSearch={setSearchQuery} searchQuery={searchQuery} />
         
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden pt-16">
           <Sidebar onNewClick={() => setShowUploadDialog(true)} />
           
           <main 
@@ -94,10 +93,10 @@ export default function RecentPage() {
             <div 
               className="flex-1 overflow-y-auto transition-all w-full"
             >
-              <div className="px-4 md:px-8 py-6 md:py-8 mt-0">
+              <div className="px-4 md:px-8 py-6 md:py-8">
                 <div className="mb-4 md:mb-6">
                   <h1 className="text-xl md:text-[22px] font-normal text-[#202124] mb-4 md:mb-6">Recent</h1>
-                  <div className="h-12 flex items-center border-b border-[#e5e5e5] mb-4 md:mb-6 gap-3 md:gap-4 overflow-x-auto">
+                  {/* <div className="h-12 flex items-center border-b border-[#e5e5e5] mb-4 md:mb-6 gap-3 md:gap-4 overflow-x-auto">
                     <button className="h-8 px-3 rounded flex items-center gap-2 text-sm text-[#5f6368] hover:bg-gray-100 transition-colors whitespace-nowrap">
                       Type
                       <ChevronDown size={16} />
@@ -110,7 +109,7 @@ export default function RecentPage() {
                       Modified
                       <ChevronDown size={16} />
                     </button>
-                  </div>
+                  </div> */}
                 </div>
                 <FileGrid
                   files={recentFiles}

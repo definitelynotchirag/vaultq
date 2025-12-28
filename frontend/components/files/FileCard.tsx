@@ -1,11 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { MoreVertical, Star, Check } from 'lucide-react';
-import { Folder, FileText, Table, Presentation, File, Image, Video } from 'lucide-react';
-import { File as FileType } from '@/types';
-import { formatFileSize, formatDate } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import { formatDate, formatFileSize } from '@/lib/utils';
+import { File as FileType } from '@/types';
+import { Check, File, FileText, Folder, Image, MoreVertical, Presentation, Star, Table, Video } from 'lucide-react';
+import { useState } from 'react';
 
 interface FileCardProps {
   file: FileType;
@@ -89,7 +88,7 @@ export function FileCard({
 
   return (
     <div
-      className={`border border-[#e5e5e5] rounded-lg cursor-pointer transition-base ${
+      className={`border border-[#e5e5e5] rounded-lg cursor-pointer transition-base p-2 sm:p-8 ${
         selected
           ? 'border-[#1a73e8] shadow-[0_1px_3px_rgba(60,64,67,.3),0_4px_8px_3px_rgba(60,64,67,.15)]'
           : 'hover:shadow-[0_1px_3px_rgba(60,64,67,.3),0_4px_8px_3px_rgba(60,64,67,.15)] hover:border-transparent'
