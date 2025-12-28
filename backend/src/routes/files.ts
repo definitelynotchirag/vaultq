@@ -155,6 +155,125 @@ router.get(
 );
 
 router.get(
+  '/storage',
+  requireAuth,
+  fileRateLimiter,
+  async (req: Request, res: Response) => {
+    try {
+      const user = req.user as IUser;
+      const storageUsed = await calculateUserStorageUsed(user);
+      const storageLimit = user.storageLimit || 100 * 1024 * 1024;
+
+      res.json({
+        success: true,
+        storage: {
+          used: storageUsed,
+          limit: storageLimit,
+          available: Math.max(0, storageLimit - storageUsed),
+          percentage: storageLimit > 0 ? (storageUsed / storageLimit) * 100 : 0,
+        },
+      });
+    } catch (error: any) {
+      throw createError(error.message || 'Failed to fetch storage information', 500);
+    }
+  }
+);
+
+router.get(
+  '/trash',
+  requireAuth,
+  fileRateLimiter,
+  async (req: Request, res: Response) => {
+    try {
+      const user = req.user as IUser;
+      const files = await getTrashFiles(user);
+
+      const populatedFiles = await Promise.all(
+        files.map(async (file) => {
+          const populatedPermissions = await Promise.all(
+            file.permissions.map(async (perm: any) => {
+              const user = await User.findById(perm.userId).select('name email');
+              return {
+                userId: user ? { _id: user._id, name: user.name, email: user.email } : perm.userId,
+                level: perm.level,
+              };
+            })
+          );
+
+          return {
+            _id: file._id,
+            originalName: file.originalName,
+            size: file.size,
+            public: file.public,
+            owner: file.owner,
+            permissions: populatedPermissions,
+            starredBy: file.starredBy,
+            deleted: file.deleted,
+            deletedAt: file.deletedAt,
+            createdAt: file.createdAt,
+            updatedAt: file.updatedAt,
+          };
+        })
+      );
+
+      res.json({
+        success: true,
+        files: populatedFiles,
+      });
+    } catch (error: any) {
+      throw createError(error.message || 'Failed to fetch trash files', 500);
+    }
+  }
+);
+
+router.get(
+  '/starred',
+  requireAuth,
+  fileRateLimiter,
+  async (req: Request, res: Response) => {
+    const searchQuery = req.query.search as string | undefined;
+
+    try {
+      const user = req.user as IUser;
+      const files = await getStarredFiles(user, searchQuery);
+
+      const populatedFiles = await Promise.all(
+        files.map(async (file) => {
+          const populatedPermissions = await Promise.all(
+            file.permissions.map(async (perm: any) => {
+              const user = await User.findById(perm.userId).select('name email');
+              return {
+                userId: user ? { _id: user._id, name: user.name, email: user.email } : perm.userId,
+                level: perm.level,
+              };
+            })
+          );
+
+          return {
+            _id: file._id,
+            originalName: file.originalName,
+            size: file.size,
+            public: file.public,
+            owner: file.owner,
+            permissions: populatedPermissions,
+            starredBy: file.starredBy,
+            createdAt: file.createdAt,
+            updatedAt: file.updatedAt,
+          };
+        })
+      );
+
+      res.json({
+        success: true,
+        files: populatedFiles,
+      });
+    } catch (error: any) {
+      throw createError(error.message || 'Failed to fetch starred files', 500);
+    }
+  }
+);
+
+router.get(
   '/:id',
   requireAuth,
   fileRateLimiter,
@@ -465,54 +584,6 @@ router.get(
   }
 );
 
-router.get(
-  '/trash',
-  requireAuth,
-  fileRateLimiter,
-  async (req: Request, res: Response) => {
-
-    try {
-      const user = req.user as IUser;
-      const files = await getTrashFiles(user);
-
-      const populatedFiles = await Promise.all(
-        files.map(async (file) => {
-          const populatedPermissions = await Promise.all(
-            file.permissions.map(async (perm: any) => {
-              const user = await User.findById(perm.userId).select('name email');
-              return {
-                userId: user ? { _id: user._id, name: user.name, email: user.email } : perm.userId,
-                level: perm.level,
-              };
-            })
-          );
-
-          return {
-            _id: file._id,
-            originalName: file.originalName,
-            size: file.size,
-            public: file.public,
-            owner: file.owner,
-            permissions: populatedPermissions,
-            starredBy: file.starredBy,
-            deleted: file.deleted,
-            deletedAt: file.deletedAt,
-            createdAt: file.createdAt,
-            updatedAt: file.updatedAt,
-          };
-        })
-      );
-
-      res.json({
-        success: true,
-        files: populatedFiles,
-      });
-    } catch (error: any) {
-      throw createError(error.message || 'Failed to fetch trash files', 500);
-    }
-  }
-);
-
 router.post(
   '/:id/restore',
   requireAuth,
@@ -728,79 +799,6 @@ router.delete(
         throw error;
       }
       throw createError(error.message || 'Failed to unstar file', 500);
-    }
-  }
-);
-
-router.get(
-  '/starred',
-  requireAuth,
-  fileRateLimiter,
-  async (req: Request, res: Response) => {
-    const searchQuery = req.query.search as string | undefined;
-
-    try {
-      const user = req.user as IUser;
-      const files = await getStarredFiles(user, searchQuery);
-
-      const populatedFiles = await Promise.all(
-        files.map(async (file) => {
-          const populatedPermissions = await Promise.all(
-            file.permissions.map(async (perm: any) => {
-              const user = await User.findById(perm.userId).select('name email');
-              return {
-                userId: user ? { _id: user._id, name: user.name, email: user.email } : perm.userId,
-                level: perm.level,
-              };
-            })
-          );
-
-          return {
-            _id: file._id,
-            originalName: file.originalName,
-            size: file.size,
-            public: file.public,
-            owner: file.owner,
-            permissions: populatedPermissions,
-            starredBy: file.starredBy,
-            createdAt: file.createdAt,
-            updatedAt: file.updatedAt,
-          };
-        })
-      );
-
-      res.json({
-        success: true,
-        files: populatedFiles,
-      });
-    } catch (error: any) {
-      throw createError(error.message || 'Failed to fetch starred files', 500);
-    }
-  }
-);
-
-router.get(
-  '/storage',
-  requireAuth,
-  fileRateLimiter,
-  async (req: Request, res: Response) => {
-
-    try {
-      const user = req.user as IUser;
-      const storageUsed = await calculateUserStorageUsed(user);
-      const storageLimit = user.storageLimit || 100 * 1024 * 1024;
-
-      res.json({
-        success: true,
-        storage: {
-          used: storageUsed,
-          limit: storageLimit,
-          available: Math.max(0, storageLimit - storageUsed),
-          percentage: storageLimit > 0 ? (storageUsed / storageLimit) * 100 : 0,
-        },
-      });
-    } catch (error: any) {
-      throw createError(error.message || 'Failed to fetch storage information', 500);
     }
   }
 );

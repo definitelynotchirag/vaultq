@@ -45,7 +45,7 @@ export function Sidebar({ onNewClick }: SidebarProps) {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { isCollapsed } = useSidebar();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { storage, formatBytes } = useStorage();
+  const { storage, formatBytes, loading } = useStorage();
 
   const navItems = [
     { href: '/', label: 'My Drive', icon: Home },
@@ -176,68 +176,116 @@ export function Sidebar({ onNewClick }: SidebarProps) {
         })}
       </List>
 
-      {!isCollapsed && storage && (
-        <Box
-          sx={{
-            px: { xs: 2, sm: 3 },
-            pb: 2,
-            pt: 1,
-            borderTop: `1px solid ${colors.border.default}`,
-            overflow: 'hidden',
-          }}
-        >
-          <Box sx={{ mb: 1 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+      {(storage || loading) && (
+        <>
+          {!isCollapsed ? (
+            <Box
+              sx={{
+                px: { xs: 2, sm: 3 },
+                pb: 2,
+                pt: 1,
+                borderTop: `1px solid ${colors.border.default}`,
+                overflow: 'hidden',
+              }}
+            >
+              <Box sx={{ mb: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                      color: colors.text.secondary,
+                      fontWeight: 500,
+                    }}
+                  >
+                    Storage
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                      color: colors.text.secondary,
+                    }}
+                  >
+                    {storage ? `${formatBytes(storage.used)} of ${formatBytes(storage.limit)}` : 'Loading...'}
+                  </Typography>
+                </Box>
+                <LinearProgress
+                  variant={storage ? "determinate" : "indeterminate"}
+                  value={storage ? Math.min(storage.percentage, 100) : 0}
+                  sx={{
+                    height: 6,
+                    borderRadius: 3,
+                    backgroundColor: colors.background.hover,
+                    '& .MuiLinearProgress-bar': {
+                      backgroundColor:
+                        storage && storage.percentage > 90
+                          ? '#f44336'
+                          : storage && storage.percentage > 75
+                          ? '#ff9800'
+                          : colors.primary.main,
+                      borderRadius: 3,
+                    },
+                  }}
+                />
+              </Box>
               <Typography
                 variant="caption"
                 sx={{
-                  fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                  fontSize: { xs: '0.65rem', sm: '0.7rem' },
                   color: colors.text.secondary,
-                  fontWeight: 500,
+                  display: 'block',
                 }}
               >
-                Storage
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  fontSize: { xs: '0.7rem', sm: '0.75rem' },
-                  color: colors.text.secondary,
-                }}
-              >
-                {formatBytes(storage.used)} of {formatBytes(storage.limit)}
+                {storage ? `${formatBytes(storage.available)} available` : 'Calculating...'}
               </Typography>
             </Box>
-            <LinearProgress
-              variant="determinate"
-              value={Math.min(storage.percentage, 100)}
+          ) : (
+            <Box
               sx={{
-                height: 6,
-                borderRadius: 3,
-                backgroundColor: colors.background.hover,
-                '& .MuiLinearProgress-bar': {
-                  backgroundColor:
-                    storage.percentage > 90
-                      ? '#f44336'
-                      : storage.percentage > 75
-                      ? '#ff9800'
-                      : colors.primary.main,
-                  borderRadius: 3,
-                },
+                px: 1,
+                pb: 2,
+                pt: 1,
+                borderTop: `1px solid ${colors.border.default}`,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 0.5,
               }}
-            />
-          </Box>
-          <Typography
-            variant="caption"
-            sx={{
-              fontSize: { xs: '0.65rem', sm: '0.7rem' },
-              color: colors.text.secondary,
-              display: 'block',
-            }}
-          >
-            {formatBytes(storage.available)} available
-          </Typography>
-        </Box>
+            >
+              <LinearProgress
+                variant={storage ? "determinate" : "indeterminate"}
+                value={storage ? Math.min(storage.percentage, 100) : 0}
+                sx={{
+                  width: '100%',
+                  height: 4,
+                  borderRadius: 2,
+                  backgroundColor: colors.background.hover,
+                  '& .MuiLinearProgress-bar': {
+                    backgroundColor:
+                      storage && storage.percentage > 90
+                        ? '#f44336'
+                        : storage && storage.percentage > 75
+                        ? '#ff9800'
+                        : colors.primary.main,
+                    borderRadius: 2,
+                  },
+                }}
+              />
+              <Typography
+                variant="caption"
+                sx={{
+                  fontSize: '0.6rem',
+                  color: colors.text.secondary,
+                  textAlign: 'center',
+                  lineHeight: 1,
+                }}
+              >
+                {storage ? `${Math.round(storage.percentage)}%` : '...'}
+              </Typography>
+            </Box>
+          )}
+        </>
       )}
 
     </Box>
