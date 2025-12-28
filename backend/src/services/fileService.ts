@@ -31,9 +31,13 @@ export const checkFileAccess = async (
     return file;
   }
 
-  const hasPermission = file.permissions.some(
-    (perm) => perm.userId.toString() === userId && perm.level === requiredLevel
-  );
+  const hasPermission = file.permissions.some((perm) => {
+    if (perm.userId.toString() !== userId) return false;
+    if (requiredLevel === 'read') {
+      return perm.level === 'read' || perm.level === 'write';
+    }
+    return perm.level === 'write';
+  });
 
   if (hasPermission) {
     return file;
