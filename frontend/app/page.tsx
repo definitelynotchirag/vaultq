@@ -9,6 +9,7 @@ import { RenameDialog } from '@/components/files/RenameDialog';
 import { ShareDialog } from '@/components/files/ShareDialog';
 import { UploadDialog } from '@/components/files/UploadDialog';
 import { FileGrid } from '@/components/layout/FileGrid';
+import { FileList } from '@/components/layout/FileList';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -138,7 +139,7 @@ export default function HomePage() {
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',
-              ml: { xs: 0, md: 'var(--sidebar-width, 256px)' },
+              ml: { xs: 0, md: 4 },
               transition: 'margin-left 300ms ease',
             }}
           >
@@ -213,9 +214,14 @@ export default function HomePage() {
                     onFileStar={handleStar}
                   />
                 ) : (
-                  <Box sx={{ textAlign: 'center', py: 6, color: colors.text.secondary }}>
-                    <Typography variant="body1">List view coming soon</Typography>
-                  </Box>
+                  <FileList
+                    files={files}
+                    loading={isLoading}
+                    onFileClick={handleFileClick}
+                    onFileMenuClick={handleFileMenuClick}
+                    onFileDoubleClick={(file) => handleOpenFile(file)}
+                    onFileStar={handleStar}
+                  />
                 )}
               </Container>
             </Box>
