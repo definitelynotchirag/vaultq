@@ -18,6 +18,8 @@ import {
     IconButton,
     Toolbar,
     Typography,
+    useMediaQuery,
+    useTheme,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 
@@ -33,6 +35,8 @@ export function FileViewer({ isOpen, file, onClose, isSharedView = false }: File
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     if (isOpen && file) {
@@ -104,9 +108,14 @@ export function FileViewer({ isOpen, file, onClose, isSharedView = false }: File
     return getFileExtension(fileName) === 'pdf';
   };
 
+  const isVideo = (fileName: string) => {
+    const ext = getFileExtension(fileName);
+    return ['mp4', 'mov', 'avi', 'webm'].includes(ext);
+  };
+
   if (!isOpen || !file) return null;
 
-  const canView = isImage(file.originalName) || isPdf(file.originalName);
+  const canView = isImage(file.originalName) || isPdf(file.originalName) || isVideo(file.originalName);
 
   return (
     <Box
@@ -128,10 +137,10 @@ export function FileViewer({ isOpen, file, onClose, isSharedView = false }: File
       >
         <Toolbar 
           sx={{ 
-            gap: 1.5,
-            minHeight: '48px !important',
-            height: '48px',
-            px: 2,
+            gap: isMobile ? 0.5 : 1.5,
+            minHeight: isMobile ? '44px !important' : '48px !important',
+            height: isMobile ? '44px' : '48px',
+            px: isMobile ? 1 : 2,
           }}
         >
           <Typography
@@ -143,45 +152,47 @@ export function FileViewer({ isOpen, file, onClose, isSharedView = false }: File
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
-              fontSize: '14px',
+              fontSize: isMobile ? '12px' : '14px',
             }}
           >
             {file.originalName}
           </Typography>
-          <Button
-            onClick={handleCopyLink}
-            startIcon={copied ? <Check sx={{ fontSize: 18 }} /> : <LinkIcon sx={{ fontSize: 18 }} />}
-            sx={{
-              color: colors.text.white,
-              backgroundColor: copied ? colors.success.main : 'transparent',
-              textTransform: 'none',
-              fontSize: '14px',
-              px: 1.5,
-              py: 0.75,
-              minWidth: 'auto',
-              '&:hover': {
-                backgroundColor: copied ? colors.success.main : colors.overlay.white10,
-              },
-            }}
-          >
-            {copied ? 'Copied' : 'Copy link'}
-          </Button>
+          {!isMobile && (
+            <Button
+              onClick={handleCopyLink}
+              startIcon={copied ? <Check sx={{ fontSize: 18 }} /> : <LinkIcon sx={{ fontSize: 18 }} />}
+              sx={{
+                color: colors.text.white,
+                backgroundColor: copied ? colors.success.main : 'transparent',
+                textTransform: 'none',
+                fontSize: '14px',
+                px: 1.5,
+                py: 0.75,
+                minWidth: 'auto',
+                '&:hover': {
+                  backgroundColor: copied ? colors.success.main : colors.overlay.white10,
+                },
+              }}
+            >
+              {copied ? 'Copied' : 'Copy link'}
+            </Button>
+          )}
           <Button
             onClick={handleDownload}
-            startIcon={<Download sx={{ fontSize: 18 }} />}
+            startIcon={<Download sx={{ fontSize: isMobile ? 16 : 18 }} />}
             sx={{
               color: colors.text.white,
               textTransform: 'none',
-              fontSize: '14px',
-              px: 1.5,
-              py: 0.75,
+              fontSize: isMobile ? '12px' : '14px',
+              px: isMobile ? 1 : 1.5,
+              py: isMobile ? 0.5 : 0.75,
               minWidth: 'auto',
               '&:hover': {
                 backgroundColor: colors.overlay.white10,
               },
             }}
           >
-            Download
+            {isMobile ? '' : 'Download'}
           </Button>
           <IconButton
             onClick={onClose}
@@ -206,13 +217,13 @@ export function FileViewer({ isOpen, file, onClose, isSharedView = false }: File
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
-          p: 2,
+          p: isMobile ? 1 : 2,
         }}
       >
         {loading && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-            <CircularProgress sx={{ color: colors.primary.main }} size={48} />
-            <Typography variant="h6" sx={{ color: colors.text.white, fontWeight: 500 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: isMobile ? 1.5 : 2 }}>
+            <CircularProgress sx={{ color: colors.primary.main }} size={isMobile ? 40 : 48} />
+            <Typography variant={isMobile ? 'body1' : 'h6'} sx={{ color: colors.text.white, fontWeight: 500, fontSize: isMobile ? '14px' : 'inherit' }}>
               Loading...
             </Typography>
           </Box>
@@ -220,15 +231,16 @@ export function FileViewer({ isOpen, file, onClose, isSharedView = false }: File
 
         {error && (
           <Typography
-            variant="h6"
+            variant={isMobile ? 'body1' : 'h6'}
             sx={{
               color: colors.error.main,
               fontWeight: 500,
               backgroundColor: colors.error.light,
-              px: 3,
-              py: 1.5,
+              px: isMobile ? 2 : 3,
+              py: isMobile ? 1 : 1.5,
               borderRadius: 2,
               border: `1px solid ${colors.error.main}`,
+              fontSize: isMobile ? '14px' : 'inherit',
             }}
           >
             {error}
@@ -263,6 +275,21 @@ export function FileViewer({ isOpen, file, onClose, isSharedView = false }: File
                   boxShadow: colors.shadow.heavy,
                 }}
               />
+            ) : isVideo(file.originalName) ? (
+              <Box
+                component="video"
+                src={viewUrl}
+                controls
+                sx={{
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  width: 'auto',
+                  height: 'auto',
+                  borderRadius: 2,
+                  boxShadow: colors.shadow.heavy,
+                  backgroundColor: colors.background.dark,
+                }}
+              />
             ) : null}
           </Box>
         )}
@@ -271,37 +298,38 @@ export function FileViewer({ isOpen, file, onClose, isSharedView = false }: File
           <Box sx={{ textAlign: 'center' }}>
             <Box
               sx={{
-                width: 80,
-                height: 80,
+                width: isMobile ? 60 : 80,
+                height: isMobile ? 60 : 80,
                 backgroundColor: colors.overlay.white05,
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 mx: 'auto',
-                mb: 3,
+                mb: isMobile ? 2 : 3,
               }}
             >
-              <Close sx={{ fontSize: 40, color: colors.overlay.white02 }} />
+              <Close sx={{ fontSize: isMobile ? 30 : 40, color: colors.overlay.white02 }} />
             </Box>
-            <Typography variant="h5" sx={{ color: colors.text.white, fontWeight: 500, mb: 1 }}>
+            <Typography variant={isMobile ? 'h6' : 'h5'} sx={{ color: colors.text.white, fontWeight: 500, mb: 1, fontSize: isMobile ? '18px' : 'inherit' }}>
               No preview available
             </Typography>
-            <Typography variant="body1" sx={{ color: colors.text.disabled, mb: 4 }}>
+            <Typography variant="body1" sx={{ color: colors.text.disabled, mb: isMobile ? 3 : 4, fontSize: isMobile ? '14px' : 'inherit', px: isMobile ? 2 : 0 }}>
               This file type cannot be viewed in the browser.
             </Typography>
             <Button
               onClick={handleDownload}
               variant="contained"
-              startIcon={<Download />}
+              startIcon={<Download sx={{ fontSize: isMobile ? 18 : 24 }} />}
               sx={{
                 backgroundColor: colors.primary.main,
                 '&:hover': {
                   backgroundColor: colors.primary.hover,
                 },
-                px: 4,
-                py: 1.5,
+                px: isMobile ? 3 : 4,
+                py: isMobile ? 1 : 1.5,
                 boxShadow: colors.shadow.heavy,
+                fontSize: isMobile ? '14px' : 'inherit',
               }}
             >
               Download to view
