@@ -2,15 +2,17 @@
 
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading, login } = useAuth();
+  const { user, loading } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     if (!loading && !user) {
-      login();
+      router.push('/signin');
     }
-  }, [user, loading, login]);
+  }, [user, loading, router]);
 
   if (loading) {
     return (

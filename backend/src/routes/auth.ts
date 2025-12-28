@@ -22,8 +22,15 @@ router.get(
   passport.authenticate('google', {
     failureRedirect: `${FRONTEND_URL}/auth/failure`,
   }),
-  (_req: Request, res: Response) => {
-    return res.redirect(`${FRONTEND_URL}/auth/success`);
+  (req: Request, res: Response) => {
+    // Ensure session is saved before redirecting
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.redirect(`${FRONTEND_URL}/auth/failure`);
+      }
+      return res.redirect(`${FRONTEND_URL}/auth/success`);
+    });
   }
 );
 

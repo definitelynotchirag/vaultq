@@ -6,12 +6,20 @@ if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
   throw new Error('Google OAuth credentials are not defined in environment variables');
 }
 
+// Use absolute URL for callback in production, relative for development
+const getCallbackURL = () => {
+  if (process.env.NODE_ENV === 'production' && process.env.BACKEND_URL) {
+    return `${process.env.BACKEND_URL}/auth/google/callback`;
+  }
+  return '/auth/google/callback';
+};
+
 passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: '/auth/google/callback',
+      callbackURL: getCallbackURL(),
     },
     async (_accessToken, _refreshToken, profile, done) => {
       try {

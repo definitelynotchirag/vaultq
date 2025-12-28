@@ -41,6 +41,22 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Build cookie configuration
+const cookieConfig: any = {
+  httpOnly: true,
+  maxAge: 24 * 60 * 60 * 1000, // 24 hours
+  path: '/',
+};
+
+if (process.env.NODE_ENV === 'production') {
+  cookieConfig.secure = true; // Required for HTTPS
+  cookieConfig.sameSite = 'none'; // Required for cross-origin requests
+  // Don't set domain - let it default to the request domain
+} else {
+  cookieConfig.secure = false;
+  cookieConfig.sameSite = 'lax';
+}
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
@@ -49,12 +65,7 @@ app.use(
     store: MongoStore.create({
       mongoUrl: process.env.MONGODB_URI,
     }),
-    cookie: {
-      secure: process.env.NODE_ENV === 'production',
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000,
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    },
+    cookie: cookieConfig,
   })
 );
 
