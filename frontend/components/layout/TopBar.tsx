@@ -78,12 +78,12 @@ export function TopBar({ onSearch, searchQuery }: TopBarProps) {
                 }
               }}
               type="text"
-              placeholder="    Search in VaultQ"
+              placeholder="Search in VaultQ"
               value={searchValue}
               onChange={handleSearchChange}
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setIsSearchFocused(false)}
-              className={`w-full h-12 pl-10 pr-11 rounded-lg border-none outline-none transition-hover ${
+              className={`w-full h-12 pl-3 pr-11 rounded-lg border-none outline-none transition-hover ${
                 isSearchFocused ? 'bg-white shadow-md' : 'bg-[#f1f3f4] hover:bg-[#e8eaed]'
               }`}
               style={{ fontSize: '16px', color: '#202124' }}
