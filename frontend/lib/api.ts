@@ -39,8 +39,11 @@ async function fetchApi<T>(
 
   if (response.status === 401) {
     if (!skipAuthRedirect) {
-      const isAuthPage = window.location.pathname.startsWith('/auth/');
-      if (!isAuthPage) {
+      const pathname = window.location.pathname;
+      const isAuthPage = pathname.startsWith('/auth/');
+      const isSharedPage = pathname.startsWith('/shared/');
+      const isSigninPage = pathname === '/signin';
+      if (!isAuthPage && !isSharedPage && !isSigninPage) {
         window.location.href = `${API_URL}/auth/google`;
       }
     }
@@ -71,7 +74,7 @@ export const api = {
     },
 
     getCurrentUser: async (): Promise<AuthResponse> => {
-      return fetchApi<AuthResponse>('/auth/me');
+      return fetchApi<AuthResponse>('/auth/me', {}, true);
     },
 
     logout: async (): Promise<{ success: boolean; message?: string }> => {

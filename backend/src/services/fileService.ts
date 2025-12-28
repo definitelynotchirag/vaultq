@@ -4,7 +4,7 @@ import { IFile, IUser } from '../types';
 
 export const checkFileAccess = async (
   fileId: string,
-  user: IUser,
+  user: IUser | undefined,
   requiredLevel: 'read' | 'write' = 'read'
 ): Promise<IFile> => {
   const file = await File.findById(fileId);
@@ -16,14 +16,18 @@ export const checkFileAccess = async (
     throw createError('File not found', 404);
   }
 
+  if (file.public && requiredLevel === 'read') {
+    return file;
+  }
+
+  if (!user) {
+    throw createError('Authentication required', 401);
+  }
+
   const userId = user._id.toString();
   const ownerId = file.owner.toString();
 
   if (ownerId === userId) {
-    return file;
-  }
-
-  if (file.public && requiredLevel === 'read') {
     return file;
   }
 

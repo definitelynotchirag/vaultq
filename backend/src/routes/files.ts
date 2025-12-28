@@ -12,10 +12,9 @@ import { IUser } from '../types';
 
 const router = Router();
 
-router.use(requireAuth);
-
 router.post(
   '/upload-url',
+  requireAuth,
   fileRateLimiter,
   validateFileSize,
   async (req: Request, res: Response) => {
@@ -63,6 +62,7 @@ router.post(
 
 router.post(
   '/confirm-upload',
+  requireAuth,
   fileRateLimiter,
   async (req: Request, res: Response) => {
     const { originalName, storageName, url, size } = req.body;
@@ -106,6 +106,7 @@ router.post(
 
 router.get(
   '/',
+  requireAuth,
   fileRateLimiter,
   async (req: Request, res: Response) => {
     if (!req.user) {
@@ -155,6 +156,7 @@ router.get(
 
 router.put(
   '/:id',
+  requireAuth,
   fileRateLimiter,
   async (req: Request, res: Response) => {
     if (!req.user) {
@@ -196,6 +198,7 @@ router.put(
 
 router.delete(
   '/:id',
+  requireAuth,
   fileRateLimiter,
   async (req: Request, res: Response) => {
     if (!req.user) {
@@ -226,6 +229,7 @@ router.delete(
 
 router.post(
   '/:id/share',
+  requireAuth,
   fileRateLimiter,
   async (req: Request, res: Response) => {
     if (!req.user) {
@@ -282,6 +286,7 @@ router.post(
 
 router.post(
   '/:id/public',
+  requireAuth,
   fileRateLimiter,
   async (req: Request, res: Response) => {
     if (!req.user) {
@@ -322,6 +327,7 @@ router.post(
 
 router.post(
   '/:id/private',
+  requireAuth,
   fileRateLimiter,
   async (req: Request, res: Response) => {
     if (!req.user) {
@@ -364,13 +370,10 @@ router.get(
   '/:id/download',
   fileRateLimiter,
   async (req: Request, res: Response) => {
-    if (!req.user) {
-      throw createError('Authentication required', 401);
-    }
     const { id } = req.params;
 
     try {
-      const user = req.user as IUser;
+      const user = req.user as IUser | undefined;
       const file = await checkFileAccess(id, user, 'read');
 
       const downloadUrl = await generateDownloadUrl(file.storageName);
@@ -393,13 +396,10 @@ router.get(
   '/:id/view',
   fileRateLimiter,
   async (req: Request, res: Response) => {
-    if (!req.user) {
-      throw createError('Authentication required', 401);
-    }
     const { id } = req.params;
 
     try {
-      const user = req.user as IUser;
+      const user = req.user as IUser | undefined;
       const file = await checkFileAccess(id, user, 'read');
 
       const viewUrl = await generateViewUrl(file.storageName, file.originalName);
@@ -420,11 +420,9 @@ router.get(
 
 router.get(
   '/trash',
+  requireAuth,
   fileRateLimiter,
   async (req: Request, res: Response) => {
-    if (!req.user) {
-      throw createError('Authentication required', 401);
-    }
 
     try {
       const user = req.user as IUser;
@@ -470,11 +468,9 @@ router.get(
 
 router.post(
   '/:id/restore',
+  requireAuth,
   fileRateLimiter,
   async (req: Request, res: Response) => {
-    if (!req.user) {
-      throw createError('Authentication required', 401);
-    }
     const { id } = req.params;
 
     try {
@@ -519,11 +515,9 @@ router.post(
 
 router.delete(
   '/:id/permanent',
+  requireAuth,
   fileRateLimiter,
   async (req: Request, res: Response) => {
-    if (!req.user) {
-      throw createError('Authentication required', 401);
-    }
     const { id } = req.params;
 
     try {
@@ -563,11 +557,9 @@ router.delete(
 
 router.post(
   '/:id/share-email',
+  requireAuth,
   fileRateLimiter,
   async (req: Request, res: Response) => {
-    if (!req.user) {
-      throw createError('Authentication required', 401);
-    }
     const { id } = req.params;
     const { email, level } = req.body;
 
@@ -623,11 +615,9 @@ router.post(
 
 router.post(
   '/:id/star',
+  requireAuth,
   fileRateLimiter,
   async (req: Request, res: Response) => {
-    if (!req.user) {
-      throw createError('Authentication required', 401);
-    }
     const { id } = req.params;
 
     try {
@@ -663,11 +653,9 @@ router.post(
 
 router.delete(
   '/:id/star',
+  requireAuth,
   fileRateLimiter,
   async (req: Request, res: Response) => {
-    if (!req.user) {
-      throw createError('Authentication required', 401);
-    }
     const { id } = req.params;
 
     try {
@@ -699,11 +687,9 @@ router.delete(
 
 router.get(
   '/starred',
+  requireAuth,
   fileRateLimiter,
   async (req: Request, res: Response) => {
-    if (!req.user) {
-      throw createError('Authentication required', 401);
-    }
     const searchQuery = req.query.search as string | undefined;
 
     try {
@@ -748,11 +734,9 @@ router.get(
 
 router.get(
   '/storage',
+  requireAuth,
   fileRateLimiter,
   async (req: Request, res: Response) => {
-    if (!req.user) {
-      throw createError('Authentication required', 401);
-    }
 
     try {
       const user = req.user as IUser;
