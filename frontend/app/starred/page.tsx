@@ -109,7 +109,7 @@ export default function StarredPage() {
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',
-              ml: { xs: 0, md: 'var(--sidebar-width, 256px)' },
+              ml: { xs: 0, md: 4 },
               transition: 'margin-left 300ms ease',
             }}
           >

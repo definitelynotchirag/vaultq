@@ -1,27 +1,28 @@
 'use client';
 
-import {
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-} from '@mui/material';
-import {
-  OpenInNew,
-  Share,
-  Link as LinkIcon,
-  Star,
-  Edit,
-  Info,
-  Download,
-  Delete,
-  ChevronRight,
-} from '@mui/icons-material';
-import { File } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
+import { api } from '@/lib/api';
 import { colors } from '@/lib/colors';
 import { hasWriteAccess } from '@/lib/filePermissions';
+import { File } from '@/types';
+import {
+    ChevronRight,
+    Delete,
+    Download,
+    Edit,
+    Info,
+    Link as LinkIcon,
+    OpenInNew,
+    Share,
+    Star,
+} from '@mui/icons-material';
+import {
+    Divider,
+    ListItemIcon,
+    ListItemText,
+    Menu,
+    MenuItem,
+} from '@mui/material';
 import { useEffect, useRef } from 'react';
 
 interface FileContextMenuProps {
@@ -85,8 +86,9 @@ export function FileContextMenu({
       icon: OpenInNew,
       hasArrow: false,
       onClick: () => {
-        if (file.url) {
-          window.open(file.url, '_blank', 'noopener,noreferrer');
+        const shareableUrl = api.files.getShareableUrl(file._id);
+        if (shareableUrl) {
+          window.open(shareableUrl, '_blank', 'noopener,noreferrer');
         }
       },
     },
