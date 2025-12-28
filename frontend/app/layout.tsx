@@ -6,7 +6,6 @@ import { Providers } from "@/components/Providers";
 const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
   subsets: ["latin"],
-  variable: "--font-google-sans",
   display: "swap",
 });
 
@@ -22,9 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${roboto.variable} antialiased`}
-      >
+      <body className={roboto.className}>
         <Providers>{children}</Providers>
       </body>
     </html>

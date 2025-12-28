@@ -1,7 +1,22 @@
 'use client';
 
+import {
+  Toolbar,
+  Typography,
+  IconButton,
+  Box,
+  useTheme,
+  useMediaQuery,
+} from '@mui/material';
+import {
+  Share as ShareIcon,
+  Download,
+  Folder,
+  Star,
+  Delete,
+  MoreVert,
+} from '@mui/icons-material';
 import { File } from '@/types';
-import { Download, Folder, MoreVertical, Star, Trash2, Users } from 'lucide-react';
 
 interface SelectionToolbarProps {
   selectedCount: number;
@@ -24,82 +39,181 @@ export function SelectionToolbar({
   onDelete,
   onMore,
 }: SelectionToolbarProps) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+
   if (selectedCount === 0) return null;
 
   return (
-    <div className="fixed top-16 left-0 md:left-[var(--sidebar-width,256px)] right-0 h-14 sm:h-16 bg-[#e8f0fe] border-b border-[#c2e7ff] flex items-center px-3 sm:px-4 md:px-8 gap-2 sm:gap-3 md:gap-6 z-30 transition-all">
-      <div className="text-xs sm:text-sm font-medium text-[#001d35] whitespace-nowrap">
+    <Toolbar
+      sx={{
+        position: 'fixed',
+        top: 64,
+        left: { xs: 0, md: 'var(--sidebar-width, 256px)' },
+        right: 0,
+        height: { xs: 56, sm: 64 },
+        backgroundColor: '#e8f0fe',
+        borderBottom: '1px solid #c2e7ff',
+        zIndex: 30,
+        transition: 'left 300ms ease',
+        px: { xs: 1.5, sm: 2, md: 3 },
+        gap: { xs: 1.5, sm: 2, md: 3 },
+      }}
+    >
+      <Typography
+        variant="body2"
+        sx={{
+          fontWeight: 500,
+          color: '#001d35',
+          whiteSpace: 'nowrap',
+          fontSize: { xs: '0.75rem', sm: '0.875rem' },
+        }}
+      >
         {selectedCount} {selectedCount === 1 ? 'item' : 'items'}
-      </div>
-      
-      <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto hide-scrollbar flex-1">
+      </Typography>
+
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: { xs: 0.5, sm: 1 },
+          flex: 1,
+          overflowX: 'auto',
+          '&::-webkit-scrollbar': {
+            display: 'none',
+          },
+          scrollbarWidth: 'none',
+        }}
+      >
         {onShare && (
-          <button
+          <IconButton
             onClick={onShare}
-            className="h-8 sm:h-9 px-2.5 sm:px-3 md:px-4 rounded flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-[#001d35] hover:bg-[rgba(1,87,155,0.08)] transition-colors whitespace-nowrap flex-shrink-0"
-            aria-label="Share"
+            sx={{
+              color: '#001d35',
+              '&:hover': { backgroundColor: 'rgba(1,87,155,0.08)' },
+              px: { xs: 1.25, sm: 1.5, md: 2 },
+              minWidth: { xs: 40, sm: 'auto' },
+            }}
+            size="small"
           >
-            <Users size={16} className="sm:w-[18px] sm:h-[18px]" />
-            <span className="hidden sm:inline">Share</span>
-          </button>
+            <ShareIcon fontSize={isMobile ? 'small' : 'medium'} />
+            {!isMobile && (
+              <Typography
+                variant="body2"
+                sx={{ ml: 1, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+              >
+                Share
+              </Typography>
+            )}
+          </IconButton>
         )}
-        
+
         {onDownload && (
-          <button
+          <IconButton
             onClick={onDownload}
-            className="h-8 sm:h-9 px-2.5 sm:px-3 md:px-4 rounded flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-[#001d35] hover:bg-[rgba(1,87,155,0.08)] transition-colors whitespace-nowrap flex-shrink-0"
-            aria-label="Download"
+            sx={{
+              color: '#001d35',
+              '&:hover': { backgroundColor: 'rgba(1,87,155,0.08)' },
+              px: { xs: 1.25, sm: 1.5, md: 2 },
+              minWidth: { xs: 40, sm: 'auto' },
+            }}
+            size="small"
           >
-            <Download size={16} className="sm:w-[18px] sm:h-[18px]" />
-            <span className="hidden sm:inline">Download</span>
-          </button>
+            <Download fontSize={isMobile ? 'small' : 'medium'} />
+            {!isMobile && (
+              <Typography
+                variant="body2"
+                sx={{ ml: 1, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+              >
+                Download
+              </Typography>
+            )}
+          </IconButton>
         )}
-        
+
         {onMove && (
-          <button
+          <IconButton
             onClick={onMove}
-            className="h-8 sm:h-9 px-2.5 sm:px-3 md:px-4 rounded flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-[#001d35] hover:bg-[rgba(1,87,155,0.08)] transition-colors whitespace-nowrap hidden md:flex flex-shrink-0"
-            aria-label="Move"
+            sx={{
+              color: '#001d35',
+              '&:hover': { backgroundColor: 'rgba(1,87,155,0.08)' },
+              px: { xs: 1.25, sm: 1.5, md: 2 },
+              display: { xs: 'none', md: 'flex' },
+            }}
+            size="small"
           >
-            <Folder size={16} className="sm:w-[18px] sm:h-[18px]" />
-            <span>Move</span>
-          </button>
+            <Folder fontSize="medium" />
+            <Typography variant="body2" sx={{ ml: 1 }}>
+              Move
+            </Typography>
+          </IconButton>
         )}
-        
+
         {onStar && (
-          <button
+          <IconButton
             onClick={onStar}
-            className="h-8 sm:h-9 px-2.5 sm:px-3 md:px-4 rounded flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-[#001d35] hover:bg-[rgba(1,87,155,0.08)] transition-colors whitespace-nowrap flex-shrink-0"
-            aria-label="Star"
+            sx={{
+              color: '#001d35',
+              '&:hover': { backgroundColor: 'rgba(1,87,155,0.08)' },
+              px: { xs: 1.25, sm: 1.5, md: 2 },
+              minWidth: { xs: 40, sm: 'auto' },
+            }}
+            size="small"
           >
-            <Star size={16} className="sm:w-[18px] sm:h-[18px]" />
-            <span className="hidden sm:inline">Star</span>
-          </button>
+            <Star fontSize={isMobile ? 'small' : 'medium'} />
+            {!isMobile && (
+              <Typography
+                variant="body2"
+                sx={{ ml: 1, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+              >
+                Star
+              </Typography>
+            )}
+          </IconButton>
         )}
-        
+
         {onDelete && (
-          <button
+          <IconButton
             onClick={onDelete}
-            className="h-8 sm:h-9 px-2.5 sm:px-3 md:px-4 rounded flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-[#001d35] hover:bg-[rgba(1,87,155,0.08)] transition-colors whitespace-nowrap flex-shrink-0"
-            aria-label="Delete"
+            sx={{
+              color: '#001d35',
+              '&:hover': { backgroundColor: 'rgba(1,87,155,0.08)' },
+              px: { xs: 1.25, sm: 1.5, md: 2 },
+              minWidth: { xs: 40, sm: 'auto' },
+            }}
+            size="small"
           >
-            <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
-            <span className="hidden sm:inline">Delete</span>
-          </button>
+            <Delete fontSize={isMobile ? 'small' : 'medium'} />
+            {!isMobile && (
+              <Typography
+                variant="body2"
+                sx={{ ml: 1, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+              >
+                Delete
+              </Typography>
+            )}
+          </IconButton>
         )}
-        
+
         {onMore && (
-          <button
+          <IconButton
             onClick={onMore}
-            className="h-8 sm:h-9 px-2.5 sm:px-3 md:px-4 rounded flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-[#001d35] hover:bg-[rgba(1,87,155,0.08)] transition-colors whitespace-nowrap hidden md:flex flex-shrink-0"
-            aria-label="More"
+            sx={{
+              color: '#001d35',
+              '&:hover': { backgroundColor: 'rgba(1,87,155,0.08)' },
+              px: { xs: 1.25, sm: 1.5, md: 2 },
+              display: { xs: 'none', md: 'flex' },
+            }}
+            size="small"
           >
-            <MoreVertical size={16} className="sm:w-[18px] sm:h-[18px]" />
-            <span>More</span>
-          </button>
+            <MoreVert fontSize="medium" />
+            <Typography variant="body2" sx={{ ml: 1 }}>
+              More
+            </Typography>
+          </IconButton>
         )}
-      </div>
-    </div>
+      </Box>
+    </Toolbar>
   );
 }
-

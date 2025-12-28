@@ -1,9 +1,24 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { X, Upload, File as FileIcon } from 'lucide-react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+  IconButton,
+  Box,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+} from '@mui/material';
+import { Close, CloudUpload, InsertDriveFile } from '@mui/icons-material';
 import { useUpload } from '@/hooks/useUpload';
 import { formatFileSize } from '@/lib/utils';
+import { useRef, useState } from 'react';
 
 interface UploadDialogProps {
   isOpen: boolean;
@@ -11,16 +26,10 @@ interface UploadDialogProps {
   onUploadComplete?: () => void;
 }
 
-export function UploadDialog({
-  isOpen,
-  onClose,
-  onUploadComplete,
-}: UploadDialogProps) {
+export function UploadDialog({ isOpen, onClose, onUploadComplete }: UploadDialogProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploadFile, uploads, isUploading, clearUploads } = useUpload();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-
-  if (!isOpen) return null;
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -51,111 +60,227 @@ export function UploadDialog({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[1000] modal-enter p-3 sm:p-4">
-      <div className="bg-white rounded-lg w-full max-w-[480px] sm:max-w-md shadow-[0_8px_16px_rgba(0,0,0,0.15)] overflow-hidden">
-        <div className="flex items-center justify-between border-b border-[#e5e5e5] h-14 sm:h-16 px-4 sm:px-6">
-          <h2 className="text-[#202124] text-base sm:text-lg font-normal">Upload Files</h2>
-          <button
-            onClick={handleClose}
-            className="text-[#5f6368] hover:bg-[#f1f3f4] w-8 h-8 rounded-full flex items-center justify-center transition-colors flex-shrink-0"
-            aria-label="Close"
-          >
-            <X size={18} />
-          </button>
-        </div>
+    <Dialog
+      open={isOpen}
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 2,
+        },
+      }}
+    >
+      <DialogTitle
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          pb: 1.5,
+          borderBottom: '1px solid #e5e5e5',
+        }}
+      >
+        <Typography variant="h6" sx={{ fontWeight: 400, color: '#202124' }}>
+          Upload Files
+        </Typography>
+        <IconButton
+          onClick={handleClose}
+          size="small"
+          sx={{
+            color: '#5f6368',
+            '&:hover': { backgroundColor: '#f1f3f4' },
+          }}
+        >
+          <Close />
+        </IconButton>
+      </DialogTitle>
 
-        <div className="px-4 sm:px-6 py-4 sm:py-5">
-          <div
-            onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-[#dadce0] rounded-lg p-8 sm:p-10 text-center cursor-pointer hover:bg-[#f8f9fa] hover:border-[#1a73e8] transition-all"
-          >
-            <Upload size={40} className="sm:w-12 sm:h-12 text-[#5f6368] mx-auto mb-3 sm:mb-4" />
-            <p className="text-[#202124] font-medium mb-2 text-sm sm:text-base">Click to select files</p>
-            <p className="text-[#5f6368] text-xs sm:text-sm">Maximum file size: 100MB</p>
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-          </div>
+      <DialogContent sx={{ pt: 3 }}>
+        <Box
+          onClick={() => fileInputRef.current?.click()}
+          sx={{
+            border: '2px dashed #dadce0',
+            borderRadius: 2,
+            p: { xs: 4, sm: 5 },
+            textAlign: 'center',
+            cursor: 'pointer',
+            '&:hover': {
+              backgroundColor: '#f8f9fa',
+              borderColor: '#1a73e8',
+            },
+            transition: 'all 150ms ease',
+          }}
+        >
+          <CloudUpload sx={{ fontSize: { xs: 40, sm: 48 }, color: '#5f6368', mb: { xs: 1.5, sm: 2 } }} />
+          <Typography variant="body1" sx={{ fontWeight: 500, color: '#202124', mb: 1, fontSize: { xs: '0.875rem', sm: '1rem' } }}>
+            Click to select files
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#5f6368', fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+            Maximum file size: 100MB
+          </Typography>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            onChange={handleFileSelect}
+            style={{ display: 'none' }}
+          />
+        </Box>
 
-          {selectedFiles.length > 0 && (
-            <div className="mt-4 sm:mt-5 space-y-2 max-h-[180px] sm:max-h-[200px] overflow-y-auto pr-1">
+        {selectedFiles.length > 0 && (
+          <Box sx={{ mt: { xs: 2, sm: 2.5 }, maxHeight: { xs: 180, sm: 200 }, overflowY: 'auto' }}>
+            <List>
               {selectedFiles.map((file, index) => (
-                <div
+                <ListItem
                   key={index}
-                  className="flex items-center justify-between bg-[#f1f3f4] p-3 sm:p-4 rounded-lg"
+                  sx={{
+                    bgcolor: '#f1f3f4',
+                    borderRadius: 2,
+                    mb: 1,
+                  }}
                 >
-                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                    <FileIcon size={18} className="sm:w-5 sm:h-5 text-[#5f6368] flex-shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <div className="text-[#202124] text-xs sm:text-sm font-medium truncate">{file.name}</div>
-                      <div className="text-[#5f6368] text-[11px] sm:text-xs mt-0.5 sm:mt-1">
-                        {formatFileSize(file.size)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  <ListItemIcon>
+                    <InsertDriveFile sx={{ color: '#5f6368' }} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={file.name}
+                    secondary={formatFileSize(file.size)}
+                    primaryTypographyProps={{
+                      sx: {
+                        fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                        fontWeight: 500,
+                        color: '#202124',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      },
+                    }}
+                    secondaryTypographyProps={{
+                      sx: {
+                        fontSize: { xs: '0.6875rem', sm: '0.75rem' },
+                        color: '#5f6368',
+                      },
+                    }}
+                  />
+                </ListItem>
               ))}
-            </div>
-          )}
+            </List>
+          </Box>
+        )}
 
-          {uploads.length > 0 && (
-            <div className="mt-4 sm:mt-5 space-y-2 max-h-[180px] sm:max-h-[200px] overflow-y-auto pr-1">
+        {uploads.length > 0 && (
+          <Box sx={{ mt: { xs: 2, sm: 2.5 }, maxHeight: { xs: 180, sm: 200 }, overflowY: 'auto' }}>
+            <List>
               {uploads.map((upload, index) => (
-                <div
+                <ListItem
                   key={index}
-                  className="bg-[#f1f3f4] p-3 sm:p-4 rounded-lg"
+                  sx={{
+                    bgcolor: '#f1f3f4',
+                    borderRadius: 2,
+                    mb: 1,
+                    flexDirection: 'column',
+                    alignItems: 'stretch',
+                  }}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[#202124] text-xs sm:text-sm font-medium truncate flex-1 mr-3">
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                        fontWeight: 500,
+                        color: '#202124',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        flex: 1,
+                        mr: 1,
+                      }}
+                    >
                       {(upload.file as any).name}
-                    </span>
-                    <span className="text-[#5f6368] text-[11px] sm:text-xs flex-shrink-0">
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontSize: { xs: '0.6875rem', sm: '0.75rem' },
+                        color: '#5f6368',
+                      }}
+                    >
                       {upload.progress}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-[#dadce0] rounded-full h-2">
-                    <div
-                      className={`h-2 rounded-full transition-all ${
-                        upload.status === 'success'
-                          ? 'bg-[#0f9d58]'
-                          : upload.status === 'error'
-                          ? 'bg-[#ea4335]'
-                          : 'bg-[#1a73e8]'
-                      }`}
-                      style={{ width: `${upload.progress}%` }}
-                    />
-                  </div>
+                    </Typography>
+                  </Box>
+                  <LinearProgress
+                    variant="determinate"
+                    value={upload.progress}
+                    sx={{
+                      height: 8,
+                      borderRadius: 1,
+                      backgroundColor: '#dadce0',
+                      '& .MuiLinearProgress-bar': {
+                        backgroundColor:
+                          upload.status === 'success'
+                            ? '#0f9d58'
+                            : upload.status === 'error'
+                            ? '#ea4335'
+                            : '#1a73e8',
+                      },
+                    }}
+                  />
                   {upload.error && (
-                    <div className="text-[#ea4335] text-[11px] sm:text-xs mt-2">
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: '#ea4335',
+                        fontSize: { xs: '0.6875rem', sm: '0.75rem' },
+                        mt: 1,
+                      }}
+                    >
                       {upload.error}
-                    </div>
+                    </Typography>
                   )}
-                </div>
+                </ListItem>
               ))}
-            </div>
-          )}
+            </List>
+          </Box>
+        )}
+      </DialogContent>
 
-          <div className="flex gap-2 sm:gap-3 mt-5 sm:mt-6">
-            <button
-              onClick={handleClose}
-              className="flex-1 px-4 sm:px-5 py-2 sm:py-2.5 bg-white border border-[#dadce0] hover:bg-[#f8f9fa] text-[#202124] rounded-lg transition-colors text-xs sm:text-sm font-medium"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleUpload}
-              disabled={selectedFiles.length === 0 || isUploading}
-              className="flex-1 px-4 sm:px-5 py-2 sm:py-2.5 bg-[#1a73e8] hover:bg-[#1765cc] disabled:bg-[#dadce0] disabled:cursor-not-allowed text-white rounded-lg transition-colors text-xs sm:text-sm font-medium shadow-[0_1px_2px_rgba(0,0,0,0.3)]"
-            >
-              {isUploading ? 'Uploading...' : 'Upload'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+      <DialogActions sx={{ px: 3, pb: 2.5, pt: 2, gap: 1.5 }}>
+        <Button
+          onClick={handleClose}
+          variant="outlined"
+          sx={{
+            borderColor: '#dadce0',
+            color: '#202124',
+            '&:hover': {
+              borderColor: '#dadce0',
+              backgroundColor: '#f8f9fa',
+            },
+            textTransform: 'none',
+            flex: 1,
+          }}
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={handleUpload}
+          disabled={selectedFiles.length === 0 || isUploading}
+          variant="contained"
+          sx={{
+            backgroundColor: '#1a73e8',
+            '&:hover': {
+              backgroundColor: '#1765cc',
+            },
+            '&:disabled': {
+              backgroundColor: '#dadce0',
+            },
+            textTransform: 'none',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.3)',
+            flex: 1,
+          }}
+        >
+          {isUploading ? 'Uploading...' : 'Upload'}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }

@@ -1,22 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { DeleteDialog } from '@/components/files/DeleteDialog';
+import { FileContextMenu } from '@/components/files/FileContextMenu';
+import { FileInfoDialog } from '@/components/files/FileInfoDialog';
+import { FileViewer } from '@/components/files/FileViewer';
+import { RenameDialog } from '@/components/files/RenameDialog';
+import { ShareDialog } from '@/components/files/ShareDialog';
+import { UploadDialog } from '@/components/files/UploadDialog';
+import { FileGrid } from '@/components/layout/FileGrid';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
-import { FileGrid } from '@/components/layout/FileGrid';
-import { UploadDialog } from '@/components/files/UploadDialog';
-import { FileContextMenu } from '@/components/files/FileContextMenu';
-import { RenameDialog } from '@/components/files/RenameDialog';
-import { DeleteDialog } from '@/components/files/DeleteDialog';
-import { ShareDialog } from '@/components/files/ShareDialog';
-import { FileViewer } from '@/components/files/FileViewer';
-import { FileInfoDialog } from '@/components/files/FileInfoDialog';
-import { useStarredFiles } from '@/hooks/useStarredFiles';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useAuth } from '@/hooks/useAuth';
-import { File } from '@/types';
+import { useStarredFiles } from '@/hooks/useStarredFiles';
 import { api } from '@/lib/api';
-import { ChevronDown } from 'lucide-react';
+import { colors } from '@/lib/colors';
+import { File } from '@/types';
+import { Box, Container, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
 
 export default function StarredPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -31,7 +32,6 @@ export default function StarredPage() {
   const [shareFile, setShareFile] = useState<File | null>(null);
   const [viewFile, setViewFile] = useState<File | null>(null);
   const [infoFile, setInfoFile] = useState<File | null>(null);
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const { user } = useAuth();
 
   const { files, isLoading, renameFile: renameFileApi, deleteFile: deleteFileApi, downloadFile, toggleStar, refetch } = useStarredFiles(debouncedSearch);
@@ -95,49 +95,56 @@ export default function StarredPage() {
 
   return (
     <ProtectedRoute>
-      <div className="h-screen bg-white text-[#202124] overflow-hidden relative flex flex-col">
+      <Box sx={{ height: '100vh', backgroundColor: colors.background.default, color: colors.text.primary, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <TopBar onSearch={setSearchQuery} searchQuery={searchQuery} />
         
-        <div className="flex flex-1 overflow-hidden pt-16">
+        <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden', pt: 8 }}>
           <Sidebar onNewClick={() => setShowUploadDialog(true)} />
           
-          <main 
-            className="flex-1 transition-all h-full flex flex-col overflow-hidden"
-            style={{ marginLeft: 'var(--sidebar-width, 256px)' }}
+          <Box
+            component="main"
+            sx={{
+              flex: 1,
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              ml: { xs: 0, md: 'var(--sidebar-width, 256px)' },
+              transition: 'margin-left 300ms ease',
+            }}
           >
-            <div 
-              className="flex-1 overflow-y-auto transition-all w-full"
+            <Box
+              sx={{
+                flex: 1,
+                overflowY: 'auto',
+                width: '100%',
+              }}
             >
-              <div className="px-4 md:px-8 py-6 md:py-8">
-                <div className="mb-4 md:mb-6">
-                  <h1 className="text-xl md:text-[22px] font-normal text-[#202124] mb-4 md:mb-6">Starred</h1>
-                  <div className="h-12 flex items-center border-b border-[#e5e5e5] mb-4 md:mb-6 gap-3 md:gap-4 overflow-x-auto">
-                    <button className="h-8 px-3 rounded flex items-center gap-2 text-sm text-[#5f6368] hover:bg-gray-100 transition-colors whitespace-nowrap">
-                      Type
-                      <ChevronDown size={16} />
-                    </button>
-                    <button className="h-8 px-3 rounded flex items-center gap-2 text-sm text-[#5f6368] hover:bg-gray-100 transition-colors whitespace-nowrap">
-                      People
-                      <ChevronDown size={16} />
-                    </button>
-                    <button className="h-8 px-3 rounded flex items-center gap-2 text-sm text-[#5f6368] hover:bg-gray-100 transition-colors whitespace-nowrap">
-                      Modified
-                      <ChevronDown size={16} />
-                    </button>
-                  </div>
-                </div>
+              <Container maxWidth={false} sx={{ pl: { xs: 2, sm: 1, md: 0.5 }, pr: { xs: 2, sm: 3, md: 4 }, py: { xs: 3, sm: 4, md: 4 } }}>
+                <Box sx={{ mb: { xs: 2, sm: 3, md: 3 } }}>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontSize: { xs: '1.25rem', md: '1.375rem' },
+                      fontWeight: 400,
+                      color: colors.text.primary,
+                      mb: { xs: 2, sm: 3, md: 3 },
+                    }}
+                  >
+                    Starred
+                  </Typography>
+                </Box>
                 <FileGrid
                   files={files}
                   loading={isLoading}
                   onFileMenuClick={handleFileMenuClick}
                   onFileDoubleClick={(file) => handleOpenFile(file)}
                   onFileStar={handleStar}
-                  selectedFiles={selectedFiles}
                 />
-              </div>
-            </div>
-          </main>
-        </div>
+              </Container>
+            </Box>
+          </Box>
+        </Box>
 
         {contextMenu && (
           <FileContextMenu
@@ -196,7 +203,7 @@ export default function StarredPage() {
           onClose={() => setShareFile(null)}
           onShareComplete={handleShareComplete}
         />
-      </div>
+      </Box>
     </ProtectedRoute>
   );
 }

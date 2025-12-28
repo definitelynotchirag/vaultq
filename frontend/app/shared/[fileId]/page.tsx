@@ -1,5 +1,6 @@
 'use client';
 
+import { Box, Typography, Button, CircularProgress } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { FileViewer } from '@/components/files/FileViewer';
@@ -45,56 +46,102 @@ export default function SharedFilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white text-[#202124] flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          backgroundColor: '#ffffff',
+          color: '#202124',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Box sx={{ textAlign: 'center' }}>
+          <CircularProgress sx={{ color: '#1a73e8', mb: 2 }} />
+          <Typography variant="h6">Loading...</Typography>
+        </Box>
+      </Box>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white text-[#202124] flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-xl mb-4 text-red-600">{error}</div>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          backgroundColor: '#ffffff',
+          color: '#202124',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h6" sx={{ mb: 2, color: '#ea4335' }}>
+            {error}
+          </Typography>
           {error.includes('log in') && (
-            <button
+            <Button
               onClick={() => {
                 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
                 window.location.href = `${API_URL}/auth/google`;
               }}
-              className="px-6 py-2 bg-[#1a73e8] hover:bg-[#1765cc] text-white rounded-lg transition-colors"
+              variant="contained"
+              sx={{
+                backgroundColor: '#1a73e8',
+                '&:hover': { backgroundColor: '#1765cc' },
+                textTransform: 'none',
+                mb: 2,
+              }}
             >
               Log In
-            </button>
+            </Button>
           )}
-          <button
+          <Button
             onClick={() => router.push('/')}
-            className="mt-4 px-6 py-2 bg-[#f1f3f4] hover:bg-[#e8eaed] text-[#202124] rounded-lg transition-colors border border-[#dadce0]"
+            variant="outlined"
+            sx={{
+              borderColor: '#dadce0',
+              color: '#202124',
+              '&:hover': {
+                borderColor: '#dadce0',
+                backgroundColor: '#f8f9fa',
+              },
+              textTransform: 'none',
+            }}
           >
             Go Home
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Box>
+      </Box>
     );
   }
 
   if (!file) {
     return (
-      <div className="min-h-screen bg-white text-[#202124] flex items-center justify-center">
-        <div className="text-lg">File not found</div>
-      </div>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          backgroundColor: '#ffffff',
+          color: '#202124',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Typography variant="h6">File not found</Typography>
+      </Box>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <Box sx={{ minHeight: '100vh', backgroundColor: '#ffffff' }}>
       <FileViewer
         isOpen={true}
         file={file}
         onClose={() => router.push('/')}
         isSharedView={true}
       />
-    </div>
+    </Box>
   );
 }
-

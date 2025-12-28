@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { FileGrid } from '@/components/layout/FileGrid';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
-import { FileGrid } from '@/components/layout/FileGrid';
-import { FileContextMenu } from '@/components/files/FileContextMenu';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useTrashFiles } from '@/hooks/useTrashFiles';
+import { colors } from '@/lib/colors';
 import { File } from '@/types';
-import { RotateCcw, Trash2 } from 'lucide-react';
+import { Delete as DeleteIcon, Restore } from '@mui/icons-material';
+import { Box, Container, ListItemIcon, ListItemText, Menu, MenuItem, Typography } from '@mui/material';
+import { useState } from 'react';
 
 export default function TrashPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -16,7 +17,6 @@ export default function TrashPage() {
     file: File;
     position: { x: number; y: number };
   } | null>(null);
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
 
   const { files, isLoading, restoreFile, permanentDeleteFile, refetch } = useTrashFiles();
 
@@ -61,92 +61,113 @@ export default function TrashPage() {
     }
   };
 
-  const trashMenuItems = [
-    {
-      label: 'Restore',
-      icon: RotateCcw,
-      onClick: (file: File) => handleRestore(file._id),
-    },
-    {
-      label: 'Download',
-      icon: null,
-      onClick: (file: File) => handleDownload(file),
-    },
-    {
-      label: 'Delete forever',
-      icon: Trash2,
-      onClick: (file: File) => handlePermanentDelete(file._id),
-      danger: true,
-    },
-  ];
-
   return (
     <ProtectedRoute>
-      <div className="h-screen bg-white text-[#202124] overflow-hidden relative flex flex-col">
+      <Box sx={{ height: '100vh', backgroundColor: colors.background.default, color: colors.text.primary, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <TopBar onSearch={setSearchQuery} searchQuery={searchQuery} />
         
-        <div className="flex flex-1 overflow-hidden pt-16">
+        <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden', pt: 8 }}>
           <Sidebar onNewClick={() => {}} />
           
-          <main 
-            className="flex-1 transition-all h-full flex flex-col overflow-hidden"
-            style={{ marginLeft: 'var(--sidebar-width, 256px)' }}
+          <Box
+            component="main"
+            sx={{
+              flex: 1,
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              ml: { xs: 0, md: 'var(--sidebar-width, 256px)' },
+              transition: 'margin-left 300ms ease',
+            }}
           >
-            <div 
-              className="flex-1 overflow-y-auto transition-all w-full"
+            <Box
+              sx={{
+                flex: 1,
+                overflowY: 'auto',
+                width: '100%',
+              }}
             >
-              <div className="px-4 md:px-8 py-6 md:py-8">
-                <div className="mb-4 md:mb-6">
-                  <h1 className="text-xl md:text-[22px] font-normal text-[#202124] mb-2">Trash</h1>
-                  <p className="text-[#5f6368] text-sm">
-                    Files in trash are deleted after 30 days
-                  </p>
-                </div>
+              <Container maxWidth={false} sx={{ pl: { xs: 2, sm: 1, md: 0.5 }, pr: { xs: 2, sm: 3, md: 1 }, py: { xs: 3, sm: 4, md: 4 } }}>
+                <Box sx={{ mb: { xs: 2, sm: 3, md: 3 } }}>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontSize: { xs: '1.25rem', md: '1.375rem' },
+                      fontWeight: 400,
+                      color: colors.text.primary,
+                      mb: 1,
+                    }}
+                  >
+                    Trash
+                  </Typography>
+                </Box>
                 {files.length === 0 && !isLoading ? (
-                  <div className="text-center py-12">
-                    <p className="text-[#5f6368]">Trash is empty</p>
-                  </div>
+                  <Box sx={{ textAlign: 'center', py: 6 }}>
+                    <Typography variant="body1" sx={{ color: colors.text.secondary }}>
+                      Trash is empty
+                    </Typography>
+                  </Box>
                 ) : (
                   <FileGrid
                     files={files}
                     loading={isLoading}
                     onFileMenuClick={handleFileMenuClick}
-                    selectedFiles={selectedFiles}
                   />
                 )}
-              </div>
-            </div>
-          </main>
-        </div>
+              </Container>
+            </Box>
+          </Box>
+        </Box>
 
         {contextMenu && (
-          <div
-            className="fixed bg-white border border-[#e5e5e5] rounded-lg shadow-lg py-2 min-w-[200px] z-[1000]"
-            style={{ left: contextMenu.position.x, top: contextMenu.position.y }}
+          <Menu
+            open={true}
+            onClose={() => setContextMenu(null)}
+            anchorReference="anchorPosition"
+            anchorPosition={{ top: contextMenu.position.y, left: contextMenu.position.x }}
+            PaperProps={{
+              sx: {
+                minWidth: 200,
+                boxShadow: colors.shadow.menu,
+                border: `1px solid ${colors.border.default}`,
+              },
+            }}
           >
-            {trashMenuItems.map((item, index) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={index}
-                  onClick={() => {
-                    item.onClick(contextMenu.file);
-                    setContextMenu(null);
-                  }}
-                  className={`w-full flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
-                    item.danger
-                      ? 'text-[#ea4335] hover:bg-[#f1f3f4]'
-                      : 'text-[#202124] hover:bg-[#f1f3f4]'
-                  }`}
-                >
-                  {Icon && <Icon size={18} className="text-[#5f6368]" />}
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
+            <MenuItem
+              onClick={() => {
+                handleRestore(contextMenu.file._id);
+                setContextMenu(null);
+              }}
+            >
+              <ListItemIcon>
+                <Restore fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Restore</ListItemText>
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                handleDownload(contextMenu.file);
+                setContextMenu(null);
+              }}
+            >
+              <ListItemText>Download</ListItemText>
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                handlePermanentDelete(contextMenu.file._id);
+                setContextMenu(null);
+              }}
+              sx={{ color: colors.error.main }}
+            >
+              <ListItemIcon>
+                <DeleteIcon fontSize="small" sx={{ color: colors.error.main }} />
+              </ListItemIcon>
+              <ListItemText>Delete forever</ListItemText>
+            </MenuItem>
+          </Menu>
         )}
-      </div>
+      </Box>
     </ProtectedRoute>
   );
 }

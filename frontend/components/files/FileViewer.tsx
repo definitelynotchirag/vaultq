@@ -1,9 +1,24 @@
 'use client';
 
+import {
+  Box,
+  IconButton,
+  Typography,
+  CircularProgress,
+  Button,
+  AppBar,
+  Toolbar,
+} from '@mui/material';
+import {
+  Close,
+  Download,
+  Link as LinkIcon,
+  Check,
+} from '@mui/icons-material';
 import { api } from '@/lib/api';
+import { colors } from '@/lib/colors';
 import { File } from '@/types';
 import { useEffect, useState } from 'react';
-import { Check, Download, Link as LinkIcon, X } from 'lucide-react';
 
 interface FileViewerProps {
   isOpen: boolean;
@@ -93,98 +108,206 @@ export function FileViewer({ isOpen, file, onClose, isSharedView = false }: File
   const canView = isImage(file.originalName) || isPdf(file.originalName);
 
   return (
-    <div className="fixed inset-0 bg-[#1a1a1a] z-[2000] flex flex-col">
-      <div className="h-16 flex items-center justify-between px-4 border-b border-[#3c3c3c] bg-[#1a1a1a] flex-shrink-0">
-        <div className="flex items-center gap-4 flex-1 min-w-0">
-          <h2 className="text-white text-lg font-normal truncate">{file.originalName}</h2>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
+    <Box
+      sx={{
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: colors.background.dark,
+        zIndex: 2000,
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <AppBar
+        position="static"
+        sx={{
+          backgroundColor: colors.background.darkSecondary,
+          borderBottom: `1px solid ${colors.border.dark}`,
+        }}
+      >
+        <Toolbar 
+          sx={{ 
+            gap: 1.5,
+            minHeight: '48px !important',
+            height: '48px',
+            px: 2,
+          }}
+        >
+          <Typography
+            variant="body1"
+            sx={{
+              flex: 1,
+              color: colors.text.white,
+              fontWeight: 400,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              fontSize: '14px',
+            }}
+          >
+            {file.originalName}
+          </Typography>
+          <Button
             onClick={handleCopyLink}
-            className={`h-10 px-4 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium ${
-              copied
-                ? 'bg-[#0f9d58] text-white'
-                : 'text-white hover:bg-[rgba(255,255,255,0.1)]'
-            }`}
+            startIcon={copied ? <Check sx={{ fontSize: 18 }} /> : <LinkIcon sx={{ fontSize: 18 }} />}
+            sx={{
+              color: colors.text.white,
+              backgroundColor: copied ? colors.success.main : 'transparent',
+              textTransform: 'none',
+              fontSize: '14px',
+              px: 1.5,
+              py: 0.75,
+              minWidth: 'auto',
+              '&:hover': {
+                backgroundColor: copied ? colors.success.main : colors.overlay.white10,
+              },
+            }}
           >
-            {copied ? (
-              <>
-                <Check size={18} />
-                Copied
-              </>
-            ) : (
-              <>
-                <LinkIcon size={18} />
-                Copy link
-              </>
-            )}
-          </button>
-          <button
+            {copied ? 'Copied' : 'Copy link'}
+          </Button>
+          <Button
             onClick={handleDownload}
-            className="h-10 px-4 rounded-lg text-white hover:bg-[rgba(255,255,255,0.1)] transition-colors flex items-center gap-2 text-sm font-medium"
+            startIcon={<Download sx={{ fontSize: 18 }} />}
+            sx={{
+              color: colors.text.white,
+              textTransform: 'none',
+              fontSize: '14px',
+              px: 1.5,
+              py: 0.75,
+              minWidth: 'auto',
+              '&:hover': {
+                backgroundColor: colors.overlay.white10,
+              },
+            }}
           >
-            <Download size={18} />
             Download
-          </button>
-          <div className="w-px h-8 bg-[#3c3c3c] mx-2" />
-          <button
+          </Button>
+          <IconButton
             onClick={onClose}
-            className="w-10 h-10 rounded-full text-white hover:bg-[rgba(255,255,255,0.1)] transition-colors flex items-center justify-center"
+            sx={{
+              color: colors.text.white,
+              ml: 0.5,
+              '&:hover': {
+                backgroundColor: colors.overlay.white10,
+              },
+            }}
           >
-            <X size={24} />
-          </button>
-        </div>
-      </div>
+            <Close sx={{ fontSize: 20 }} />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
 
-      <div className="flex-1 overflow-hidden flex items-center justify-center relative p-4">
+      <Box
+        sx={{
+          flex: 1,
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+          p: 2,
+        }}
+      >
         {loading && (
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 border-4 border-[rgba(255,255,255,0.1)] border-t-[#1a73e8] rounded-full animate-spin" />
-            <div className="text-white text-lg font-medium">Loading...</div>
-          </div>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+            <CircularProgress sx={{ color: colors.primary.main }} size={48} />
+            <Typography variant="h6" sx={{ color: colors.text.white, fontWeight: 500 }}>
+              Loading...
+            </Typography>
+          </Box>
         )}
 
         {error && (
-          <div className="text-[#ea4335] text-lg font-medium bg-[rgba(234,67,53,0.1)] px-6 py-3 rounded-lg border border-[#ea4335]">
+          <Typography
+            variant="h6"
+            sx={{
+              color: colors.error.main,
+              fontWeight: 500,
+              backgroundColor: colors.error.light,
+              px: 3,
+              py: 1.5,
+              borderRadius: 2,
+              border: `1px solid ${colors.error.main}`,
+            }}
+          >
             {error}
-          </div>
+          </Typography>
         )}
 
         {!loading && !error && viewUrl && canView && (
-          <div className="w-full h-full flex items-center justify-center">
+          <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {isPdf(file.originalName) ? (
               <iframe
                 src={viewUrl}
-                className="w-full h-full border-0 rounded-lg bg-white shadow-2xl"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                  borderRadius: 8,
+                  backgroundColor: colors.background.default,
+                  boxShadow: colors.shadow.heavy,
+                }}
                 title={file.originalName}
               />
             ) : isImage(file.originalName) ? (
-              <img
+              <Box
+                component="img"
                 src={viewUrl}
                 alt={file.originalName}
-                className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+                sx={{
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  objectFit: 'contain',
+                  borderRadius: 2,
+                  boxShadow: colors.shadow.heavy,
+                }}
               />
             ) : null}
-          </div>
+          </Box>
         )}
 
         {!loading && !error && viewUrl && !canView && (
-          <div className="text-center">
-            <div className="w-20 h-20 bg-[rgba(255,255,255,0.05)] rounded-full flex items-center justify-center mx-auto mb-6">
-              <X size={40} className="text-white opacity-20" />
-            </div>
-            <p className="text-white text-xl font-medium mb-2">No preview available</p>
-            <p className="text-[#80868b] mb-8">This file type cannot be viewed in the browser.</p>
-            <button
-              onClick={handleDownload}
-              className="px-8 py-3 bg-[#1a73e8] hover:bg-[#1765cc] text-white rounded-lg transition-colors flex items-center gap-2 mx-auto font-medium shadow-lg"
+          <Box sx={{ textAlign: 'center' }}>
+            <Box
+              sx={{
+                width: 80,
+                height: 80,
+                backgroundColor: colors.overlay.white05,
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 3,
+              }}
             >
-              <Download size={20} />
+              <Close sx={{ fontSize: 40, color: colors.overlay.white02 }} />
+            </Box>
+            <Typography variant="h5" sx={{ color: colors.text.white, fontWeight: 500, mb: 1 }}>
+              No preview available
+            </Typography>
+            <Typography variant="body1" sx={{ color: colors.text.disabled, mb: 4 }}>
+              This file type cannot be viewed in the browser.
+            </Typography>
+            <Button
+              onClick={handleDownload}
+              variant="contained"
+              startIcon={<Download />}
+              sx={{
+                backgroundColor: colors.primary.main,
+                '&:hover': {
+                  backgroundColor: colors.primary.hover,
+                },
+                px: 4,
+                py: 1.5,
+                boxShadow: colors.shadow.heavy,
+              }}
+            >
               Download to view
-            </button>
-          </div>
+            </Button>
+          </Box>
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }

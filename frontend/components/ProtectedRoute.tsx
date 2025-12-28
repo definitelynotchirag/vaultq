@@ -1,5 +1,6 @@
 'use client';
 
+import { Box, CircularProgress, Typography } from '@mui/material';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -16,9 +17,22 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-white">
-        <div className="text-[#5f6368]">Loading...</div>
-      </div>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          backgroundColor: '#ffffff',
+        }}
+      >
+        <Box sx={{ textAlign: 'center' }}>
+          <CircularProgress sx={{ color: '#1a73e8', mb: 2 }} />
+          <Typography variant="body2" sx={{ color: '#5f6368' }}>
+            Loading...
+          </Typography>
+        </Box>
+      </Box>
     );
   }
 
@@ -28,4 +42,3 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
-

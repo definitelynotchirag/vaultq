@@ -1,6 +1,9 @@
 # VaultQ - Google Drive Clone
 
+
 A scalable, production-ready cloud storage solution built with modern web technologies. VaultQ provides secure file storage, sharing capabilities, and Google OAuth authentication with AWS S3 integration.
+
+![VaultQ Architecture](./frontend/public/image.png)
 
 ## Features
 
@@ -191,8 +194,6 @@ docker-compose down -v
 ```
 
 ## Architecture
-
-![VaultQ Architecture](./frontend/public/image.png)
 
 ```
 Client

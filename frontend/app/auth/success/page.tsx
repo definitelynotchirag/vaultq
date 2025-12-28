@@ -1,5 +1,6 @@
 'use client';
 
+import { Box, Typography, CircularProgress } from '@mui/material';
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -46,12 +47,25 @@ export default function AuthSuccessPage() {
   }, [user, loading, router]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white text-[#202124]">
-      <div className="text-center">
-        <div className="text-xl mb-4 font-normal">Authentication successful!</div>
-        <div className="text-[#5f6368]">Redirecting to Drive...</div>
-      </div>
-    </div>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        backgroundColor: '#ffffff',
+        color: '#202124',
+      }}
+    >
+      <Box sx={{ textAlign: 'center' }}>
+        <CircularProgress sx={{ color: '#1a73e8', mb: 2 }} />
+        <Typography variant="h6" sx={{ fontWeight: 400, mb: 1 }}>
+          Authentication successful!
+        </Typography>
+        <Typography variant="body2" sx={{ color: '#5f6368' }}>
+          Redirecting to Drive...
+        </Typography>
+      </Box>
+    </Box>
   );
 }
-

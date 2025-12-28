@@ -1,23 +1,28 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
 import {
-  Download,
-  Edit,
-  Copy,
-  Share2,
-  Folder,
-  Info,
-  CheckCircle,
-  Trash2,
-  ChevronRight,
-  Star,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+} from '@mui/material';
+import {
+  OpenInNew,
+  Share,
   Link as LinkIcon,
-  ExternalLink,
-} from 'lucide-react';
+  Star,
+  Edit,
+  Info,
+  Download,
+  Delete,
+  ChevronRight,
+} from '@mui/icons-material';
 import { File } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
+import { colors } from '@/lib/colors';
 import { hasWriteAccess } from '@/lib/filePermissions';
+import { useEffect, useRef } from 'react';
 
 interface FileContextMenuProps {
   file: File;
@@ -50,53 +55,23 @@ export function FileContextMenu({
   onOpen,
   onDelete,
 }: FileContextMenuProps) {
-  const menuRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const canWrite = hasWriteAccess(file, user);
   const isStarred = user && file.starredBy?.includes(user._id);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        onClose();
-      }
-    };
-
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         onClose();
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleEscape);
-
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
     };
   }, [onClose]);
-
-  useEffect(() => {
-    if (menuRef.current) {
-      const rect = menuRef.current.getBoundingClientRect();
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-
-      let x = position.x;
-      let y = position.y;
-
-      if (x + rect.width > viewportWidth) {
-        x = viewportWidth - rect.width - 10;
-      }
-      if (y + rect.height > viewportHeight) {
-        y = viewportHeight - rect.height - 10;
-      }
-
-      menuRef.current.style.left = `${x}px`;
-      menuRef.current.style.top = `${y}px`;
-    }
-  }, [position]);
 
   const menuItems = [
     {
@@ -107,16 +82,18 @@ export function FileContextMenu({
     },
     {
       label: 'Open in new tab',
-      icon: ExternalLink,
+      icon: OpenInNew,
       hasArrow: false,
-      onClick: () => window.open(file.url, '_blank'),
+      onClick: () => {
+        if (file.url) {
+          window.open(file.url, '_blank', 'noopener,noreferrer');
+        }
+      },
     },
-    {
-      type: 'divider',
-    },
+    { type: 'divider' },
     {
       label: 'Share',
-      icon: Share2,
+      icon: Share,
       hasArrow: false,
       onClick: () => onShare && onShare(file),
       hidden: !canWrite,
@@ -126,12 +103,6 @@ export function FileContextMenu({
       icon: LinkIcon,
       hasArrow: false,
       onClick: () => onCopyLink && onCopyLink(file),
-    },
-    {
-      label: 'Move to',
-      icon: Folder,
-      hasArrow: true,
-      onClick: () => onOrganize && onOrganize(file),
     },
     {
       label: isStarred ? 'Remove from starred' : 'Add to starred',
@@ -152,27 +123,17 @@ export function FileContextMenu({
       hasArrow: false,
       onClick: () => onInfo && onInfo(file),
     },
-    {
-      type: 'divider',
-    },
-    {
-      label: 'Make a copy',
-      icon: Copy,
-      hasArrow: false,
-      onClick: () => onCopy && onCopy(file),
-    },
+    { type: 'divider' },
     {
       label: 'Download',
       icon: Download,
       hasArrow: false,
       onClick: () => onDownload && onDownload(file),
     },
-    {
-      type: 'divider',
-    },
+    { type: 'divider' },
     {
       label: 'Move to trash',
-      icon: Trash2,
+      icon: Delete,
       hasArrow: false,
       onClick: () => onDelete && onDelete(file),
       hidden: !canWrite,
@@ -180,50 +141,66 @@ export function FileContextMenu({
   ].filter((item) => !('hidden' in item && item.hidden));
 
   return (
-    <div
+    <Menu
+      open={true}
+      onClose={onClose}
+      anchorReference="anchorPosition"
+      anchorPosition={{ top: position.y, left: position.x }}
       ref={menuRef}
-      className="fixed bg-white rounded-lg shadow-[0_2px_6px_rgba(0,0,0,.15),0_1px_2px_rgba(0,0,0,.3)] py-2 min-w-[200px] z-[1000]"
-      style={{ left: position.x, top: position.y }}
+      PaperProps={{
+        sx: {
+          minWidth: 200,
+          boxShadow: colors.shadow.menu,
+          border: `1px solid ${colors.border.default}`,
+        },
+      }}
+      MenuListProps={{
+        sx: { py: 0.5 },
+      }}
     >
       {menuItems.map((item, index) => {
         if (item.type === 'divider') {
-          return (
-            <div
-              key={`divider-${index}`}
-              className="h-px bg-[#e5e5e5] my-2"
-            />
-          );
+          return <Divider key={`divider-${index}`} />;
         }
 
         const Icon = item.icon;
-        const isDisabled = ('disabled' in item && item.disabled) as boolean;
-        const isGrayed = ('grayed' in item && item.grayed) as boolean;
         return (
-          <button
+          <MenuItem
             key={index}
             onClick={() => {
-              if (!isDisabled && 'onClick' in item && item.onClick) {
+              if ('onClick' in item && item.onClick) {
                 item.onClick();
                 onClose();
               }
             }}
-            disabled={!!isDisabled}
-            className={`w-full h-10 px-4 flex items-center justify-between text-sm transition-colors ${
-              isDisabled || isGrayed
-                ? 'text-[#80868b] cursor-not-allowed'
-                : 'text-[#202124] hover:bg-[#f1f3f4]'
-            }`}
+            sx={{
+              minHeight: 40,
+              px: 2,
+              '&:hover': {
+                backgroundColor: colors.background.hover,
+              },
+            }}
           >
-            <div className="flex items-center gap-3">
-              {Icon && <Icon size={18} className="text-[#5f6368]" />}
-              <span>{item.label}</span>
-            </div>
-            {item.hasArrow && (
-              <ChevronRight size={16} className="text-[#5f6368]" />
+            {Icon && (
+              <ListItemIcon sx={{ minWidth: 36, color: colors.text.secondary }}>
+                <Icon fontSize="small" />
+              </ListItemIcon>
             )}
-          </button>
+            <ListItemText
+              primary={item.label}
+              primaryTypographyProps={{
+                sx: {
+                  fontSize: '0.875rem',
+                  color: colors.text.primary,
+                },
+              }}
+            />
+            {item.hasArrow && (
+              <ChevronRight sx={{ fontSize: 16, color: colors.text.secondary, ml: 1 }} />
+            )}
+          </MenuItem>
         );
       })}
-    </div>
+    </Menu>
   );
 }

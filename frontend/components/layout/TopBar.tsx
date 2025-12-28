@@ -1,9 +1,11 @@
 'use client';
 
+import { AppBar, Toolbar, IconButton, InputBase, Box, Menu, MenuItem, Avatar, Typography, useTheme, useMediaQuery } from '@mui/material';
+import { Search as SearchIcon, Close } from '@mui/icons-material';
 import { useAuth } from '@/hooks/useAuth';
-import { Grid3x3, HelpCircle, Search, Settings, X } from 'lucide-react';
+import { colors } from '@/lib/colors';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 interface TopBarProps {
   onSearch: (query: string) => void;
@@ -13,29 +15,20 @@ interface TopBarProps {
 export function TopBar({ onSearch, searchQuery }: TopBarProps) {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [searchValue, setSearchValue] = useState(searchQuery);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
-        setShowUserMenu(false);
-      }
-    };
-
-    if (showUserMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showUserMenu]);
+    setSearchValue(searchQuery);
+  }, [searchQuery]);
 
   const handleLogout = async () => {
     await logout();
+    setShowUserMenu(false);
     router.push('/');
   };
 
@@ -54,91 +47,191 @@ export function TopBar({ onSearch, searchQuery }: TopBarProps) {
   };
 
   return (
-    <div className="h-16 bg-white border-b border-[#e5e5e5] shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] flex items-center justify-between px-3 sm:px-4 md:px-6 fixed top-0 left-0 right-0 z-50">
-      <div className="flex items-center gap-2 sm:gap-3 md:gap-6 flex-1 min-w-0">
-        <div className="flex items-center gap-2 md:gap-3 w-auto md:w-[200px] shrink-0">
-          <div className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center shrink-0 ml-10 md:ml-0">
-            <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 md:w-10 md:h-10">
-              <path d="M8 12C8 10.8954 8.89543 10 10 10H16.1716C16.702 10 17.2107 10.2107 17.5858 10.5858L21.4142 14.4142C21.7893 14.7893 22.298 15 22.8284 15H30C31.1046 15 32 15.8954 32 17V28C32 29.1046 31.1046 30 30 30H10C8.89543 30 8 29.1046 8 28V12Z" fill="#4285F4"/>
+    <AppBar
+      position="fixed"
+      sx={{
+        zIndex: (theme) => theme.zIndex.drawer + 1,
+        backgroundColor: colors.background.default,
+        color: colors.text.primary,
+        boxShadow: colors.shadow.light,
+      }}
+    >
+      <Toolbar sx={{ px: { xs: 1.5, sm: 2, md: 3 }, gap: { xs: 1, sm: 1.5, md: 3 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5, md: 2 }, minWidth: { md: 200 } }}>
+          <Box
+            sx={{
+              width: { xs: 32, md: 40 },
+              height: { xs: 32, md: 40 },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              ml: { xs: 5, md: 0 },
+            }}
+          >
+            <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 12C8 10.8954 8.89543 10 10 10H16.1716C16.702 10 17.2107 10.2107 17.5858 10.5858L21.4142 14.4142C21.7893 14.7893 22.298 15 22.8284 15H30C31.1046 15 32 15.8954 32 17V28C32 29.1046 31.1046 30 30 30H10C8.89543 30 8 29.1046 8 28V12Z" fill={colors.primary.light}/>
               <path d="M20 10V15C20 16.1046 20.8954 17 22 17H27L20 10Z" fill="#AECBFA"/>
             </svg>
-          </div>
-          <span className="text-lg md:text-[22px] text-[#5f6368] font-normal hidden sm:block" style={{ fontFamily: 'var(--font-sans)' }}>
+          </Box>
+          <Typography
+            variant="h6"
+            sx={{
+              fontSize: { xs: '1rem', md: '1.375rem' },
+              color: colors.text.secondary,
+              fontWeight: 400,
+              display: { xs: 'none', sm: 'block' },
+            }}
+          >
             VaultQ
-          </span>
-        </div>
+          </Typography>
+        </Box>
 
-        <div className="flex items-center gap-2 flex-1 max-w-[720px] mx-auto hidden md:flex">
-          <div className="relative flex-1 flex items-center">
-            <Search className="absolute left-3 text-[#5f6368] w-5 h-5 pointer-events-none z-10" />
-            <input
-              ref={(el) => {
+        <Box
+          sx={{
+            display: { xs: 'none', md: 'flex' },
+            alignItems: 'center',
+            flex: 1,
+            maxWidth: 720,
+            mx: 'auto',
+          }}
+        >
+          <Box
+            sx={{
+              position: 'relative',
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <SearchIcon
+              sx={{
+                position: 'absolute',
+                left: 12,
+                color: colors.text.secondary,
+                pointerEvents: 'none',
+                zIndex: 1,
+              }}
+            />
+            <InputBase
+              inputRef={(el) => {
                 if (el) {
                   (window as any).__searchInputRef = el;
                 }
               }}
-              type="text"
               placeholder="Search in VaultQ"
               value={searchValue}
               onChange={handleSearchChange}
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setIsSearchFocused(false)}
-              className={`w-full h-12 pl-11 pr-11 rounded-lg border-none outline-none transition-hover ${
-                isSearchFocused ? 'bg-white shadow-md' : 'bg-[#f1f3f4] hover:bg-[#e8eaed]'
-              }`}
-              style={{ fontSize: '16px', color: '#202124' }}
+              sx={{
+                width: '100%',
+                height: 48,
+                pl: 5.5,
+                pr: searchValue ? 5.5 : 3,
+                borderRadius: 2,
+                fontSize: 16,
+                color: colors.text.primary,
+                backgroundColor: isSearchFocused ? colors.background.default : colors.background.hover,
+                boxShadow: isSearchFocused ? colors.shadow.medium : 'none',
+                transition: 'all 150ms ease',
+                '&:hover': {
+                  backgroundColor: isSearchFocused ? colors.background.default : colors.background.selected,
+                },
+                '& .MuiInputBase-input': {
+                  '&::placeholder': {
+                    opacity: 1,
+                    color: colors.text.secondary,
+                  },
+                },
+              }}
             />
             {searchValue && (
-              <button
+              <IconButton
                 onClick={() => {
                   setSearchValue('');
                   onSearch('');
                 }}
-                className="absolute right-3 text-[#5f6368] hover:text-[#202124] transition-colors z-10"
+                sx={{
+                  position: 'absolute',
+                  right: 8,
+                  color: colors.text.secondary,
+                  '&:hover': { color: colors.text.primary },
+                }}
+                size="small"
               >
-                <X className="w-5 h-5" />
-              </button>
+                <Close fontSize="small" />
+              </IconButton>
             )}
-          </div>
-        </div>
-      </div>
+          </Box>
+        </Box>
 
-      <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 shrink-0">
-        <button className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors" aria-label="Help">
-          <HelpCircle className="w-4 h-4 sm:w-[18px] sm:h-[18px] md:w-5 md:h-5 text-[#5f6368]" />
-        </button>
-        <button className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors hidden sm:flex" aria-label="Settings">
-          <Settings className="w-4 h-4 sm:w-[18px] sm:h-[18px] md:w-5 md:h-5 text-[#5f6368]" />
-        </button>
-        <button className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors hidden sm:flex" aria-label="Google apps">
-          <Grid3x3 className="w-4 h-4 sm:w-[18px] sm:h-[18px] md:w-5 md:h-5 text-[#5f6368]" />
-        </button>
-        <div className="relative ml-1 sm:ml-1.5 md:ml-2" ref={userMenuRef}>
-          <button
-            onClick={() => setShowUserMenu(!showUserMenu)}
-            className="w-8 h-8 rounded-full border border-[#dadce0] bg-white hover:bg-gray-50 flex items-center justify-center transition-colors"
-            aria-label="Account menu"
-          >
-            <span className="text-xs font-medium text-[#5f6368]">
-              {user ? getInitials(user.name) : 'U'}
-            </span>
-          </button>
-          {showUserMenu && (
-            <div className="absolute right-0 top-11 w-56 sm:w-64 bg-white border border-[#e5e5e5] rounded-lg shadow-lg py-2 z-50">
-              <div className="px-4 py-3 border-b border-[#e5e5e5]">
-                <div className="text-[#202124] font-medium text-sm">{user?.name}</div>
-                <div className="text-[#5f6368] text-xs mt-1 break-words">{user?.email}</div>
-              </div>
-              <button
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1, md: 1.5 } }}>
+          <Box ref={userMenuRef} sx={{ position: 'relative', ml: { xs: 0.5, sm: 1, md: 1.5 } }}>
+            <IconButton
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              sx={{
+                border: `1px solid ${colors.border.light}`,
+                backgroundColor: colors.background.default,
+                '&:hover': { backgroundColor: colors.overlay.black04 },
+                width: { xs: 32, sm: 36, md: 40 },
+                height: { xs: 32, sm: 36, md: 40 },
+              }}
+            >
+              <Avatar
+                sx={{
+                  width: { xs: 24, sm: 28, md: 32 },
+                  height: { xs: 24, sm: 28, md: 32 },
+                  bgcolor: 'transparent',
+                  color: colors.text.secondary,
+                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                  fontWeight: 500,
+                }}
+              >
+                {user ? getInitials(user.name) : 'U'}
+              </Avatar>
+            </IconButton>
+            <Menu
+              open={showUserMenu}
+              onClose={() => setShowUserMenu(false)}
+              anchorEl={userMenuRef.current}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              PaperProps={{
+                sx: {
+                  mt: 1,
+                  minWidth: { xs: 224, sm: 256 },
+                  boxShadow: colors.shadow.menu,
+                  border: `1px solid ${colors.border.default}`,
+                },
+              }}
+            >
+              <Box sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${colors.border.default}` }}>
+                <Typography variant="body2" sx={{ fontWeight: 500, color: colors.text.primary }}>
+                  {user?.name}
+                </Typography>
+                <Typography variant="caption" sx={{ color: colors.text.secondary, display: 'block', wordBreak: 'break-word' }}>
+                  {user?.email}
+                </Typography>
+              </Box>
+              <MenuItem
                 onClick={handleLogout}
-                className="w-full text-left px-4 py-3 text-sm text-[#202124] hover:bg-[#f1f3f4] transition-colors mt-1"
+                sx={{
+                  mt: 0.5,
+                  '&:hover': { backgroundColor: colors.background.hover },
+                }}
               >
                 Sign out
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+              </MenuItem>
+            </Menu>
+          </Box>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 }

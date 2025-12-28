@@ -1,9 +1,39 @@
 'use client';
 
-import { useState } from 'react';
-import { X, Link as LinkIcon, User, Lock, Unlock, Check, Copy, Mail } from 'lucide-react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Typography,
+  IconButton,
+  Box,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Avatar,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+} from '@mui/material';
+import {
+  Close,
+  Link as LinkIcon,
+  Lock,
+  LockOpen,
+  Check,
+  ContentCopy,
+  Mail,
+  OpenInNew,
+} from '@mui/icons-material';
 import { File } from '@/types';
 import { api } from '@/lib/api';
+import { colors } from '@/lib/colors';
+import { useState } from 'react';
 
 interface ShareDialogProps {
   isOpen: boolean;
@@ -12,12 +42,7 @@ interface ShareDialogProps {
   onShareComplete?: () => void;
 }
 
-export function ShareDialog({
-  isOpen,
-  file,
-  onClose,
-  onShareComplete,
-}: ShareDialogProps) {
+export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDialogProps) {
   const [isPublic, setIsPublic] = useState(file?.public || false);
   const [isSaving, setIsSaving] = useState(false);
   const [email, setEmail] = useState('');
@@ -75,163 +100,293 @@ export function ShareDialog({
     }
   };
 
+  const handleOpenInNewTab = () => {
+    const shareableUrl = api.files.getShareableUrl(file._id);
+    if (shareableUrl) {
+      window.open(shareableUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[1000] modal-enter p-4">
-      <div className="w-full max-w-[640px] max-h-[90vh] bg-white rounded-lg shadow-[0_8px_16px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col">
-        <div className="h-16 flex items-center justify-between border-b border-[#e5e5e5] flex-shrink-0 px-6">
-          <h2 className="text-lg md:text-[22px] text-[#202124] font-normal truncate pr-4">Share "{file.originalName}"</h2>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full hover:bg-[#f1f3f4] flex items-center justify-center transition-colors flex-shrink-0"
+    <Dialog
+      open={isOpen && !!file}
+      onClose={onClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 2,
+          maxHeight: '90vh',
+          display: 'flex',
+          flexDirection: 'column',
+        },
+      }}
+    >
+      <DialogTitle
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          pb: 1.5,
+          borderBottom: `1px solid ${colors.border.default}`,
+          flexShrink: 0,
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 400,
+            color: colors.text.primary,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            pr: 2,
+            fontSize: { xs: '1rem', md: '1.375rem' },
+          }}
+        >
+          Share "{file.originalName}"
+        </Typography>
+        <IconButton
+          onClick={onClose}
+          size="small"
+          sx={{
+            color: colors.text.secondary,
+            '&:hover': { backgroundColor: colors.background.hover },
+          }}
+        >
+          <Close />
+        </IconButton>
+      </DialogTitle>
+
+      <DialogContent sx={{ flex: 1, overflowY: 'auto', pt: 3 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            p: 2,
+            bgcolor: colors.background.light,
+            borderRadius: 2,
+            mb: 3,
+          }}
+        >
+          <Avatar sx={{ bgcolor: colors.primary.main, width: 40, height: 40 }}>
+            <LinkIcon />
+          </Avatar>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="body2" sx={{ fontWeight: 500, color: '#202124' }}>
+              Anyone with the link
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#5f6368' }}>
+              {isPublic ? 'Can view' : 'No access'}
+            </Typography>
+          </Box>
+          <Button
+            onClick={handleTogglePublic}
+            disabled={isSaving}
+            variant={isPublic ? 'contained' : 'outlined'}
+            startIcon={isPublic ? <LockOpen /> : <Lock />}
+            sx={{
+              backgroundColor: isPublic ? colors.primary.main : 'transparent',
+              borderColor: isPublic ? 'transparent' : colors.border.light,
+              color: isPublic ? colors.text.white : colors.text.primary,
+              '&:hover': {
+                backgroundColor: isPublic ? colors.primary.hover : colors.background.light,
+              },
+              textTransform: 'none',
+              boxShadow: isPublic ? colors.shadow.card : 'none',
+            }}
           >
-            <X size={18} className="text-[#5f6368]" />
-          </button>
-        </div>
+            {isPublic ? 'Public' : 'Private'}
+          </Button>
+        </Box>
 
-        <div className="flex-1 overflow-y-auto px-6 py-5" style={{ maxHeight: 'calc(90vh - 64px - 72px)' }}>
-          <div className="flex items-center gap-3 p-4 bg-[#f8f9fa] rounded-lg mb-5">
-            <div className="w-10 h-10 bg-[#1a73e8] rounded-full flex items-center justify-center flex-shrink-0">
-              <LinkIcon size={20} className="text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-[#202124]">Anyone with the link</div>
-              <div className="text-xs text-[#5f6368]">
-                {isPublic ? 'Can view' : 'No access'}
-              </div>
-            </div>
-            <button
-              onClick={handleTogglePublic}
-              disabled={isSaving}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 ${
-                isPublic
-                  ? 'bg-[#1a73e8] hover:bg-[#1765cc] text-white shadow-[0_1px_2px_rgba(0,0,0,0.3),0_1px_3px_1px_rgba(0,0,0,0.15)]'
-                  : 'bg-white border border-[#dadce0] hover:bg-[#f8f9fa] text-[#202124]'
-              }`}
+        <Box sx={{ borderTop: '1px solid #e5e5e5', pt: 3, mb: 3 }}>
+          <Typography variant="body2" sx={{ fontWeight: 500, color: '#202124', mb: 2 }}>
+            Copy link
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
+            <TextField
+              value={api.files.getShareableUrl(file._id)}
+              InputProps={{
+                readOnly: true,
+              }}
+              fullWidth
+              variant="outlined"
+              sx={{
+                flex: 1,
+                '& .MuiOutlinedInput-root': {
+                  bgcolor: colors.background.light,
+                  borderRadius: 2,
+                },
+              }}
+            />
+            <Button
+              onClick={handleCopyLink}
+              variant="contained"
+              startIcon={copied ? <Check /> : <ContentCopy />}
+              sx={{
+                backgroundColor: copied ? colors.success.main : colors.primary.main,
+                '&:hover': {
+                  backgroundColor: copied ? colors.success.main : colors.primary.hover,
+                },
+                textTransform: 'none',
+                boxShadow: colors.shadow.card,
+                minWidth: { xs: '100%', sm: 'auto' },
+              }}
             >
-              {isPublic ? (
-                <>
-                  <Unlock size={16} />
-                  Public
-                </>
-              ) : (
-                <>
-                  <Lock size={16} />
-                  Private
-                </>
-              )}
-            </button>
-          </div>
+              {copied ? 'Copied' : 'Copy'}
+            </Button>
+            <Button
+              onClick={handleOpenInNewTab}
+              variant="outlined"
+              startIcon={<OpenInNew />}
+              sx={{
+                borderColor: colors.border.light,
+                color: colors.text.primary,
+                '&:hover': {
+                  backgroundColor: colors.background.light,
+                  borderColor: colors.border.light,
+                },
+                textTransform: 'none',
+                minWidth: { xs: '100%', sm: 'auto' },
+              }}
+            >
+              Open in new tab
+            </Button>
+          </Box>
+        </Box>
 
-          <div className="border-t border-[#e5e5e5] pt-5 mb-5">
-            <h3 className="text-sm font-medium text-[#202124] mb-4">Copy link</h3>
-            <div className="flex gap-2 flex-col sm:flex-row">
-              <input
-                type="text"
-                value={api.files.getShareableUrl(file._id)}
-                readOnly
-                className="flex-1 bg-[#f8f9fa] border border-[#dadce0] text-[#202124] px-4 py-2.5 rounded-lg focus:outline-none focus:border-[#1a73e8] focus:ring-1 focus:ring-[#1a73e8] text-sm"
+        <Box sx={{ borderTop: '1px solid #e5e5e5', pt: 3, mb: 3 }}>
+          <Typography variant="body2" sx={{ fontWeight: 500, color: '#202124', mb: 2 }}>
+            Share with specific people
+          </Typography>
+          <form onSubmit={handleShareWithUser}>
+            <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' }, mb: 2 }}>
+              <TextField
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter email address"
+                fullWidth
+                variant="outlined"
+                InputProps={{
+                  startAdornment: <Mail sx={{ color: colors.text.secondary, mr: 1 }} />,
+                }}
+                sx={{
+                  flex: 1,
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                  },
+                }}
               />
-              <button
-                onClick={handleCopyLink}
-                className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-colors flex items-center justify-center gap-2 ${
-                  copied
-                    ? 'bg-[#0f9d58] text-white'
-                    : 'bg-[#1a73e8] hover:bg-[#1765cc] text-white shadow-[0_1px_2px_rgba(0,0,0,0.3),0_1px_3px_1px_rgba(0,0,0,0.15)]'
-                }`}
-              >
-                {copied ? (
-                  <>
-                    <Check size={16} />
-                    Copied
-                  </>
-                ) : (
-                  <>
-                    <Copy size={16} />
-                    Copy
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-
-          <div className="border-t border-[#e5e5e5] pt-5 mb-5">
-            <h3 className="text-sm font-medium text-[#202124] mb-4">Share with specific people</h3>
-            <form onSubmit={handleShareWithUser} className="space-y-3">
-              <div className="flex gap-2 flex-col sm:flex-row">
-                <div className="flex-1 relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#5f6368] w-4 h-4" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter email address"
-                    className="w-full bg-white border border-[#dadce0] text-[#202124] pl-10 pr-4 py-2.5 rounded-lg focus:outline-none focus:border-[#1a73e8] focus:ring-1 focus:ring-[#1a73e8] text-sm"
-                  />
-                </div>
-                <select
+              <FormControl sx={{ minWidth: { xs: '100%', sm: 140 } }}>
+                <InputLabel>Permission</InputLabel>
+                <Select
                   value={permissionLevel}
                   onChange={(e) => setPermissionLevel(e.target.value as 'read' | 'write')}
-                  className="bg-white border border-[#dadce0] text-[#202124] px-4 py-2.5 rounded-lg focus:outline-none focus:border-[#1a73e8] focus:ring-1 focus:ring-[#1a73e8] text-sm"
+                  label="Permission"
+                  sx={{
+                    borderRadius: 2,
+                  }}
                 >
-                  <option value="read">Can view</option>
-                  <option value="write">Can edit</option>
-                </select>
-                <button
-                  type="submit"
-                  disabled={!email.trim() || isSaving}
-                  className="px-5 py-2.5 bg-[#1a73e8] hover:bg-[#1765cc] disabled:bg-[#dadce0] disabled:cursor-not-allowed text-white rounded-lg transition-colors text-sm font-medium shadow-[0_1px_2px_rgba(0,0,0,0.3),0_1px_3px_1px_rgba(0,0,0,0.15)]"
-                >
-                  Share
-                </button>
-              </div>
-            </form>
-          </div>
+                  <MenuItem value="read">Can view</MenuItem>
+                  <MenuItem value="write">Can edit</MenuItem>
+                </Select>
+              </FormControl>
+              <Button
+                type="submit"
+                disabled={!email.trim() || isSaving}
+                variant="contained"
+                sx={{
+                  backgroundColor: colors.primary.main,
+                  '&:hover': {
+                    backgroundColor: colors.primary.hover,
+                  },
+                  '&:disabled': {
+                    backgroundColor: colors.border.light,
+                  },
+                  textTransform: 'none',
+                  boxShadow: colors.shadow.card,
+                  minWidth: { xs: '100%', sm: 'auto' },
+                }}
+              >
+                Share
+              </Button>
+            </Box>
+          </form>
+        </Box>
 
-          {file.permissions && file.permissions.length > 0 && (
-            <div className="border-t border-[#e5e5e5] pt-5">
-              <h3 className="text-sm font-medium text-[#202124] mb-4">People with access</h3>
-              <div className="space-y-3">
-                {file.permissions.map((perm, index) => {
-                  const permUser = typeof perm.userId === 'object' && perm.userId !== null
-                    ? (perm.userId as any)
-                    : null;
-                  const userName = permUser?.name || 'Unknown User';
-                  const userEmail = permUser?.email || perm.userId;
+        {file.permissions && file.permissions.length > 0 && (
+          <Box sx={{ borderTop: '1px solid #e5e5e5', pt: 3 }}>
+            <Typography variant="body2" sx={{ fontWeight: 500, color: '#202124', mb: 2 }}>
+              People with access
+            </Typography>
+            <List>
+              {file.permissions.map((perm, index) => {
+                const permUser = typeof perm.userId === 'object' && perm.userId !== null
+                  ? (perm.userId as any)
+                  : null;
+                const userName = permUser?.name || 'Unknown User';
+                const userEmail = permUser?.email || perm.userId;
 
-                  return (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-4 bg-[#f8f9fa] rounded-lg"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-[#5f6368] rounded-full flex items-center justify-center flex-shrink-0">
-                          <User size={18} className="text-white" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-sm font-medium text-[#202124] truncate">{userName}</div>
-                          <div className="text-xs text-[#5f6368] truncate">{userEmail}</div>
-                          <div className="text-xs text-[#5f6368] mt-1">
+                return (
+                  <ListItem
+                    key={index}
+                    sx={{
+                      bgcolor: colors.background.light,
+                      borderRadius: 2,
+                      mb: 1,
+                    }}
+                  >
+                    <ListItemAvatar>
+                      <Avatar sx={{ bgcolor: colors.secondary.main, width: 40, height: 40 }}>
+                        {userName.charAt(0).toUpperCase()}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={userName}
+                      secondary={
+                        <>
+                          <Typography variant="caption" sx={{ display: 'block', color: colors.text.secondary }}>
+                            {userEmail}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: colors.text.secondary }}>
                             {perm.level === 'read' ? 'Can view' : 'Can edit'}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
+                          </Typography>
+                        </>
+                      }
+                      primaryTypographyProps={{
+                        sx: {
+                          fontWeight: 500,
+                          color: colors.text.primary,
+                        },
+                      }}
+                    />
+                  </ListItem>
+                );
+              })}
+            </List>
+          </Box>
+        )}
+      </DialogContent>
 
-        <div className="h-[72px] flex items-center justify-end gap-3 border-t border-[#e5e5e5] flex-shrink-0 px-6">
-          <button
-            onClick={onClose}
-            className="px-6 py-2.5 bg-[#1a73e8] hover:bg-[#1765cc] text-white rounded-lg transition-colors text-sm font-medium shadow-[0_1px_2px_rgba(0,0,0,0.3),0_1px_3px_1px_rgba(0,0,0,0.15)]"
-          >
-            Done
-          </button>
-        </div>
-      </div>
-    </div>
+      <DialogActions sx={{ px: 3, pb: 2.5, pt: 2, borderTop: '1px solid #e5e5e5', flexShrink: 0 }}>
+        <Button
+          onClick={onClose}
+          variant="contained"
+          sx={{
+            backgroundColor: colors.primary.main,
+            '&:hover': {
+              backgroundColor: colors.primary.hover,
+            },
+            textTransform: 'none',
+            boxShadow: colors.shadow.card,
+          }}
+        >
+          Done
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }

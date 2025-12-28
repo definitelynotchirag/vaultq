@@ -14,7 +14,9 @@ import { TopBar } from '@/components/layout/TopBar';
 import { useAuth } from '@/hooks/useAuth';
 import { useFiles } from '@/hooks/useFiles';
 import { api } from '@/lib/api';
+import { colors } from '@/lib/colors';
 import { File } from '@/types';
+import { Box, Container, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 
 export default function SharedPage() {
@@ -30,7 +32,6 @@ export default function SharedPage() {
   const [shareFile, setShareFile] = useState<File | null>(null);
   const [viewFile, setViewFile] = useState<File | null>(null);
   const [infoFile, setInfoFile] = useState<File | null>(null);
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const { user } = useAuth();
 
   const { files, isLoading, renameFile: renameFileApi, deleteFile: deleteFileApi, downloadFile, refetch } = useFiles(debouncedSearch);
@@ -104,40 +105,56 @@ export default function SharedPage() {
 
   return (
     <ProtectedRoute>
-      <div className="h-screen bg-white text-[#202124] overflow-hidden relative flex flex-col">
+      <Box sx={{ height: '100vh', backgroundColor: colors.background.default, color: colors.text.primary, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <TopBar onSearch={setSearchQuery} searchQuery={searchQuery} />
         
-        <div className="flex flex-1 overflow-hidden pt-16">
+        <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden', pt: 8 }}>
           <Sidebar onNewClick={() => setShowUploadDialog(true)} />
           
-          <main 
-            className="flex-1 transition-all h-full flex flex-col overflow-hidden"
-            style={{ marginLeft: 'var(--sidebar-width, 256px)' }}
+          <Box
+            component="main"
+            sx={{
+              flex: 1,
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              ml: { xs: 0, md: 'var(--sidebar-width, 256px)' },
+              transition: 'margin-left 300ms ease',
+            }}
           >
-            <div 
-              className="flex-1 overflow-y-auto transition-all w-full"
+            <Box
+              sx={{
+                flex: 1,
+                overflowY: 'auto',
+                width: '100%',
+              }}
             >
-              <div className="px-4 md:px-8 py-6 md:py-8">
-                <div className="mb-4 md:mb-6">
-                  <h1 className="text-xl md:text-[22px] font-normal text-[#202124] mb-4 md:mb-6">Shared with me</h1>
-                  <div className="h-12 flex items-center border-b border-[#e5e5e5] mb-4 md:mb-6 gap-3 md:gap-4 overflow-x-auto">
-                    <button className="h-8 px-3 rounded flex items-center gap-2 text-sm text-[#5f6368] hover:bg-gray-100 transition-colors whitespace-nowrap">Type</button>
-                    <button className="h-8 px-3 rounded flex items-center gap-2 text-sm text-[#5f6368] hover:bg-gray-100 transition-colors whitespace-nowrap">People</button>
-                    <button className="h-8 px-3 rounded flex items-center gap-2 text-sm text-[#5f6368] hover:bg-gray-100 transition-colors whitespace-nowrap">Modified</button>
-                  </div>
-                </div>
+              <Container maxWidth={false} sx={{ pl: { xs: 2, sm: 1, md: 0.5 }, pr: { xs: 2, sm: 3, md: 4 }, py: { xs: 3, sm: 4, md: 4 } }}>
+                <Box sx={{ mb: { xs: 2, sm: 3, md: 3 } }}>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontSize: { xs: '1.25rem', md: '1.375rem' },
+                      fontWeight: 400,
+                      color: colors.text.primary,
+                      mb: { xs: 2, sm: 3, md: 3 },
+                    }}
+                  >
+                    Shared with me
+                  </Typography>
+                </Box>
                 <FileGrid
                   files={sharedFiles}
                   loading={isLoading}
                   onFileMenuClick={handleFileMenuClick}
                   onFileDoubleClick={(file) => handleOpenFile(file)}
                   onFileStar={handleStar}
-                  selectedFiles={selectedFiles}
                 />
-              </div>
-            </div>
-          </main>
-        </div>
+              </Container>
+            </Box>
+          </Box>
+        </Box>
 
         {contextMenu && (
           <FileContextMenu
@@ -196,7 +213,7 @@ export default function SharedPage() {
           onClose={() => setShareFile(null)}
           onShareComplete={handleShareComplete}
         />
-      </div>
+      </Box>
     </ProtectedRoute>
   );
 }

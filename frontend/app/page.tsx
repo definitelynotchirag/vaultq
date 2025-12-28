@@ -9,17 +9,17 @@ import { RenameDialog } from '@/components/files/RenameDialog';
 import { ShareDialog } from '@/components/files/ShareDialog';
 import { UploadDialog } from '@/components/files/UploadDialog';
 import { FileGrid } from '@/components/layout/FileGrid';
-import { SelectionToolbar } from '@/components/layout/SelectionToolbar';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useAuth } from '@/hooks/useAuth';
 import { useFiles } from '@/hooks/useFiles';
-import { useFileSelection } from '@/hooks/useFileSelection';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { api } from '@/lib/api';
+import { colors } from '@/lib/colors';
 import { File } from '@/types';
-import { Grid3x3, List } from 'lucide-react';
+import { GridView, List as ListIcon } from '@mui/icons-material';
+import { Box, Container, IconButton, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 
 export default function HomePage() {
@@ -39,44 +39,15 @@ export default function HomePage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const { user } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const { files, isLoading, renameFile: renameFileApi, deleteFile: deleteFileApi, downloadFile, refetch } = useFiles(debouncedSearch);
-  
-  const {
-    selectedFiles,
-    selectFile,
-    selectAll,
-    clearSelection,
-    getSelectedFiles,
-  } = useFileSelection(files);
 
   useKeyboardShortcuts({
-    onSelectAll: () => selectAll(),
-    onDelete: () => {
-      const selected = getSelectedFiles();
-      if (selected.length > 0) {
-        setDeleteFile(selected[0]);
-      }
-    },
-    onDownload: async () => {
-      const selected = getSelectedFiles();
-      for (const file of selected) {
-        try {
-          await downloadFile(file._id);
-        } catch (error) {
-          console.error('Download error:', error);
-        }
-      }
-    },
     onFocusSearch: () => {
       if (searchInputRef.current) {
         searchInputRef.current.focus();
-      }
-    },
-    onOpen: () => {
-      const selected = getSelectedFiles();
-      if (selected.length === 1) {
-        handleOpenFile(selected[0]);
       }
     },
   });
@@ -88,19 +59,8 @@ export default function HomePage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  useEffect(() => {
-    if (selectedFiles.length === 0) {
-      setPreviewFile(null);
-    } else if (selectedFiles.length === 1) {
-      const file = files.find(f => f._id === selectedFiles[0]);
-      if (file) {
-        setPreviewFile(file);
-      }
-    }
-  }, [selectedFiles, files]);
-
-  const handleFileSelect = (file: File, event: React.MouseEvent) => {
-    selectFile(file._id, event);
+  const handleFileClick = (file: File) => {
+    setPreviewFile(file);
   };
 
   const handleFileMenuClick = (file: File, event: React.MouseEvent) => {
@@ -114,27 +74,12 @@ export default function HomePage() {
     await renameFileApi({ fileId, newName });
     setRenameFile(null);
     refetch();
-    clearSelection();
   };
 
   const handleDelete = async (fileId: string) => {
     await deleteFileApi(fileId);
     setDeleteFile(null);
     refetch();
-    clearSelection();
-  };
-
-  const handleDeleteSelected = async () => {
-    const selected = getSelectedFiles();
-    for (const file of selected) {
-      try {
-        await deleteFileApi(file._id);
-      } catch (error) {
-        console.error('Delete error:', error);
-      }
-    }
-    refetch();
-    clearSelection();
   };
 
   const handleOpenFile = (file: File) => {
@@ -149,26 +94,8 @@ export default function HomePage() {
     }
   };
 
-  const handleDownloadSelected = async () => {
-    const selected = getSelectedFiles();
-    for (const file of selected) {
-      try {
-        await downloadFile(file._id);
-      } catch (error) {
-        console.error('Download error:', error);
-      }
-    }
-  };
-
   const handleShareComplete = () => {
     refetch();
-  };
-
-  const handleShareSelected = () => {
-    const selected = getSelectedFiles();
-    if (selected.length > 0) {
-      setShareFile(selected[0]);
-    }
   };
 
   const handleStar = async (file: File) => {
@@ -185,22 +112,6 @@ export default function HomePage() {
     }
   };
 
-  const handleStarSelected = async () => {
-    const selected = getSelectedFiles();
-    for (const file of selected) {
-      try {
-        const isStarred = user && file.starredBy?.includes(user._id);
-        if (isStarred) {
-          await api.files.unstarFile(file._id);
-        } else {
-          await api.files.starFile(file._id);
-        }
-      } catch (error) {
-        console.error('Star error:', error);
-      }
-    }
-    refetch();
-  };
 
   const handleCopyLink = async (file: File) => {
     const shareableUrl = api.files.getShareableUrl(file._id);
@@ -211,91 +122,104 @@ export default function HomePage() {
     }
   };
 
-  const hasSelection = selectedFiles.length > 0;
-  const selectedFilesList = getSelectedFiles();
-
   return (
     <ProtectedRoute>
-      <div className="h-screen bg-white text-[#202124] overflow-hidden relative flex flex-col">
+      <Box sx={{ height: '100vh', backgroundColor: colors.background.default, color: colors.text.primary, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <TopBar onSearch={setSearchQuery} searchQuery={searchQuery} />
         
-        <div className="flex flex-1 overflow-hidden pt-16">
+        <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden', pt: 8 }}>
           <Sidebar onNewClick={() => setShowUploadDialog(true)} />
           
-          <main 
-            className="flex-1 transition-all h-full flex flex-col overflow-hidden"
-            style={{ marginLeft: 'var(--sidebar-width, 256px)' }}
+          <Box
+            component="main"
+            sx={{
+              flex: 1,
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              ml: { xs: 0, md: 'var(--sidebar-width, 256px)' },
+              transition: 'margin-left 300ms ease',
+            }}
           >
-            {hasSelection && (
-              <SelectionToolbar
-                selectedCount={selectedFiles.length}
-                selectedFiles={selectedFilesList}
-                onShare={handleShareSelected}
-                onDownload={handleDownloadSelected}
-                onStar={handleStarSelected}
-                onDelete={handleDeleteSelected}
-              />
-            )}
-
-            <div 
-              className={`flex-1 overflow-y-auto transition-all ${hasSelection ? 'mt-16' : ''} w-full`}
-              onClick={() => {
-                if (!contextMenu) {
-                  clearSelection();
-                }
+            <Box
+              sx={{
+                flex: 1,
+                overflowY: 'auto',
+                width: '100%',
               }}
             >
-              <div className="px-4 md:px-8 py-6 md:py-8">
-                <div className="flex items-center justify-between mb-4 md:mb-6">
-                  <h1 className="text-xl md:text-[22px] font-normal text-[#202124]">My Drive</h1>
+              <Container maxWidth={false} sx={{ pl: { xs: 2, sm: 1, md: 0.5 }, pr: { xs: 2, sm: 3, md: 4 }, py: { xs: 3, sm: 4, md: 4 } }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: { xs: 2, sm: 3, md: 3 } }}>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontSize: { xs: '1.25rem', md: '1.375rem' },
+                      fontWeight: 400,
+                      color: colors.text.primary,
+                    }}
+                  >
+                    My Drive
+                  </Typography>
                   
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center border border-[#dadce0] rounded">
-                      <button
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', border: `1px solid ${colors.border.light}`, borderRadius: 1 }}>
+                      <IconButton
                         onClick={() => setViewMode('grid')}
-                        className={`w-9 h-9 md:w-10 md:h-10 flex items-center justify-center transition-colors ${
-                          viewMode === 'grid'
-                            ? 'bg-[#e8eaed]'
-                            : 'bg-white hover:bg-[#f1f3f4]'
-                        }`}
+                        size="small"
+                        sx={{
+                          width: { xs: 36, sm: 40 },
+                          height: { xs: 36, sm: 40 },
+                          color: viewMode === 'grid' ? colors.text.primary : colors.text.secondary,
+                          backgroundColor: viewMode === 'grid' ? colors.background.selected : 'transparent',
+                          borderRadius: 0,
+                          '&:hover': {
+                            backgroundColor: viewMode === 'grid' ? colors.background.selected : colors.background.hover,
+                          },
+                        }}
                         aria-label="Grid view"
                       >
-                        <Grid3x3 size={18} className="text-[#5f6368]" />
-                      </button>
-                      <button
+                        <GridView fontSize={isMobile ? 'small' : 'medium'} />
+                      </IconButton>
+                      <Box sx={{ width: 1, height: 24, backgroundColor: colors.border.light }} />
+                      <IconButton
                         onClick={() => setViewMode('list')}
-                        className={`w-9 h-9 md:w-10 md:h-10 flex items-center justify-center border-l border-[#dadce0] transition-colors ${
-                          viewMode === 'list'
-                            ? 'bg-[#e8eaed]'
-                            : 'bg-white hover:bg-[#f1f3f4]'
-                        }`}
+                        size="small"
+                        sx={{
+                          width: { xs: 36, sm: 40 },
+                          height: { xs: 36, sm: 40 },
+                          color: viewMode === 'list' ? colors.text.primary : colors.text.secondary,
+                          backgroundColor: viewMode === 'list' ? colors.background.selected : 'transparent',
+                          borderRadius: 0,
+                          '&:hover': {
+                            backgroundColor: viewMode === 'list' ? colors.background.selected : colors.background.hover,
+                          },
+                        }}
                         aria-label="List view"
                       >
-                        <List size={18} className="text-[#5f6368]" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
+                        <ListIcon fontSize={isMobile ? 'small' : 'medium'} />
+                      </IconButton>
+                    </Box>
+                  </Box>
+                </Box>
 
                 {viewMode === 'grid' ? (
                   <FileGrid
                     files={files}
                     loading={isLoading}
-                    onFileSelect={handleFileSelect}
+                    onFileClick={handleFileClick}
                     onFileMenuClick={handleFileMenuClick}
                     onFileDoubleClick={(file) => handleOpenFile(file)}
                     onFileStar={handleStar}
-                    selectedFiles={selectedFiles}
                   />
                 ) : (
-                  <div className="text-center py-12 text-[#5f6368]">
-                    List view coming soon
-                  </div>
+                  <Box sx={{ textAlign: 'center', py: 6, color: colors.text.secondary }}>
+                    <Typography variant="body1">List view coming soon</Typography>
+                  </Box>
                 )}
-              </div>
-            </div>
-          </main>
+              </Container>
+            </Box>
+          </Box>
 
           {previewFile && (
             <PreviewPanel
@@ -304,7 +228,7 @@ export default function HomePage() {
               onClose={() => setPreviewFile(null)}
             />
           )}
-        </div>
+        </Box>
 
         {contextMenu && (
           <FileContextMenu
@@ -363,7 +287,7 @@ export default function HomePage() {
           onClose={() => setShareFile(null)}
           onShareComplete={handleShareComplete}
         />
-      </div>
+      </Box>
     </ProtectedRoute>
   );
 }

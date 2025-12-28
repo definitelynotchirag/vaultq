@@ -1,37 +1,58 @@
 'use client';
 
 import { useAuth } from '@/hooks/useAuth';
+import { colors } from '@/lib/colors';
 import { formatDate, formatFileSize } from '@/lib/utils';
 import { File as FileType } from '@/types';
-import { Check, File, FileText, Folder, Image, MoreVertical, Presentation, Star, Table, Video } from 'lucide-react';
+import {
+  Description,
+  Folder,
+  Image as ImageIcon,
+  MoreVert,
+  PictureAsPdf,
+  Slideshow,
+  Star,
+  StarBorder,
+  TableChart,
+  VideoFile,
+} from '@mui/icons-material';
+import {
+  Box,
+  Card,
+  CardContent,
+  IconButton,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
 import { useState } from 'react';
 
 interface FileCardProps {
   file: FileType;
-  onSelect?: (file: FileType, event: React.MouseEvent) => void;
+  onClick?: (file: FileType) => void;
   onMenuClick?: (file: FileType, event: React.MouseEvent) => void;
   onDoubleClick?: (file: FileType) => void;
   onStar?: (file: FileType) => void;
-  selected?: boolean;
 }
 
 export function FileCard({
   file,
-  onSelect,
+  onClick,
   onMenuClick,
   onDoubleClick,
   onStar,
-  selected,
 }: FileCardProps) {
   const [hovered, setHovered] = useState(false);
   const { user } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isStarred = user && file.starredBy?.includes(user._id);
 
   const handleClick = (e: React.MouseEvent) => {
     if (e.detail === 2 && onDoubleClick) {
       onDoubleClick(file);
-    } else if (onSelect) {
-      onSelect(file, e);
+    } else if (onClick) {
+      onClick(file);
     }
   };
 
@@ -51,116 +72,191 @@ export function FileCard({
 
   const getFileIcon = () => {
     const extension = file.originalName.split('.').pop()?.toLowerCase() || '';
-    const iconSize = 48;
-    
+    const iconSize = isMobile ? 36 : 48;
+
     if (extension === 'folder' || !extension) {
-      return <Folder size={iconSize} color="#5f6368" />;
+      return <Folder sx={{ fontSize: iconSize, color: colors.fileType.folder }} />;
     }
-    
+
     if (['pdf'].includes(extension)) {
-      return <File size={iconSize} color="#ea4335" />;
+      return <PictureAsPdf sx={{ fontSize: iconSize, color: colors.fileType.pdf }} />;
     }
-    
+
     if (['doc', 'docx'].includes(extension)) {
-      return <FileText size={iconSize} color="#4285f4" />;
+      return <Description sx={{ fontSize: iconSize, color: colors.fileType.doc }} />;
     }
-    
+
     if (['xls', 'xlsx'].includes(extension)) {
-      return <Table size={iconSize} color="#0f9d58" />;
+      return <TableChart sx={{ fontSize: iconSize, color: colors.fileType.sheet }} />;
     }
-    
+
     if (['ppt', 'pptx'].includes(extension)) {
-      return <Presentation size={iconSize} color="#f4b400" />;
+      return <Slideshow sx={{ fontSize: iconSize, color: colors.fileType.slide }} />;
     }
-    
+
     if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension)) {
-      return <Image size={iconSize} color="#4285f4" />;
+      return <ImageIcon sx={{ fontSize: iconSize, color: colors.fileType.image }} />;
     }
-    
+
     if (['mp4', 'mov', 'avi', 'webm'].includes(extension)) {
-      return <Video size={iconSize} color="#ea4335" />;
+      return <VideoFile sx={{ fontSize: iconSize, color: colors.fileType.video }} />;
     }
-    
-    return <FileText size={iconSize} color="#5f6368" />;
+
+    return <Description sx={{ fontSize: iconSize, color: colors.fileType.default }} />;
   };
 
-  const showCheckbox = selected || hovered;
-
   return (
-    <div
-      className={`border border-[#e5e5e5] rounded-lg cursor-pointer transition-base p-2 sm:p-8 ${
-        selected
-          ? 'border-[#1a73e8] shadow-[0_1px_3px_rgba(60,64,67,.3),0_4px_8px_3px_rgba(60,64,67,.15)]'
-          : 'hover:shadow-[0_1px_3px_rgba(60,64,67,.3),0_4px_8px_3px_rgba(60,64,67,.15)] hover:border-transparent'
-      }`}
+    <Card
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={handleClick}
       onDoubleClick={() => onDoubleClick && onDoubleClick(file)}
+      sx={{
+        cursor: 'pointer',
+        border: `1px solid ${colors.border.default}`,
+        boxShadow: 'none',
+        transition: 'all 200ms ease',
+        '&:hover': {
+          boxShadow: colors.shadow.medium,
+          borderColor: 'transparent',
+        },
+        p: { xs: 0.5, sm: 1, md: 2 },
+      }}
     >
-      <div className="h-[140px] sm:h-[160px] md:h-[180px] bg-[#f1f3f4] rounded-t-lg flex items-center justify-center relative">
-        <div className="scale-75 sm:scale-90 md:scale-100">
+      <Box
+        sx={{
+          height: { xs: 140, sm: 160, md: 180 },
+          bgcolor: colors.background.hover,
+          borderRadius: '8px 8px 0 0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+        }}
+      >
+        <Box sx={{ transform: { xs: 'scale(0.75)', sm: 'scale(0.9)', md: 'scale(1)' } }}>
           {getFileIcon()}
-        </div>
-        
-        {showCheckbox && (
-          <div className="absolute top-2 sm:top-3 left-2 sm:left-3">
-            <div className={`w-5 h-5 rounded-sm border-2 flex items-center justify-center transition-colors ${
-              selected
-                ? 'bg-[#1a73e8] border-[#1a73e8]'
-                : 'bg-white border-[#5f6368] hover:border-[#1a73e8]'
-            }`}>
-              {selected && <Check size={14} color="white" strokeWidth={3} />}
-            </div>
-          </div>
-        )}
-        
-        {!showCheckbox && onStar && isStarred && (
-          <button
+        </Box>
+
+        {!hovered && onStar && isStarred && (
+          <IconButton
             onClick={handleStarClick}
-            className="absolute top-2 sm:top-3 left-2 sm:left-3 w-7 h-7 sm:w-8 sm:h-8 bg-transparent rounded-full flex items-center justify-center text-[#f4b400] transition-colors"
-            aria-label="Starred"
+            sx={{
+              position: 'absolute',
+              top: { xs: 8, sm: 12 },
+              left: { xs: 8, sm: 12 },
+              color: colors.warning.main,
+              p: { xs: 0.75, sm: 1 },
+            }}
+            size="small"
           >
-            <Star size={18} className="sm:w-5 sm:h-5 fill-current" />
-          </button>
+            <Star sx={{ fontSize: { xs: 18, sm: 20 }, fill: 'currentColor' }} />
+          </IconButton>
         )}
-        
+
         {hovered && (
           <>
             {onStar && (
-              <button
+              <IconButton
                 onClick={handleStarClick}
-                className={`absolute top-2 sm:top-3 right-10 sm:right-12 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-colors ${
-                  isStarred
-                    ? 'bg-[#feefc3] hover:bg-[#fde293] text-[#f4b400]'
-                    : 'bg-white hover:bg-[#f1f3f4] text-[#5f6368] shadow-[0_1px_2px_rgba(0,0,0,.3),0_1px_3px_1px_rgba(0,0,0,.15)]'
-                }`}
-                aria-label={isStarred ? 'Remove star' : 'Add star'}
+                sx={{
+                  position: 'absolute',
+                  top: { xs: 8, sm: 12 },
+                  right: { xs: 56, sm: 54 },
+                  backgroundColor: isStarred ? colors.warning.light : colors.background.default,
+                  color: isStarred ? colors.warning.main : colors.text.primary,
+                  boxShadow: colors.shadow.card,
+                  '&:hover': {
+                    backgroundColor: isStarred ? colors.warning.lighter : colors.background.hover,
+                  },
+                  p: { xs: 0.75, sm: 1 },
+                }}
+                size="small"
               >
-                <Star size={16} className={`sm:w-[18px] sm:h-[18px] ${isStarred ? 'fill-current' : ''}`} />
-              </button>
+                {isStarred ? (
+                  <Star
+                    sx={{
+                      fontSize: { xs: 16, sm: 18 },
+                      fill: 'currentColor',
+                    }}
+                  />
+                ) : (
+                  <StarBorder
+                    sx={{
+                      fontSize: { xs: 16, sm: 18 },
+                      color: 'currentColor',
+                    }}
+                  />
+                )}
+              </IconButton>
             )}
-            <button
+            <IconButton
               onClick={handleMenuClick}
-              className="absolute top-2 sm:top-3 right-2 sm:right-3 w-7 h-7 sm:w-8 sm:h-8 bg-white hover:bg-[#f1f3f4] rounded-full flex items-center justify-center text-[#5f6368] shadow-[0_1px_2px_rgba(0,0,0,.3),0_1px_3px_1px_rgba(0,0,0,.15)] transition-colors"
-              aria-label="More actions"
+              sx={{
+                position: 'absolute',
+                top: { xs: 8, sm: 12 },
+                right: { xs: 8, sm: 12 },
+                backgroundColor: colors.background.default,
+                color: colors.text.secondary,
+                boxShadow: colors.shadow.card,
+                '&:hover': {
+                  backgroundColor: colors.background.hover,
+                },
+                p: { xs: 0.75, sm: 1 },
+              }}
+              size="small"
             >
-              <MoreVertical size={16} className="sm:w-[18px] sm:h-[18px]" />
-            </button>
+              <MoreVert sx={{ fontSize: { xs: 16, sm: 18 } }} />
+            </IconButton>
           </>
         )}
-      </div>
-      
-      <div className="p-3 sm:p-3.5 md:p-4">
-        <div className="text-xs sm:text-sm text-[#202124] font-normal overflow-hidden text-ellipsis whitespace-nowrap mb-1 sm:mb-1.5">
+      </Box>
+
+      <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 2.5 }, '&:last-child': { pb: { xs: 1.5, sm: 2, md: 2.5 } } }}>
+        <Typography
+          variant="body2"
+          sx={{
+            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+            color: colors.text.primary,
+            fontWeight: 400,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            mb: { xs: 0.5, sm: 0.75 },
+          }}
+        >
           {file.originalName}
-        </div>
-        <div className="text-[11px] sm:text-xs text-[#5f6368] flex items-center gap-1 sm:gap-1.5">
-          <span className="truncate">{formatDate(file.updatedAt)}</span>
-          <span>•</span>
-          <span>{formatFileSize(file.size)}</span>
-        </div>
-      </div>
-    </div>
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 0.75 }, flexWrap: 'wrap' }}>
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: { xs: '0.6875rem', sm: '0.75rem' },
+              color: colors.text.secondary,
+            }}
+          >
+            {formatDate(file.updatedAt)}
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: { xs: '0.6875rem', sm: '0.75rem' },
+              color: colors.text.secondary,
+            }}
+          >
+            •
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: { xs: '0.6875rem', sm: '0.75rem' },
+              color: colors.text.secondary,
+            }}
+          >
+            {formatFileSize(file.size)}
+          </Typography>
+        </Box>
+      </CardContent>
+    </Card>
   );
 }

@@ -1,6 +1,23 @@
 'use client';
 
-import { X, Folder, FileText, Table, Presentation, File, Image, Video } from 'lucide-react';
+import {
+  Drawer,
+  Box,
+  Typography,
+  IconButton,
+  useTheme,
+  useMediaQuery,
+} from '@mui/material';
+import {
+  Close,
+  Folder,
+  Description,
+  TableChart,
+  Slideshow,
+  PictureAsPdf,
+  Image as ImageIcon,
+  VideoFile,
+} from '@mui/icons-material';
 import { File as FileType } from '@/types';
 import { formatFileSize, formatDate } from '@/lib/utils';
 
@@ -11,120 +28,221 @@ interface PreviewPanelProps {
 }
 
 export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+
   if (!isOpen || !file) return null;
 
   const getFileIcon = () => {
     const extension = file.originalName.split('.').pop()?.toLowerCase() || '';
-    const iconSize = 64;
-    
+    const iconSize = isMobile ? 48 : 64;
+
     if (extension === 'folder' || !extension) {
-      return <Folder size={iconSize} color="#5f6368" />;
+      return <Folder sx={{ fontSize: iconSize, color: '#5f6368' }} />;
     }
-    
+
     if (['pdf'].includes(extension)) {
-      return <File size={iconSize} color="#ea4335" />;
+      return <PictureAsPdf sx={{ fontSize: iconSize, color: '#ea4335' }} />;
     }
-    
+
     if (['doc', 'docx'].includes(extension)) {
-      return <FileText size={iconSize} color="#4285f4" />;
+      return <Description sx={{ fontSize: iconSize, color: '#4285f4' }} />;
     }
-    
+
     if (['xls', 'xlsx'].includes(extension)) {
-      return <Table size={iconSize} color="#0f9d58" />;
+      return <TableChart sx={{ fontSize: iconSize, color: '#0f9d58' }} />;
     }
-    
+
     if (['ppt', 'pptx'].includes(extension)) {
-      return <Presentation size={iconSize} color="#f4b400" />;
+      return <Slideshow sx={{ fontSize: iconSize, color: '#f4b400' }} />;
     }
-    
+
     if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension)) {
-      return <Image size={iconSize} color="#4285f4" />;
+      return <ImageIcon sx={{ fontSize: iconSize, color: '#4285f4' }} />;
     }
-    
+
     if (['mp4', 'mov', 'avi', 'webm'].includes(extension)) {
-      return <Video size={iconSize} color="#ea4335" />;
+      return <VideoFile sx={{ fontSize: iconSize, color: '#ea4335' }} />;
     }
-    
-    return <FileText size={iconSize} color="#5f6368" />;
+
+    return <Description sx={{ fontSize: iconSize, color: '#5f6368' }} />;
   };
 
   return (
-    <div className="fixed right-0 top-16 w-full sm:w-[340px] md:w-[360px] h-[calc(100vh-64px)] bg-white border-l border-[#e5e5e5] overflow-y-auto z-40 shadow-lg sm:shadow-none">
-      <div className="p-4 sm:p-5 md:p-6">
-        <div className="flex items-center justify-between mb-4 sm:mb-5 md:mb-6">
-          <h2 className="text-base sm:text-lg font-normal text-[#202124]">Details</h2>
-          <button
+    <Drawer
+      anchor="right"
+      open={isOpen}
+      onClose={onClose}
+      variant="persistent"
+      sx={{
+        width: isOpen ? { xs: '100%', sm: 340, md: 360 } : 0,
+        flexShrink: 0,
+        '& .MuiDrawer-paper': {
+          width: { xs: '100%', sm: 340, md: 360 },
+          top: 64,
+          height: 'calc(100vh - 64px)',
+          borderLeft: '1px solid #e5e5e5',
+          boxShadow: { xs: 'none', sm: 'none', md: '0 2px 8px rgba(0,0,0,0.1)' },
+        },
+      }}
+    >
+      <Box sx={{ p: { xs: 2, sm: 2.5, md: 3 }, overflowY: 'auto', height: '100%' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: { xs: 2, sm: 2.5, md: 3 } }}>
+          <Typography variant="h6" sx={{ fontWeight: 400, color: '#202124', fontSize: { xs: '1rem', sm: '1.125rem' } }}>
+            Details
+          </Typography>
+          <IconButton
             onClick={onClose}
-            className="w-8 h-8 rounded-full hover:bg-[#f1f3f4] flex items-center justify-center transition-colors"
-            aria-label="Close details"
+            sx={{
+              color: '#5f6368',
+              '&:hover': { backgroundColor: '#f1f3f4' },
+            }}
+            size="small"
           >
-            <X size={18} className="text-[#5f6368]" />
-          </button>
-        </div>
+            <Close />
+          </IconButton>
+        </Box>
 
-        <div className="w-full h-[160px] sm:h-[180px] md:h-[200px] bg-[#f1f3f4] rounded-lg flex items-center justify-center mb-4 sm:mb-5 md:mb-6">
-          <div className="scale-90 sm:scale-100">
+        <Box
+          sx={{
+            width: '100%',
+            height: { xs: 160, sm: 180, md: 200 },
+            bgcolor: '#f1f3f4',
+            borderRadius: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            mb: { xs: 2, sm: 2.5, md: 3 },
+          }}
+        >
+          <Box sx={{ transform: { xs: 'scale(0.9)', sm: 'scale(1)' } }}>
             {getFileIcon()}
-          </div>
-        </div>
+          </Box>
+        </Box>
 
-        <div className="mb-4 sm:mb-5 md:mb-6">
-          <div className="text-[11px] font-medium text-[#5f6368] uppercase tracking-wide mb-2">
+        <Box sx={{ mb: { xs: 2, sm: 2.5, md: 3 } }}>
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: '0.6875rem',
+              fontWeight: 500,
+              color: '#5f6368',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              display: 'block',
+              mb: 1,
+            }}
+          >
             Name
-          </div>
-          <div className="text-sm text-[#202124] break-words">
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#202124', wordBreak: 'break-word' }}>
             {file.originalName}
-          </div>
-        </div>
+          </Typography>
+        </Box>
 
-        <div className="mb-4 sm:mb-5 md:mb-6">
-          <div className="text-[11px] font-medium text-[#5f6368] uppercase tracking-wide mb-2">
+        <Box sx={{ mb: { xs: 2, sm: 2.5, md: 3 } }}>
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: '0.6875rem',
+              fontWeight: 500,
+              color: '#5f6368',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              display: 'block',
+              mb: 1,
+            }}
+          >
             Size
-          </div>
-          <div className="text-sm text-[#202124]">
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#202124' }}>
             {formatFileSize(file.size)}
-          </div>
-        </div>
+          </Typography>
+        </Box>
 
-        <div className="mb-4 sm:mb-5 md:mb-6">
-          <div className="text-[11px] font-medium text-[#5f6368] uppercase tracking-wide mb-2">
+        <Box sx={{ mb: { xs: 2, sm: 2.5, md: 3 } }}>
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: '0.6875rem',
+              fontWeight: 500,
+              color: '#5f6368',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              display: 'block',
+              mb: 1,
+            }}
+          >
             Modified
-          </div>
-          <div className="text-sm text-[#202124]">
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#202124' }}>
             {formatDate(file.updatedAt)}
-          </div>
-        </div>
+          </Typography>
+        </Box>
 
-        <div className="mb-4 sm:mb-5 md:mb-6">
-          <div className="text-[11px] font-medium text-[#5f6368] uppercase tracking-wide mb-2">
+        <Box sx={{ mb: { xs: 2, sm: 2.5, md: 3 } }}>
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: '0.6875rem',
+              fontWeight: 500,
+              color: '#5f6368',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              display: 'block',
+              mb: 1,
+            }}
+          >
             Created
-          </div>
-          <div className="text-sm text-[#202124]">
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#202124' }}>
             {formatDate(file.createdAt)}
-          </div>
-        </div>
+          </Typography>
+        </Box>
 
-        <div className="mb-4 sm:mb-5 md:mb-6">
-          <div className="text-[11px] font-medium text-[#5f6368] uppercase tracking-wide mb-2">
+        <Box sx={{ mb: { xs: 2, sm: 2.5, md: 3 } }}>
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: '0.6875rem',
+              fontWeight: 500,
+              color: '#5f6368',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              display: 'block',
+              mb: 1,
+            }}
+          >
             Owner
-          </div>
-          <div className="text-sm text-[#202124]">
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#202124' }}>
             You
-          </div>
-        </div>
+          </Typography>
+        </Box>
 
         {file.public && (
-          <div className="mb-4 sm:mb-5 md:mb-6">
-            <div className="text-[11px] font-medium text-[#5f6368] uppercase tracking-wide mb-2">
+          <Box>
+            <Typography
+              variant="caption"
+              sx={{
+                fontSize: '0.6875rem',
+                fontWeight: 500,
+                color: '#5f6368',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                display: 'block',
+                mb: 1,
+              }}
+            >
               Sharing
-            </div>
-            <div className="text-sm text-[#202124]">
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#202124' }}>
               Anyone with the link can view
-            </div>
-          </div>
+            </Typography>
+          </Box>
         )}
-      </div>
-    </div>
+      </Box>
+    </Drawer>
   );
 }
-

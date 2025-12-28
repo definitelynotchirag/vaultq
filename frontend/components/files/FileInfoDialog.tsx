@@ -1,6 +1,29 @@
 'use client';
 
-import { X, User, Calendar, HardDrive, Lock, Unlock, Share2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+  IconButton,
+  Box,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+} from '@mui/material';
+import {
+  Close,
+  Person,
+  CalendarToday,
+  Storage,
+  Lock,
+  LockOpen,
+  Share,
+} from '@mui/icons-material';
 import { File } from '@/types';
 import { formatFileSize } from '@/lib/utils';
 
@@ -38,134 +61,261 @@ export function FileInfoDialog({ isOpen, file, onClose }: FileInfoDialogProps) {
     : '';
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[1000] modal-enter">
-      <div className="bg-white rounded-lg w-full max-w-2xl mx-4 shadow-[0_8px_16px_rgba(0,0,0,0.15)] max-h-[90vh] overflow-y-auto flex flex-col p-6">
-        <div className="flex items-center justify-between border-b border-[#e5e5e5] pb-4 mb-4 sticky top-0 bg-white z-10 -mx-6 px-6">
-          <h2 className="text-[#202124] text-lg font-normal">File information</h2>
-          <button onClick={onClose} className="text-[#5f6368] hover:bg-[#f1f3f4] w-8 h-8 rounded-full flex items-center justify-center transition-colors">
-            <X size={18} />
-          </button>
-        </div>
+    <Dialog
+      open={isOpen && !!file}
+      onClose={onClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 2,
+          maxHeight: '90vh',
+          display: 'flex',
+          flexDirection: 'column',
+        },
+      }}
+    >
+      <DialogTitle
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          pb: 1.5,
+          borderBottom: '1px solid #e5e5e5',
+          flexShrink: 0,
+        }}
+      >
+        <Typography variant="h6" sx={{ fontWeight: 400, color: '#202124' }}>
+          File information
+        </Typography>
+        <IconButton
+          onClick={onClose}
+          size="small"
+          sx={{
+            color: '#5f6368',
+            '&:hover': { backgroundColor: '#f1f3f4' },
+          }}
+        >
+          <Close />
+        </IconButton>
+      </DialogTitle>
 
-        <div className="space-y-6 flex-1 overflow-y-auto">
-          <div>
-            <h3 className="text-sm font-medium text-[#202124] mb-3 uppercase tracking-wider text-[11px]">General</h3>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="text-[#5f6368] text-sm min-w-[120px]">Name</div>
-                <div className="text-[#202124] text-sm flex-1 break-words">{file.originalName}</div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="text-[#5f6368] text-sm min-w-[120px]">Type</div>
-                <div className="text-[#202124] text-sm">{getFileType(file.originalName)}</div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="text-[#5f6368] text-sm min-w-[120px]">Size</div>
-                <div className="text-[#202124] text-sm">{formatFileSize(file.size)}</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-[#e5e5e5] pt-4">
-            <h3 className="text-sm font-medium text-[#202124] mb-3 uppercase tracking-wider text-[11px]">Details</h3>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <User size={18} className="text-[#5f6368] mt-0.5" />
-                <div className="flex-1">
-                  <div className="text-[#5f6368] text-xs mb-0.5">Owner</div>
-                  <div className="text-[#202124] text-sm font-medium">{ownerName}</div>
-                  {ownerEmail && (
-                    <div className="text-[#5f6368] text-xs">{ownerEmail}</div>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Calendar size={18} className="text-[#5f6368] mt-0.5" />
-                <div className="flex-1">
-                  <div className="text-[#5f6368] text-xs mb-0.5">Created</div>
-                  <div className="text-[#202124] text-sm font-medium">{formatDate(file.createdAt)}</div>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Calendar size={18} className="text-[#5f6368] mt-0.5" />
-                <div className="flex-1">
-                  <div className="text-[#5f6368] text-xs mb-0.5">Modified</div>
-                  <div className="text-[#202124] text-sm font-medium">{formatDate(file.updatedAt)}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-[#e5e5e5] pt-4">
-            <h3 className="text-sm font-medium text-[#202124] mb-3 uppercase tracking-wider text-[11px]">Sharing</h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                {file.public ? (
-                  <>
-                    <Unlock size={18} className="text-[#0f9d58]" />
-                    <div className="flex-1">
-                      <div className="text-[#202124] text-sm font-medium">Anyone with the link can view</div>
-                      <div className="text-[#5f6368] text-xs">Public</div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <Lock size={18} className="text-[#5f6368]" />
-                    <div className="flex-1">
-                      <div className="text-[#202124] text-sm font-medium">Private</div>
-                      <div className="text-[#5f6368] text-xs">Only people with access can view</div>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {file.permissions && file.permissions.length > 0 && (
-                <div className="mt-4">
-                  <div className="text-[#5f6368] text-xs mb-2 flex items-center gap-2 font-medium">
-                    <Share2 size={14} />
-                    Shared with ({file.permissions.length})
-                  </div>
-                  <div className="space-y-2">
-                    {file.permissions.map((perm, index) => {
-                      const permUser = typeof perm.userId === 'object' && perm.userId !== null
-                        ? (perm.userId as any)
-                        : null;
-                      const userName = permUser?.name || 'Unknown User';
-                      const userEmail = permUser?.email || '';
-
-                      return (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-3 bg-[#f8f9fa] rounded-lg"
-                        >
-                          <div>
-                            <div className="text-[#202124] text-sm font-medium">{userName}</div>
-                            {userEmail && (
-                              <div className="text-[#5f6368] text-xs">{userEmail}</div>
-                            )}
-                          </div>
-                          <div className="text-[#5f6368] text-xs">
-                            {perm.level === 'read' ? 'Can view' : 'Can edit'}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex gap-3 border-t border-[#e5e5e5] bg-white sticky bottom-0 pt-4 mt-4 -mx-6 px-6">
-          <button
-            onClick={onClose}
-            className="flex-1 px-4 py-2 bg-[#1a73e8] hover:bg-[#1765cc] text-white rounded-lg transition-colors text-sm font-medium shadow-[0_1px_2px_rgba(0,0,0,0.3)]"
+      <DialogContent sx={{ flex: 1, overflowY: 'auto', pt: 3 }}>
+        <Box sx={{ mb: 3 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: '0.6875rem',
+              fontWeight: 500,
+              color: '#5f6368',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              display: 'block',
+              mb: 1.5,
+            }}
           >
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
+            General
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Typography variant="body2" sx={{ color: '#5f6368', minWidth: 120 }}>
+                Name
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#202124', wordBreak: 'break-word', flex: 1 }}>
+                {file.originalName}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Typography variant="body2" sx={{ color: '#5f6368', minWidth: 120 }}>
+                Type
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#202124' }}>
+                {getFileType(file.originalName)}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Typography variant="body2" sx={{ color: '#5f6368', minWidth: 120 }}>
+                Size
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#202124' }}>
+                {formatFileSize(file.size)}
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+
+        <Divider sx={{ my: 3 }} />
+
+        <Box sx={{ mb: 3 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: '0.6875rem',
+              fontWeight: 500,
+              color: '#5f6368',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              display: 'block',
+              mb: 1.5,
+            }}
+          >
+            Details
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Person sx={{ color: '#5f6368', mt: 0.5 }} />
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="caption" sx={{ color: '#5f6368', display: 'block', mb: 0.5 }}>
+                  Owner
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 500, color: '#202124' }}>
+                  {ownerName}
+                </Typography>
+                {ownerEmail && (
+                  <Typography variant="caption" sx={{ color: '#5f6368' }}>
+                    {ownerEmail}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <CalendarToday sx={{ color: '#5f6368', mt: 0.5 }} />
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="caption" sx={{ color: '#5f6368', display: 'block', mb: 0.5 }}>
+                  Created
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 500, color: '#202124' }}>
+                  {formatDate(file.createdAt)}
+                </Typography>
+              </Box>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <CalendarToday sx={{ color: '#5f6368', mt: 0.5 }} />
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="caption" sx={{ color: '#5f6368', display: 'block', mb: 0.5 }}>
+                  Modified
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 500, color: '#202124' }}>
+                  {formatDate(file.updatedAt)}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+
+        <Divider sx={{ my: 3 }} />
+
+        <Box>
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: '0.6875rem',
+              fontWeight: 500,
+              color: '#5f6368',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              display: 'block',
+              mb: 1.5,
+            }}
+          >
+            Sharing
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+            {file.public ? (
+              <>
+                <LockOpen sx={{ color: '#0f9d58' }} />
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 500, color: '#202124' }}>
+                    Anyone with the link can view
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#5f6368' }}>
+                    Public
+                  </Typography>
+                </Box>
+              </>
+            ) : (
+              <>
+                <Lock sx={{ color: '#5f6368' }} />
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 500, color: '#202124' }}>
+                    Private
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#5f6368' }}>
+                    Only people with access can view
+                  </Typography>
+                </Box>
+              </>
+            )}
+          </Box>
+
+          {file.permissions && file.permissions.length > 0 && (
+            <Box sx={{ mt: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <Share sx={{ fontSize: 14, color: '#5f6368' }} />
+                <Typography variant="caption" sx={{ fontWeight: 500, color: '#5f6368' }}>
+                  Shared with ({file.permissions.length})
+                </Typography>
+              </Box>
+              <List>
+                {file.permissions.map((perm, index) => {
+                  const permUser = typeof perm.userId === 'object' && perm.userId !== null
+                    ? (perm.userId as any)
+                    : null;
+                  const userName = permUser?.name || 'Unknown User';
+                  const userEmail = permUser?.email || '';
+
+                  return (
+                    <ListItem
+                      key={index}
+                      sx={{
+                        bgcolor: '#f8f9fa',
+                        borderRadius: 2,
+                        mb: 1,
+                      }}
+                    >
+                      <ListItemText
+                        primary={userName}
+                        secondary={userEmail}
+                        primaryTypographyProps={{
+                          sx: {
+                            fontWeight: 500,
+                            color: '#202124',
+                          },
+                        }}
+                        secondaryTypographyProps={{
+                          sx: {
+                            color: '#5f6368',
+                          },
+                        }}
+                      />
+                      <Typography variant="caption" sx={{ color: '#5f6368' }}>
+                        {perm.level === 'read' ? 'Can view' : 'Can edit'}
+                      </Typography>
+                    </ListItem>
+                  );
+                })}
+              </List>
+            </Box>
+          )}
+        </Box>
+      </DialogContent>
+
+      <DialogActions sx={{ px: 3, pb: 2.5, pt: 2, borderTop: '1px solid #e5e5e5', flexShrink: 0 }}>
+        <Button
+          onClick={onClose}
+          variant="contained"
+          sx={{
+            backgroundColor: '#1a73e8',
+            '&:hover': {
+              backgroundColor: '#1765cc',
+            },
+            textTransform: 'none',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.3)',
+          }}
+        >
+          Close
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }

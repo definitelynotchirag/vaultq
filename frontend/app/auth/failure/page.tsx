@@ -1,5 +1,6 @@
 'use client';
 
+import { Box, Typography } from '@mui/material';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -15,13 +16,27 @@ export default function AuthFailurePage() {
   }, [router]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white text-[#202124]">
-      <div className="text-center">
-        <div className="text-xl mb-4 text-[#ea4335] font-normal">Authentication failed</div>
-        <div className="text-[#5f6368] mb-4">Please try again later.</div>
-        <div className="text-[#80868b] text-sm">Redirecting to home...</div>
-      </div>
-    </div>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        backgroundColor: '#ffffff',
+        color: '#202124',
+      }}
+    >
+      <Box sx={{ textAlign: 'center' }}>
+        <Typography variant="h6" sx={{ fontWeight: 400, color: '#ea4335', mb: 2 }}>
+          Authentication failed
+        </Typography>
+        <Typography variant="body1" sx={{ color: '#5f6368', mb: 2 }}>
+          Please try again later.
+        </Typography>
+        <Typography variant="body2" sx={{ color: '#80868b', fontSize: '0.875rem' }}>
+          Redirecting to home...
+        </Typography>
+      </Box>
+    </Box>
   );
 }
-
