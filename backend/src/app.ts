@@ -59,9 +59,11 @@ if (process.env.NODE_ENV === 'production') {
 
 app.use(
   session({
+    name: 'vaultq.sid',
     secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
     resave: false,
     saveUninitialized: false,
+    proxy: process.env.NODE_ENV === 'production',
     store: MongoStore.create({
       mongoUrl: process.env.MONGODB_URI,
     }),
