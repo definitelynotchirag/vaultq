@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
-import path from 'path';
 import { existsSync } from 'fs';
+import path from 'path';
 
 // Load .env file only if it exists (for local development)
 // In Docker, environment variables are provided by docker-compose via env_file
@@ -9,10 +9,10 @@ if (existsSync(envPath)) {
   dotenv.config({ path: envPath });
 }
 
+import MongoStore from 'connect-mongo';
 import cors from 'cors';
 import express, { Application } from 'express';
 import session from 'express-session';
-import MongoStore from 'connect-mongo';
 import passport from 'passport';
 import './config/passport';
 import { errorHandler } from './middleware/errorHandler';
@@ -26,8 +26,14 @@ const app: Application = express();
 // This allows express-rate-limit to correctly identify users via X-Forwarded-For header
 app.set('trust proxy', true);
 
+// CORS origin must be set via FRONTEND_URL environment variable
+const frontendUrl = process.env.FRONTEND_URL;
+if (!frontendUrl) {
+  throw new Error('FRONTEND_URL environment variable is required');
+}
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+  origin: frontendUrl,
   credentials: true,
 }));
 
