@@ -27,7 +27,8 @@ const app: Application = express();
 app.set('trust proxy', true);
 
 // CORS origin must be set via FRONTEND_URL environment variable
-const frontendUrl = process.env.FRONTEND_URL;
+// Remove trailing slash to match browser origin format
+const frontendUrl = process.env.FRONTEND_URL?.replace(/\/$/, '');
 if (!frontendUrl) {
   throw new Error('FRONTEND_URL environment variable is required');
 }
