@@ -85,7 +85,7 @@ export function Sidebar({ onNewClick }: SidebarProps) {
                 }}
                 className="w-10 h-10 rounded-full bg-white border border-[#dadce0] shadow-[0_1px_2px_0_rgba(60,64,67,.3),0_1px_3px_1px_rgba(60,64,67,.15)] hover:shadow-[0_1px_3px_0_rgba(60,64,67,.3),0_4px_8px_3px_rgba(60,64,67,.15)] hover:bg-[#f8f9fa] active:bg-[#f1f3f4] flex items-center justify-center transition-all"
               >
-                <Plus className="pl-10 w-5 h-5 text-[#5f6368]" />
+                <Plus className="w-5 h-5 text-[#5f6368]" />
               </button>
             </div>
           )}
