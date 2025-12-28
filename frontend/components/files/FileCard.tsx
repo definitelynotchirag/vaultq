@@ -138,7 +138,7 @@ export function FileCard({
                 }`}
                 aria-label={isStarred ? 'Remove star' : 'Add star'}
               >
-                <Star size={16} className="sm:w-[18px] sm:h-[18px]" className={isStarred ? 'fill-current' : ''} />
+                <Star size={16} className={`sm:w-[18px] sm:h-[18px] ${isStarred ? 'fill-current' : ''}`} />
               </button>
             )}
             <button
