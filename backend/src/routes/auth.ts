@@ -6,6 +6,8 @@ import { IUser } from '../types';
 
 const router = Router();
 
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3001';
+
 router.get(
   '/google',
   authRateLimiter,
@@ -18,10 +20,10 @@ router.get(
   '/google/callback',
   authRateLimiter,
   passport.authenticate('google', {
-    failureRedirect: '/auth/failure',
+    failureRedirect: `${FRONTEND_URL}/auth/failure`,
   }),
   (_req: Request, res: Response) => {
-    return res.redirect('/auth/success');
+    return res.redirect(`${FRONTEND_URL}/auth/success`);
   }
 );
 
@@ -51,11 +53,11 @@ router.post('/logout', requireAuth, (req: Request, res: Response) => {
 });
 
 router.get('/success', (_req: Request, res: Response) => {
-  res.json({ success: true, message: 'Authentication successful' });
+  res.redirect(`${FRONTEND_URL}/auth/success`);
 });
 
 router.get('/failure', (_req: Request, res: Response) => {
-  res.status(401).json({ success: false, error: 'Authentication failed' });
+  res.redirect(`${FRONTEND_URL}/auth/failure`);
 });
 
 export default router;

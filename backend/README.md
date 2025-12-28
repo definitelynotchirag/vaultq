@@ -25,7 +25,7 @@ A scalable Google Drive clone backend built with Express, TypeScript, MongoDB, a
 
 - Node.js 18+
 - MongoDB instance
-- AWS S3 bucket with IAM credentials
+- AWS S3 bucket with IAM credentials (with `s3:PutBucketCORS` permission)
 - Google OAuth 2.0 credentials
 
 ## Environment Variables
@@ -43,7 +43,7 @@ GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 SESSION_SECRET=your_session_secret
 NODE_ENV=development
-FRONTEND_URL=http://localhost:3000
+FRONTEND_URL=http://localhost:3001
 ```
 
 ## Installation
@@ -51,6 +51,49 @@ FRONTEND_URL=http://localhost:3000
 ```bash
 npm install
 ```
+
+## S3 CORS Configuration
+
+**Important**: Before uploading files, you must configure CORS on your S3 bucket to allow direct uploads from the frontend.
+
+Run the setup script:
+
+```bash
+npm run setup:s3-cors
+```
+
+This will configure your S3 bucket with the necessary CORS rules to allow uploads from your frontend origin.
+
+**Manual Setup** (Alternative):
+
+If you prefer to set up CORS manually via AWS Console:
+
+1. Go to your S3 bucket in AWS Console
+2. Navigate to **Permissions** → **Cross-origin resource sharing (CORS)**
+3. Add the following CORS configuration:
+
+```json
+[
+  {
+    "AllowedHeaders": ["*"],
+    "AllowedMethods": ["GET", "POST", "PUT", "HEAD"],
+    "AllowedOrigins": [
+      "http://localhost:3001",
+      "http://localhost:3000",
+      "https://your-production-domain.com"
+    ],
+    "ExposeHeaders": [
+      "ETag",
+      "x-amz-server-side-encryption",
+      "x-amz-request-id",
+      "x-amz-id-2"
+    ],
+    "MaxAgeSeconds": 3000
+  }
+]
+```
+
+Replace `https://your-production-domain.com` with your actual production frontend URL.
 
 ## Development
 
@@ -143,4 +186,5 @@ docker run -p 3000:3000 --env-file .env vaultq-backend
 ## Deployment
 
 The backend is designed to be deployed on platforms like Render or Railway. Ensure all environment variables are set in your deployment platform.
+
 

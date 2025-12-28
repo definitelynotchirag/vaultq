@@ -24,6 +24,9 @@ export interface IFile extends Document<ObjectId, any, any> {
   size: number;
   public: boolean;
   permissions: IPermission[];
+  starredBy: ObjectId[];
+  deleted: boolean;
+  deletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }

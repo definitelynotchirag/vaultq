@@ -53,6 +53,21 @@ const fileSchema = new Schema<IFile>(
       type: [permissionSchema],
       default: [],
     },
+    starredBy: {
+      type: [Schema.Types.ObjectId],
+      ref: 'User',
+      default: [],
+      index: true,
+    },
+    deleted: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    deletedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -63,4 +78,5 @@ fileSchema.index({ originalName: 'text' });
 fileSchema.index({ 'permissions.userId': 1 });
 
 export const File = mongoose.model<IFile>('File', fileSchema);
+
 
