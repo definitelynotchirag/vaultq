@@ -17,6 +17,7 @@ import {
     Avatar,
     Box,
     Button,
+    CircularProgress,
     Dialog,
     DialogActions,
     DialogContent,
@@ -33,7 +34,7 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 interface ShareDialogProps {
@@ -44,25 +45,58 @@ interface ShareDialogProps {
 }
 
 export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDialogProps) {
+  const [currentFile, setCurrentFile] = useState<File | null>(file);
   const [isPublic, setIsPublic] = useState(file?.public || false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [permissionLevel, setPermissionLevel] = useState<'read' | 'write'>('read');
   const [copied, setCopied] = useState(false);
 
-  if (!isOpen || !file) return null;
+  useEffect(() => {
+    if (isOpen && file) {
+      setIsLoading(true);
+      api.files.getFile(file._id)
+        .then((response) => {
+          if (response.success && response.file) {
+            setCurrentFile(response.file);
+            setIsPublic(response.file.public || false);
+          }
+        })
+        .catch((error: any) => {
+          console.error('Failed to fetch file:', error);
+          toast.error('Failed to load file information');
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
+  }, [isOpen, file]);
+
+  useEffect(() => {
+    if (file) {
+      setCurrentFile(file);
+      setIsPublic(file.public || false);
+    }
+  }, [file]);
+
+  if (!isOpen || !currentFile) return null;
 
   const handleTogglePublic = async () => {
     setIsSaving(true);
     try {
       if (isPublic) {
-        await api.files.makePrivate(file._id);
+        await api.files.makePrivate(currentFile._id);
         toast.success('File is now private');
       } else {
-        await api.files.makePublic(file._id);
+        await api.files.makePublic(currentFile._id);
         toast.success('File is now public');
       }
       setIsPublic(!isPublic);
+      const updatedFile = await api.files.getFile(currentFile._id);
+      if (updatedFile.success && updatedFile.file) {
+        setCurrentFile(updatedFile.file);
+      }
       if (onShareComplete) {
         onShareComplete();
       }
@@ -80,9 +114,13 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
 
     setIsSaving(true);
     try {
-      await api.files.shareFileByEmail(file._id, email.trim(), permissionLevel);
+      await api.files.shareFileByEmail(currentFile._id, email.trim(), permissionLevel);
       toast.success(`File shared with ${email.trim()}`);
       setEmail('');
+      const updatedFile = await api.files.getFile(currentFile._id);
+      if (updatedFile.success && updatedFile.file) {
+        setCurrentFile(updatedFile.file);
+      }
       if (onShareComplete) {
         onShareComplete();
       }
@@ -95,7 +133,7 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
   };
 
   const handleCopyLink = async () => {
-    const shareableUrl = api.files.getShareableUrl(file._id);
+    const shareableUrl = api.files.getShareableUrl(currentFile._id);
     try {
       await navigator.clipboard.writeText(shareableUrl);
       setCopied(true);
@@ -108,9 +146,29 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
   };
 
   const handleOpenInNewTab = () => {
-    const shareableUrl = api.files.getShareableUrl(file._id);
+    const shareableUrl = api.files.getShareableUrl(currentFile._id);
     if (shareableUrl) {
       window.open(shareableUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleUpdatePermission = async (userId: string, newLevel: 'read' | 'write') => {
+    setIsSaving(true);
+    try {
+      await api.files.shareFile(currentFile._id, userId, newLevel);
+      toast.success('Permission updated successfully');
+      const updatedFile = await api.files.getFile(currentFile._id);
+      if (updatedFile.success && updatedFile.file) {
+        setCurrentFile(updatedFile.file);
+      }
+      if (onShareComplete) {
+        onShareComplete();
+      }
+    } catch (error: any) {
+      console.error('Update permission error:', error);
+      toast.error(error.message || 'Failed to update permission');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -135,7 +193,7 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
           alignItems: 'center',
           justifyContent: 'space-between',
           pb: 1.5,
-          borderBottom: `1px solid ${colors.border.default}`,
+          // borderBottom: `1px solid ${colors.border.default}`,
           flexShrink: 0,
         }}
       >
@@ -150,8 +208,8 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
             pr: 2,
             fontSize: { xs: '1rem', md: '1.375rem' },
           }}
-        >
-          Share "{file.originalName}"
+          >
+          Share "{currentFile.originalName}"
         </Typography>
         <IconButton
           onClick={onClose}
@@ -166,17 +224,23 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
       </DialogTitle>
 
       <DialogContent sx={{ flex: 1, overflowY: 'auto', pt: 3 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-            p: 2,
-            bgcolor: colors.background.light,
-            borderRadius: 2,
-            mb: 3,
-          }}
-        >
+        {isLoading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2,
+                p: 2,
+                bgcolor: colors.background.light,
+                borderRadius: 2,
+                mb: 3,
+              }}
+            >
           <Avatar sx={{ bgcolor: colors.primary.main, width: 40, height: 40 }}>
             <LinkIcon />
           </Avatar>
@@ -214,7 +278,7 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
             <TextField
-              value={api.files.getShareableUrl(file._id)}
+              value={api.files.getShareableUrl(currentFile._id)}
               InputProps={{
                 readOnly: true,
               }}
@@ -324,18 +388,19 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
           </form>
         </Box>
 
-        {file.permissions && file.permissions.length > 0 && (
+        {currentFile.permissions && currentFile.permissions.length > 0 && (
           <Box sx={{ borderTop: '1px solid #e5e5e5', pt: 3 }}>
             <Typography variant="body2" sx={{ fontWeight: 500, color: '#202124', mb: 2 }}>
               People with access
             </Typography>
             <List>
-              {file.permissions.map((perm, index) => {
+              {currentFile.permissions.map((perm, index) => {
                 const permUser = typeof perm.userId === 'object' && perm.userId !== null
                   ? (perm.userId as any)
                   : null;
                 const userName = permUser?.name || 'Unknown User';
                 const userEmail = permUser?.email || perm.userId;
+                const userId = String(permUser?._id || perm.userId);
 
                 return (
                   <ListItem
@@ -344,6 +409,9 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
                       bgcolor: colors.background.light,
                       borderRadius: 2,
                       mb: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 2,
                     }}
                   >
                     <ListItemAvatar>
@@ -354,14 +422,9 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
                     <ListItemText
                       primary={userName}
                       secondary={
-                        <>
-                          <Typography variant="caption" sx={{ display: 'block', color: colors.text.secondary }}>
-                            {userEmail}
-                          </Typography>
-                          <Typography variant="caption" sx={{ color: colors.text.secondary }}>
-                            {perm.level === 'read' ? 'Can view' : 'Can edit'}
-                          </Typography>
-                        </>
+                        <Typography variant="caption" sx={{ display: 'block', color: colors.text.secondary }}>
+                          {userEmail}
+                        </Typography>
                       }
                       primaryTypographyProps={{
                         sx: {
@@ -369,12 +432,36 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
                           color: colors.text.primary,
                         },
                       }}
+                      sx={{ flex: 1 }}
                     />
+                    <FormControl 
+                      size="small" 
+                      sx={{ 
+                        minWidth: { xs: 120, sm: 140 },
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                        },
+                      }}
+                    >
+                      <Select
+                        value={perm.level}
+                        onChange={(e) => handleUpdatePermission(userId, e.target.value as 'read' | 'write')}
+                        disabled={isSaving}
+                        sx={{
+                          bgcolor: colors.background.default,
+                        }}
+                      >
+                        <MenuItem value="read">Can view</MenuItem>
+                        <MenuItem value="write">Can edit</MenuItem>
+                      </Select>
+                    </FormControl>
                   </ListItem>
                 );
               })}
             </List>
           </Box>
+        )}
+          </>
         )}
       </DialogContent>
 

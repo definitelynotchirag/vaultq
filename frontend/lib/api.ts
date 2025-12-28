@@ -1,11 +1,11 @@
 import {
-    AuthResponse,
-    DownloadUrlResponse,
-    FileResponse,
-    FilesResponse,
-    StorageResponse,
-    UploadUrlResponse,
-    ViewUrlResponse
+  AuthResponse,
+  DownloadUrlResponse,
+  FileResponse,
+  FilesResponse,
+  StorageResponse,
+  UploadUrlResponse,
+  ViewUrlResponse
 } from '@/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
@@ -88,6 +88,10 @@ export const api = {
     getFiles: async (search?: string): Promise<FilesResponse> => {
       const query = search ? `?search=${encodeURIComponent(search)}` : '';
       return fetchApi<FilesResponse>(`/files${query}`);
+    },
+
+    getFile: async (fileId: string): Promise<FileResponse> => {
+      return fetchApi<FileResponse>(`/files/${fileId}`);
     },
 
     getUploadUrl: async (

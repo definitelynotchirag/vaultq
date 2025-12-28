@@ -1,14 +1,14 @@
-import { Router, Request, Response } from 'express';
+import { Request, Response, Router } from 'express';
+import { fileRateLimiter } from '../config/rateLimiter';
+import { requireAuth } from '../middleware/auth';
+import { createError } from '../middleware/errorHandler';
+import { validateFileSize } from '../middleware/fileValidation';
 import { File } from '../models/File';
 import { User } from '../models/User';
-import { requireAuth } from '../middleware/auth';
-import { validateFileSize } from '../middleware/fileValidation';
-import { fileRateLimiter } from '../config/rateLimiter';
-import { generateUploadUrl, generateDownloadUrl, generateViewUrl, deleteFile as deleteS3File } from '../services/s3Service';
-import { checkFileAccess, getAccessibleFiles, getTrashFiles, getStarredFiles } from '../services/fileService';
-import { createError } from '../middleware/errorHandler';
-import { calculateUserStorageUsed } from '../utils/helpers';
+import { checkFileAccess, getAccessibleFiles, getStarredFiles, getTrashFiles } from '../services/fileService';
+import { deleteFile as deleteS3File, generateDownloadUrl, generateUploadUrl, generateViewUrl } from '../services/s3Service';
 import { IUser } from '../types';
+import { calculateUserStorageUsed } from '../utils/helpers';
 
 const router = Router();
 
@@ -150,6 +150,53 @@ router.get(
       });
     } catch (error: any) {
       throw createError(error.message || 'Failed to fetch files', 500);
+    }
+  }
+);
+
+router.get(
+  '/:id',
+  requireAuth,
+  fileRateLimiter,
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw createError('Authentication required', 401);
+    }
+    const { id } = req.params;
+
+    try {
+      const user = req.user as IUser;
+      const file = await checkFileAccess(id, user, 'read');
+
+      const populatedPermissions = await Promise.all(
+        file.permissions.map(async (perm: any) => {
+          const permUser = await User.findById(perm.userId).select('name email');
+          return {
+            userId: permUser ? { _id: permUser._id, name: permUser.name, email: permUser.email } : perm.userId,
+            level: perm.level,
+          };
+        })
+      );
+
+      res.json({
+        success: true,
+        file: {
+          _id: file._id,
+          originalName: file.originalName,
+          size: file.size,
+          public: file.public,
+          owner: file.owner,
+          permissions: populatedPermissions,
+          starredBy: file.starredBy,
+          createdAt: file.createdAt,
+          updatedAt: file.updatedAt,
+        },
+      });
+    } catch (error: any) {
+      if (error.statusCode) {
+        throw error;
+      }
+      throw createError(error.message || 'Failed to fetch file', 500);
     }
   }
 );
