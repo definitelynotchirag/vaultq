@@ -69,8 +69,8 @@ export function TopBar({ onSearch, searchQuery }: TopBarProps) {
         </div>
 
         <div className="flex items-center gap-2 flex-1 max-w-[720px] mx-auto hidden md:flex">
-          <Search className="text-[#5f6368] w-5 h-5 shrink-0" />
-          <div className="relative flex-1">
+          <div className="relative flex-1 flex items-center">
+            <Search className="absolute left-3 text-[#5f6368] w-5 h-5 pointer-events-none z-10" />
             <input
               ref={(el) => {
                 if (el) {
@@ -83,7 +83,7 @@ export function TopBar({ onSearch, searchQuery }: TopBarProps) {
               onChange={handleSearchChange}
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setIsSearchFocused(false)}
-              className={`w-full h-12 pl-3 pr-11 rounded-lg border-none outline-none transition-hover ${
+              className={`w-full h-12 pl-11 pr-11 rounded-lg border-none outline-none transition-hover ${
                 isSearchFocused ? 'bg-white shadow-md' : 'bg-[#f1f3f4] hover:bg-[#e8eaed]'
               }`}
               style={{ fontSize: '16px', color: '#202124' }}
@@ -94,7 +94,7 @@ export function TopBar({ onSearch, searchQuery }: TopBarProps) {
                   setSearchValue('');
                   onSearch('');
                 }}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#5f6368] hover:text-[#202124] transition-colors z-10"
+                className="absolute right-3 text-[#5f6368] hover:text-[#202124] transition-colors z-10"
               >
                 <X className="w-5 h-5" />
               </button>
