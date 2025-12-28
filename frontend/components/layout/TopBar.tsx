@@ -15,13 +15,14 @@ interface TopBarProps {
 
 export function TopBar({ onSearch, searchQuery }: TopBarProps) {
   const { user, logout } = useAuth();
-  const { isCollapsed, toggleCollapse } = useSidebar();
+  const { toggleCollapse } = useSidebar();
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [searchValue, setSearchValue] = useState(searchQuery);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -132,7 +133,7 @@ export function TopBar({ onSearch, searchQuery }: TopBarProps) {
             <InputBase
               inputRef={(el) => {
                 if (el) {
-                  (window as any).__searchInputRef = el;
+                  (window as unknown as Record<string, unknown>).__searchInputRef = el;
                 }
               }}
               placeholder="Search in VaultQ"
@@ -185,7 +186,10 @@ export function TopBar({ onSearch, searchQuery }: TopBarProps) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1, md: 1.5 } }}>
           <Box ref={userMenuRef} sx={{ position: 'relative', ml: { xs: 0.5, sm: 1, md: 1.5 } }}>
             <IconButton
-              onClick={() => setShowUserMenu(!showUserMenu)}
+              onClick={(e) => {
+                setAnchorEl(e.currentTarget);
+                setShowUserMenu(true);
+              }}
               sx={{
                 border: `1px solid ${colors.border.light}`,
                 backgroundColor: colors.background.default,
@@ -209,8 +213,11 @@ export function TopBar({ onSearch, searchQuery }: TopBarProps) {
             </IconButton>
             <Menu
               open={showUserMenu}
-              onClose={() => setShowUserMenu(false)}
-              anchorEl={userMenuRef.current}
+              onClose={() => {
+                setShowUserMenu(false);
+                setAnchorEl(null);
+              }}
+              anchorEl={anchorEl}
               anchorOrigin={{
                 vertical: 'bottom',
                 horizontal: 'right',
@@ -237,14 +244,17 @@ export function TopBar({ onSearch, searchQuery }: TopBarProps) {
                 </Typography>
               </Box>
               <MenuItem
-                onClick={handleLogout}
-                sx={{
-                  mt: 0.5,
-                  '&:hover': { backgroundColor: colors.background.hover },
-                }}
-              >
-                Sign out
-              </MenuItem>
+              onClick={() => {
+                handleLogout();
+                setAnchorEl(null);
+              }}
+              sx={{
+                mt: 0.5,
+                '&:hover': { backgroundColor: colors.background.hover },
+              }}
+            >
+              Sign out
+            </MenuItem>
             </Menu>
           </Box>
         </Box>

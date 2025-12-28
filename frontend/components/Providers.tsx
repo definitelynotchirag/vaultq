@@ -42,8 +42,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
               pauseOnHover
               theme="light"
               toastClassName="custom-toast"
-              bodyClassName="custom-toast-body"
-              progressClassName="custom-toast-progress"
             />
           </SidebarProvider>
         </AuthProvider>
