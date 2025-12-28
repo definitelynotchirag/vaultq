@@ -62,12 +62,7 @@ export const getAccessibleFiles = async (user: IUser, searchQuery?: string) => {
     query = {
       $and: [
         accessQuery,
-        {
-          $or: [
-            { originalName: { $regex: searchQuery, $options: 'i' } },
-            { $text: { $search: searchQuery } },
-          ],
-        },
+        { originalName: { $regex: searchQuery, $options: 'i' } },
         { deleted: { $ne: true } },
       ],
     };
@@ -132,12 +127,7 @@ export const getStarredFiles = async (user: IUser, searchQuery?: string) => {
     query = {
       $and: [
         accessQuery,
-        {
-          $or: [
-            { originalName: { $regex: searchQuery, $options: 'i' } },
-            { $text: { $search: searchQuery } },
-          ],
-        },
+        { originalName: { $regex: searchQuery, $options: 'i' } },
         { deleted: { $ne: true } },
       ],
     };
