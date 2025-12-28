@@ -1,6 +1,7 @@
 import { api } from '@/lib/api';
 import { triggerDownload } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
 export function useStarredFiles(searchQuery?: string) {
   const queryClient = useQueryClient();
@@ -15,6 +16,10 @@ export function useStarredFiles(searchQuery?: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['starredFiles'] });
       queryClient.invalidateQueries({ queryKey: ['files'] });
+      toast.success('File starred');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to star file');
     },
   });
 
@@ -23,6 +28,10 @@ export function useStarredFiles(searchQuery?: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['starredFiles'] });
       queryClient.invalidateQueries({ queryKey: ['files'] });
+      toast.success('File unstarred');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to unstar file');
     },
   });
 
@@ -51,8 +60,9 @@ export function useStarredFiles(searchQuery?: string) {
       if (response.success && response.downloadUrl) {
         await triggerDownload(response.downloadUrl, fileName || 'download');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Download error:', error);
+      toast.error(error.message || 'Failed to download file');
       throw error;
     }
   };

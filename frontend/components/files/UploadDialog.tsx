@@ -19,6 +19,7 @@ import { Close, CloudUpload, InsertDriveFile } from '@mui/icons-material';
 import { useUpload } from '@/hooks/useUpload';
 import { formatFileSize } from '@/lib/utils';
 import { useRef, useState } from 'react';
+import { toast } from 'react-toastify';
 
 interface UploadDialogProps {
   isOpen: boolean;
@@ -40,11 +41,13 @@ export function UploadDialog({ isOpen, onClose, onUploadComplete }: UploadDialog
     for (const file of selectedFiles) {
       try {
         await uploadFile(file);
+        toast.success(`${file.name} uploaded successfully`);
         if (onUploadComplete) {
           onUploadComplete();
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Upload error:', error);
+        toast.error(error.message || `Failed to upload ${file.name}`);
       }
     }
     setSelectedFiles([]);

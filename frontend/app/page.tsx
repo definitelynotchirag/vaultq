@@ -22,6 +22,7 @@ import { File } from '@/types';
 import { GridView, List as ListIcon } from '@mui/icons-material';
 import { Box, Container, IconButton, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'react-toastify';
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -104,12 +105,15 @@ export default function HomePage() {
     try {
       if (isStarred) {
         await api.files.unstarFile(file._id);
+        toast.success('File unstarred');
       } else {
         await api.files.starFile(file._id);
+        toast.success('File starred');
       }
       refetch();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Star error:', error);
+      toast.error(error.message || 'Failed to update star status');
     }
   };
 
@@ -118,8 +122,10 @@ export default function HomePage() {
     const shareableUrl = api.files.getShareableUrl(file._id);
     try {
       await navigator.clipboard.writeText(shareableUrl);
+      toast.success('Link copied to clipboard');
     } catch (error) {
       console.error('Failed to copy link:', error);
+      toast.error('Failed to copy link');
     }
   };
 

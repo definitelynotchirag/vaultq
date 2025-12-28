@@ -81,7 +81,7 @@ export function FileInfoDialog({ isOpen, file, onClose }: FileInfoDialogProps) {
           alignItems: 'center',
           justifyContent: 'space-between',
           pb: 1.5,
-          borderBottom: '1px solid #e5e5e5',
+          // borderBottom: '1px solid #e5e5e5',
           flexShrink: 0,
         }}
       >

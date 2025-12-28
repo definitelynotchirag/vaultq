@@ -2,6 +2,7 @@ import { api } from '@/lib/api';
 import { triggerDownload } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { File } from '@/types';
+import { toast } from 'react-toastify';
 
 export function useFiles(searchQuery?: string) {
   const queryClient = useQueryClient();
@@ -18,6 +19,9 @@ export function useFiles(searchQuery?: string) {
       queryClient.invalidateQueries({ queryKey: ['files'] });
       queryClient.invalidateQueries({ queryKey: ['storage'] });
     },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to rename file');
+    },
   });
 
   const deleteMutation = useMutation({
@@ -25,6 +29,9 @@ export function useFiles(searchQuery?: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['files'] });
       queryClient.invalidateQueries({ queryKey: ['storage'] });
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to delete file');
     },
   });
 
@@ -38,8 +45,9 @@ export function useFiles(searchQuery?: string) {
       if (response.success && response.downloadUrl) {
         await triggerDownload(response.downloadUrl, fileName || 'download');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Download error:', error);
+      toast.error(error.message || 'Failed to download file');
       throw error;
     }
   };

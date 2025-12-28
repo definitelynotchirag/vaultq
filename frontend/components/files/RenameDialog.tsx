@@ -14,6 +14,7 @@ import {
     Typography,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
 interface RenameDialogProps {
   isOpen: boolean;
@@ -41,9 +42,11 @@ export function RenameDialog({ isOpen, file, onClose, onRename }: RenameDialogPr
     setIsSaving(true);
     try {
       await onRename(file._id, newName.trim());
+      toast.success('File renamed successfully');
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Rename error:', error);
+      toast.error(error.message || 'Failed to rename file');
     } finally {
       setIsSaving(false);
     }

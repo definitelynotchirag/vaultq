@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@/types';
 import { api } from '@/lib/api';
+import { toast } from 'react-toastify';
 
 interface AuthContextType {
   user: User | null;
@@ -45,8 +46,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await api.auth.logout();
       setUser(null);
-    } catch (error) {
+      toast.success('Logged out successfully');
+    } catch (error: any) {
       console.error('Logout error:', error);
+      toast.error(error.message || 'Failed to logout');
     }
   };
 

@@ -2,6 +2,7 @@ import { api } from '@/lib/api';
 import { File as FileType } from '@/types';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 
 interface UploadProgress {
   file: globalThis.File;
@@ -103,6 +104,7 @@ export function useUpload() {
 
               setIsUploading(false);
               queryClient.invalidateQueries({ queryKey: ['storage'] });
+              queryClient.invalidateQueries({ queryKey: ['files'] });
               resolve(response.file);
             } catch (error: any) {
               setUploads((prev) =>

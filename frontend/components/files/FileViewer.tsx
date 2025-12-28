@@ -5,23 +5,25 @@ import { colors } from '@/lib/colors';
 import { triggerDownload } from '@/lib/utils';
 import { File } from '@/types';
 import {
-    Check,
-    Close,
-    Download,
-    Link as LinkIcon,
+  Check,
+  Close,
+  Download,
+  Link as LinkIcon,
 } from '@mui/icons-material';
 import {
-    AppBar,
-    Box,
-    Button,
-    CircularProgress,
-    IconButton,
-    Toolbar,
-    Typography,
-    useMediaQuery,
-    useTheme,
+  AppBar,
+  Box,
+  Button,
+  CircularProgress,
+  IconButton,
+  Toolbar,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
 interface FileViewerProps {
   isOpen: boolean;
@@ -78,8 +80,9 @@ export function FileViewer({ isOpen, file, onClose, isSharedView = false }: File
       if (response.success && response.downloadUrl) {
         await triggerDownload(response.downloadUrl, file.originalName);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Download error:', err);
+      toast.error(err.message || 'Failed to download file');
     }
   };
 
@@ -89,9 +92,11 @@ export function FileViewer({ isOpen, file, onClose, isSharedView = false }: File
     try {
       await navigator.clipboard.writeText(shareableUrl);
       setCopied(true);
+      toast.success('Link copied to clipboard');
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error('Failed to copy link:', error);
+      toast.error('Failed to copy link');
     }
   };
 
@@ -143,6 +148,50 @@ export function FileViewer({ isOpen, file, onClose, isSharedView = false }: File
             px: isMobile ? 1 : 2,
           }}
         >
+          <Box
+            sx={{
+              width: isMobile ? 32 : 40,
+              height: isMobile ? 32 : 40,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mr: isMobile ? 0.5 : 0.75,
+              flexShrink: 0,
+            }}
+          >
+            <Image
+              src="/icon.png"
+              alt="VaultQ"
+              width={isMobile ? 32 : 40}
+              height={isMobile ? 32 : 40}
+              style={{ objectFit: 'contain' }}
+            />
+          </Box>
+          <Typography
+            variant="body1"
+            sx={{
+              color: colors.text.white,
+              fontWeight: 500,
+              fontSize: isMobile ? '14px' : '16px',
+              mr: isMobile ? 0.75 : 1,
+              flexShrink: 0,
+              display: { xs: 'none', sm: 'block' },
+            }}
+          >
+            VaultQ
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              color: colors.text.disabled || colors.text.secondary,
+              fontSize: isMobile ? '14px' : '16px',
+              mx: isMobile ? 0.75 : 1,
+              flexShrink: 0,
+              display: { xs: 'none', sm: 'block' },
+            }}
+          >
+            |
+          </Typography>
           <Typography
             variant="body1"
             sx={{

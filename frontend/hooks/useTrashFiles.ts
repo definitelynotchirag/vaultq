@@ -1,5 +1,6 @@
 import { api } from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
 export function useTrashFiles() {
   const queryClient = useQueryClient();
@@ -15,6 +16,10 @@ export function useTrashFiles() {
       queryClient.invalidateQueries({ queryKey: ['trash'] });
       queryClient.invalidateQueries({ queryKey: ['files'] });
       queryClient.invalidateQueries({ queryKey: ['storage'] });
+      toast.success('File restored');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to restore file');
     },
   });
 
@@ -23,6 +28,10 @@ export function useTrashFiles() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trash'] });
       queryClient.invalidateQueries({ queryKey: ['storage'] });
+      toast.success('File permanently deleted');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to delete file');
     },
   });
 

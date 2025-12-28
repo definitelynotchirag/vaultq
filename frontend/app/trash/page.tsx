@@ -12,6 +12,7 @@ import { File } from '@/types';
 import { Delete as DeleteIcon, Restore } from '@mui/icons-material';
 import { Box, Container, ListItemIcon, ListItemText, Menu, MenuItem, Typography } from '@mui/material';
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 
 export default function TrashPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -55,8 +56,9 @@ export default function TrashPage() {
       if (response.success && response.downloadUrl) {
         await triggerDownload(response.downloadUrl, file.originalName);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Download error:', error);
+      toast.error(error.message || 'Failed to download file');
     }
   };
 

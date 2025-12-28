@@ -34,6 +34,7 @@ import {
     Typography,
 } from '@mui/material';
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 
 interface ShareDialogProps {
   isOpen: boolean;
@@ -56,15 +57,18 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
     try {
       if (isPublic) {
         await api.files.makePrivate(file._id);
+        toast.success('File is now private');
       } else {
         await api.files.makePublic(file._id);
+        toast.success('File is now public');
       }
       setIsPublic(!isPublic);
       if (onShareComplete) {
         onShareComplete();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Toggle public error:', error);
+      toast.error(error.message || 'Failed to update file visibility');
     } finally {
       setIsSaving(false);
     }
@@ -77,13 +81,14 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
     setIsSaving(true);
     try {
       await api.files.shareFileByEmail(file._id, email.trim(), permissionLevel);
+      toast.success(`File shared with ${email.trim()}`);
       setEmail('');
       if (onShareComplete) {
         onShareComplete();
       }
     } catch (error: any) {
       console.error('Share error:', error);
-      alert(error.message || 'Failed to share file. Please check the email address.');
+      toast.error(error.message || 'Failed to share file. Please check the email address.');
     } finally {
       setIsSaving(false);
     }
@@ -94,9 +99,11 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
     try {
       await navigator.clipboard.writeText(shareableUrl);
       setCopied(true);
+      toast.success('Link copied to clipboard');
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error('Failed to copy link:', error);
+      toast.error('Failed to copy link');
     }
   };
 

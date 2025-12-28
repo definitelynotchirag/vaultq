@@ -13,6 +13,7 @@ import {
   Typography
 } from '@mui/material';
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 
 interface DeleteDialogProps {
   isOpen: boolean;
@@ -29,9 +30,11 @@ export function DeleteDialog({ isOpen, file, onClose, onDelete }: DeleteDialogPr
     setIsDeleting(true);
     try {
       await onDelete(file._id);
+      toast.success(`${file.originalName} moved to trash`);
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Delete error:', error);
+      toast.error(error.message || 'Failed to delete file');
     } finally {
       setIsDeleting(false);
     }
@@ -55,10 +58,10 @@ export function DeleteDialog({ isOpen, file, onClose, onDelete }: DeleteDialogPr
           alignItems: 'center',
           justifyContent: 'space-between',
           pb: 1.5,
-          borderBottom: `1px solid ${colors.border.default}`,
+          // borderBottom: `1px solid ${colors.border.default}`,
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 400, color: colors.text.primary }}>
+        <Typography variant="h5" sx={{ fontWeight: 600, color: colors.text.primary }}>
           Move to trash?
         </Typography>
         <IconButton
@@ -75,7 +78,7 @@ export function DeleteDialog({ isOpen, file, onClose, onDelete }: DeleteDialogPr
 
       <DialogContent sx={{ pt: 3 }}>
         <Typography variant="body1" sx={{ color: colors.text.primary }}>
-          {file?.originalName} will be moved to trash. You can restore it from trash within 30 days.
+          {file?.originalName} will be moved to trash.
         </Typography>
       </DialogContent>
 
