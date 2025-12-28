@@ -22,6 +22,10 @@ import sharedRoutes from './routes/shared';
 
 const app: Application = express();
 
+// Trust proxy - required when running behind a reverse proxy (Docker, nginx, etc.)
+// This allows express-rate-limit to correctly identify users via X-Forwarded-For header
+app.set('trust proxy', true);
+
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3001',
   credentials: true,
