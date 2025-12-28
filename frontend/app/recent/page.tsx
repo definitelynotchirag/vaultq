@@ -69,7 +69,7 @@ export default function RecentPage() {
 
   const handleDownload = async (file: File) => {
     try {
-      await downloadFile(file._id);
+      await downloadFile(file._id, file.originalName);
     } catch (error) {
       console.error('Download error:', error);
     }

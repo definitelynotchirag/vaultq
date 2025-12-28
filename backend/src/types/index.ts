@@ -6,6 +6,7 @@ export interface IUser extends Document<ObjectId, any, any> {
   googleId: string;
   email: string;
   name: string;
+  storageLimit: number;
   createdAt: Date;
   updatedAt: Date;
 }

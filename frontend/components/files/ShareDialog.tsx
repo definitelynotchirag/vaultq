@@ -1,38 +1,38 @@
 'use client';
 
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Typography,
-  IconButton,
-  Box,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Avatar,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-} from '@mui/material';
-import {
-  Close,
-  Link as LinkIcon,
-  Lock,
-  LockOpen,
-  Check,
-  ContentCopy,
-  Mail,
-  OpenInNew,
-} from '@mui/icons-material';
-import { File } from '@/types';
 import { api } from '@/lib/api';
 import { colors } from '@/lib/colors';
+import { File } from '@/types';
+import {
+    Check,
+    Close,
+    ContentCopy,
+    Link as LinkIcon,
+    Lock,
+    LockOpen,
+    Mail,
+    OpenInNew,
+} from '@mui/icons-material';
+import {
+    Avatar,
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    IconButton,
+    InputLabel,
+    List,
+    ListItem,
+    ListItemAvatar,
+    ListItemText,
+    MenuItem,
+    Select,
+    TextField,
+    Typography,
+} from '@mui/material';
 import { useState } from 'react';
 
 interface ShareDialogProps {

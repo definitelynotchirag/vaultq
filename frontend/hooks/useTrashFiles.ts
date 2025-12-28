@@ -14,6 +14,7 @@ export function useTrashFiles() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trash'] });
       queryClient.invalidateQueries({ queryKey: ['files'] });
+      queryClient.invalidateQueries({ queryKey: ['storage'] });
     },
   });
 
@@ -21,6 +22,7 @@ export function useTrashFiles() {
     mutationFn: (fileId: string) => api.files.permanentDeleteFile(fileId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trash'] });
+      queryClient.invalidateQueries({ queryKey: ['storage'] });
     },
   });
 

@@ -1,4 +1,5 @@
 import { api } from '@/lib/api';
+import { triggerDownload } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export function useStarredFiles(searchQuery?: string) {
@@ -44,11 +45,11 @@ export function useStarredFiles(searchQuery?: string) {
     mutationFn: (fileId: string) => api.files.downloadFile(fileId),
   });
 
-  const handleDownload = async (fileId: string) => {
+  const handleDownload = async (fileId: string, fileName?: string) => {
     try {
       const response = await downloadMutation.mutateAsync(fileId);
       if (response.success && response.downloadUrl) {
-        window.open(response.downloadUrl, '_blank');
+        await triggerDownload(response.downloadUrl, fileName || 'download');
       }
     } catch (error) {
       console.error('Download error:', error);

@@ -7,6 +7,7 @@ import { fileRateLimiter } from '../config/rateLimiter';
 import { generateUploadUrl, generateDownloadUrl, generateViewUrl, deleteFile as deleteS3File } from '../services/s3Service';
 import { checkFileAccess, getAccessibleFiles, getTrashFiles, getStarredFiles } from '../services/fileService';
 import { createError } from '../middleware/errorHandler';
+import { calculateUserStorageUsed } from '../utils/helpers';
 import { IUser } from '../types';
 
 const router = Router();
@@ -24,7 +25,23 @@ router.post(
       throw createError('originalName is required and must be a string', 400);
     }
 
+    if (!req.user) {
+      throw createError('Authentication required', 401);
+    }
+
     try {
+      const user = req.user as IUser;
+      const storageUsed = await calculateUserStorageUsed(user);
+      const storageLimit = user.storageLimit || 100 * 1024 * 1024;
+
+      if (storageUsed + size > storageLimit) {
+        const availableSpace = storageLimit - storageUsed;
+        throw createError(
+          `Storage limit exceeded. Available space: ${(availableSpace / (1024 * 1024)).toFixed(2)}MB, Required: ${(size / (1024 * 1024)).toFixed(2)}MB`,
+          413
+        );
+      }
+
       const { uploadUrl, fields, storageName, url } = await generateUploadUrl(originalName, size);
 
       res.json({
@@ -36,6 +53,9 @@ router.post(
         maxSize: 100 * 1024 * 1024,
       });
     } catch (error: any) {
+      if (error.statusCode) {
+        throw error;
+      }
       throw createError(error.message || 'Failed to generate upload URL', 500);
     }
   }
@@ -271,17 +291,24 @@ router.post(
 
     try {
       const user = req.user as IUser;
-      const file = await checkFileAccess(id, user, 'write');
+      await checkFileAccess(id, user, 'write');
 
-      file.public = true;
-      await file.save();
+      const updatedFile = await File.findByIdAndUpdate(
+        id,
+        { public: true },
+        { new: true }
+      );
+
+      if (!updatedFile) {
+        throw createError('File not found', 404);
+      }
 
       res.json({
         success: true,
         file: {
-          _id: file._id,
-          originalName: file.originalName,
-          public: file.public,
+          _id: updatedFile._id,
+          originalName: updatedFile.originalName,
+          public: updatedFile.public,
         },
       });
     } catch (error: any) {
@@ -304,17 +331,24 @@ router.post(
 
     try {
       const user = req.user as IUser;
-      const file = await checkFileAccess(id, user, 'write');
+      await checkFileAccess(id, user, 'write');
 
-      file.public = false;
-      await file.save();
+      const updatedFile = await File.findByIdAndUpdate(
+        id,
+        { public: false },
+        { new: true }
+      );
+
+      if (!updatedFile) {
+        throw createError('File not found', 404);
+      }
 
       res.json({
         success: true,
         file: {
-          _id: file._id,
-          originalName: file.originalName,
-          public: file.public,
+          _id: updatedFile._id,
+          originalName: updatedFile.originalName,
+          public: updatedFile.public,
         },
       });
     } catch (error: any) {
@@ -708,6 +742,34 @@ router.get(
       });
     } catch (error: any) {
       throw createError(error.message || 'Failed to fetch starred files', 500);
+    }
+  }
+);
+
+router.get(
+  '/storage',
+  fileRateLimiter,
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw createError('Authentication required', 401);
+    }
+
+    try {
+      const user = req.user as IUser;
+      const storageUsed = await calculateUserStorageUsed(user);
+      const storageLimit = user.storageLimit || 100 * 1024 * 1024;
+
+      res.json({
+        success: true,
+        storage: {
+          used: storageUsed,
+          limit: storageLimit,
+          available: Math.max(0, storageLimit - storageUsed),
+          percentage: storageLimit > 0 ? (storageUsed / storageLimit) * 100 : 0,
+        },
+      });
+    } catch (error: any) {
+      throw createError(error.message || 'Failed to fetch storage information', 500);
     }
   }
 );

@@ -4,18 +4,18 @@ import { FileListItem } from '@/components/files/FileListItem';
 import { colors } from '@/lib/colors';
 import { File } from '@/types';
 import {
-  Box,
-  Paper,
-  Skeleton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  useMediaQuery,
-  useTheme,
+    Box,
+    Paper,
+    Skeleton,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography,
+    useMediaQuery,
+    useTheme,
 } from '@mui/material';
 
 interface FileListProps {

@@ -1,5 +1,7 @@
 import { api } from '@/lib/api';
+import { triggerDownload } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { File } from '@/types';
 
 export function useFiles(searchQuery?: string) {
   const queryClient = useQueryClient();
@@ -14,6 +16,7 @@ export function useFiles(searchQuery?: string) {
       api.files.renameFile(fileId, newName),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['files'] });
+      queryClient.invalidateQueries({ queryKey: ['storage'] });
     },
   });
 
@@ -21,6 +24,7 @@ export function useFiles(searchQuery?: string) {
     mutationFn: (fileId: string) => api.files.deleteFile(fileId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['files'] });
+      queryClient.invalidateQueries({ queryKey: ['storage'] });
     },
   });
 
@@ -28,11 +32,11 @@ export function useFiles(searchQuery?: string) {
     mutationFn: (fileId: string) => api.files.downloadFile(fileId),
   });
 
-  const handleDownload = async (fileId: string) => {
+  const handleDownload = async (fileId: string, fileName?: string) => {
     try {
       const response = await downloadMutation.mutateAsync(fileId);
       if (response.success && response.downloadUrl) {
-        window.open(response.downloadUrl, '_blank');
+        await triggerDownload(response.downloadUrl, fileName || 'download');
       }
     } catch (error) {
       console.error('Download error:', error);

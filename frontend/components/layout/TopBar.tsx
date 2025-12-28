@@ -1,11 +1,12 @@
 'use client';
 
-import { AppBar, Toolbar, IconButton, InputBase, Box, Menu, MenuItem, Avatar, Typography, useTheme, useMediaQuery } from '@mui/material';
-import { Search as SearchIcon, Close } from '@mui/icons-material';
+import { useSidebar } from '@/contexts/SidebarContext';
 import { useAuth } from '@/hooks/useAuth';
 import { colors } from '@/lib/colors';
+import { Close, Menu as MenuIcon, Search as SearchIcon } from '@mui/icons-material';
+import { AppBar, Avatar, Box, IconButton, InputBase, Menu, MenuItem, Toolbar, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface TopBarProps {
   onSearch: (query: string) => void;
@@ -14,6 +15,7 @@ interface TopBarProps {
 
 export function TopBar({ onSearch, searchQuery }: TopBarProps) {
   const { user, logout } = useAuth();
+  const { isCollapsed, toggleCollapse } = useSidebar();
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -57,18 +59,33 @@ export function TopBar({ onSearch, searchQuery }: TopBarProps) {
       }}
     >
       <Toolbar sx={{ px: { xs: 1.5, sm: 2, md: 3 }, gap: { xs: 1, sm: 1.5, md: 3 } }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5, md: 2 }, minWidth: { md: 200 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 1, md: 1.25 }, minWidth: { md: 200 } }}>
+          {!isMobile && (
+            <IconButton
+              onClick={toggleCollapse}
+              sx={{
+                width: { xs: 32, md: 40 },
+                height: { xs: 32, md: 40 },
+                color: colors.text.secondary,
+                '&:hover': {
+                  backgroundColor: colors.background.hover,
+                },
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
           <Box
             sx={{
-              width: { xs: 32, md: 40 },
-              height: { xs: 32, md: 40 },
+              width: { xs: 40, md: 48 },
+              height: { xs: 40, md: 48 },
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               ml: { xs: 5, md: 0 },
             }}
           >
-            <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M8 12C8 10.8954 8.89543 10 10 10H16.1716C16.702 10 17.2107 10.2107 17.5858 10.5858L21.4142 14.4142C21.7893 14.7893 22.298 15 22.8284 15H30C31.1046 15 32 15.8954 32 17V28C32 29.1046 31.1046 30 30 30H10C8.89543 30 8 29.1046 8 28V12Z" fill={colors.primary.light}/>
               <path d="M20 10V15C20 16.1046 20.8954 17 22 17H27L20 10Z" fill="#AECBFA"/>
             </svg>

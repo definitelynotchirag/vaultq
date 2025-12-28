@@ -1,5 +1,6 @@
 import { api } from '@/lib/api';
 import { File as FileType } from '@/types';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
 interface UploadProgress {
@@ -12,6 +13,7 @@ interface UploadProgress {
 export function useUpload() {
   const [uploads, setUploads] = useState<UploadProgress[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const queryClient = useQueryClient();
 
   const uploadFile = async (file: globalThis.File): Promise<FileType | null> => {
     const MAX_SIZE = 100 * 1024 * 1024; // 100MB
@@ -31,10 +33,31 @@ export function useUpload() {
       };
       setUploads((prev) => [...prev, uploadProgress]);
 
-      const { uploadUrl, fields, storageName, url } = await api.files.getUploadUrl(
-        file.name,
-        file.size
-      );
+      let uploadUrl: string;
+      let fields: Record<string, string>;
+      let storageName: string;
+      let url: string;
+
+      try {
+        const response = await api.files.getUploadUrl(file.name, file.size);
+        uploadUrl = response.uploadUrl;
+        fields = response.fields;
+        storageName = response.storageName;
+        url = response.url;
+      } catch (error: any) {
+        if (error.status === 413) {
+          setUploads((prev) =>
+            prev.map((u) =>
+              u.file === file
+                ? { ...u, status: 'error', error: error.message || 'Storage limit exceeded' }
+                : u
+            )
+          );
+          setIsUploading(false);
+          throw new Error(error.message || 'Storage limit exceeded. Please delete some files to free up space.');
+        }
+        throw error;
+      }
 
       const formData = new FormData();
       Object.entries(fields).forEach(([key, value]) => {
@@ -79,6 +102,7 @@ export function useUpload() {
               }, 2000);
 
               setIsUploading(false);
+              queryClient.invalidateQueries({ queryKey: ['storage'] });
               resolve(response.file);
             } catch (error: any) {
               setUploads((prev) =>

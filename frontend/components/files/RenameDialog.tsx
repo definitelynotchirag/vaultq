@@ -1,18 +1,18 @@
 'use client';
 
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Typography,
-  IconButton,
-} from '@mui/material';
-import { Close } from '@mui/icons-material';
 import { colors } from '@/lib/colors';
 import { File } from '@/types';
+import { Close } from '@mui/icons-material';
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    TextField,
+    Typography,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 
 interface RenameDialogProps {

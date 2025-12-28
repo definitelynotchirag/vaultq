@@ -1,23 +1,24 @@
 'use client';
 
-import {
-  Box,
-  IconButton,
-  Typography,
-  CircularProgress,
-  Button,
-  AppBar,
-  Toolbar,
-} from '@mui/material';
-import {
-  Close,
-  Download,
-  Link as LinkIcon,
-  Check,
-} from '@mui/icons-material';
 import { api } from '@/lib/api';
 import { colors } from '@/lib/colors';
+import { triggerDownload } from '@/lib/utils';
 import { File } from '@/types';
+import {
+    Check,
+    Close,
+    Download,
+    Link as LinkIcon,
+} from '@mui/icons-material';
+import {
+    AppBar,
+    Box,
+    Button,
+    CircularProgress,
+    IconButton,
+    Toolbar,
+    Typography,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 
 interface FileViewerProps {
@@ -71,7 +72,7 @@ export function FileViewer({ isOpen, file, onClose, isSharedView = false }: File
         ? await api.files.getSharedFileDownloadUrl(file._id)
         : await api.files.downloadFile(file._id);
       if (response.success && response.downloadUrl) {
-        window.open(response.downloadUrl, '_blank');
+        await triggerDownload(response.downloadUrl, file.originalName);
       }
     } catch (err) {
       console.error('Download error:', err);

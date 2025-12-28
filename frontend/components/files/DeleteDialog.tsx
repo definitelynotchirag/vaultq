@@ -1,18 +1,17 @@
 'use client';
 
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  IconButton,
-  Box,
-} from '@mui/material';
-import { Close } from '@mui/icons-material';
 import { colors } from '@/lib/colors';
 import { File } from '@/types';
+import { Close } from '@mui/icons-material';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Typography
+} from '@mui/material';
 import { useState } from 'react';
 
 interface DeleteDialogProps {

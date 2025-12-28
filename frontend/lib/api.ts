@@ -3,6 +3,7 @@ import {
     DownloadUrlResponse,
     FileResponse,
     FilesResponse,
+    StorageResponse,
     UploadUrlResponse,
     ViewUrlResponse
 } from '@/types';
@@ -214,6 +215,10 @@ export const api = {
     getShareableUrl: (fileId: string): string => {
       if (typeof window === 'undefined') return '';
       return `${window.location.origin}/shared/${fileId}`;
+    },
+
+    getStorage: async (): Promise<StorageResponse> => {
+      return fetchApi<StorageResponse>('/files/storage');
     },
   },
 };

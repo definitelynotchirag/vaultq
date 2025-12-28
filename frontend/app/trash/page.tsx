@@ -5,7 +5,9 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useTrashFiles } from '@/hooks/useTrashFiles';
+import { api } from '@/lib/api';
 import { colors } from '@/lib/colors';
+import { triggerDownload } from '@/lib/utils';
 import { File } from '@/types';
 import { Delete as DeleteIcon, Restore } from '@mui/icons-material';
 import { Box, Container, ListItemIcon, ListItemText, Menu, MenuItem, Typography } from '@mui/material';
@@ -49,12 +51,9 @@ export default function TrashPage() {
 
   const handleDownload = async (file: File) => {
     try {
-      const response = await fetch(`/api/files/${file._id}/download`, {
-        credentials: 'include',
-      });
-      const data = await response.json();
-      if (data.success && data.downloadUrl) {
-        window.open(data.downloadUrl, '_blank');
+      const response = await api.files.downloadFile(file._id);
+      if (response.success && response.downloadUrl) {
+        await triggerDownload(response.downloadUrl, file.originalName);
       }
     } catch (error) {
       console.error('Download error:', error);

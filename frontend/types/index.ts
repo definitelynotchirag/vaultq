@@ -72,3 +72,13 @@ export interface ViewUrlResponse {
   expiresIn: number;
 }
 
+export interface StorageResponse {
+  success: boolean;
+  storage: {
+    used: number;
+    limit: number;
+    available: number;
+    percentage: number;
+  };
+}
+

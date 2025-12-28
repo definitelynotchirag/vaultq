@@ -1,30 +1,32 @@
 'use client';
 
+import { useSidebar } from '@/contexts/SidebarContext';
+import { useStorage } from '@/hooks/useStorage';
 import { colors } from '@/lib/colors';
 import {
-    AccessTime,
-    Add,
-    ChevronLeft,
-    ChevronRight,
-    Close,
-    Delete,
-    Home,
-    Menu as MenuIcon,
-    People,
-    Star,
+  AccessTime,
+  Add,
+  Close,
+  Delete,
+  Home,
+  Menu as MenuIcon,
+  People,
+  Star,
 } from '@mui/icons-material';
 import {
-    Box,
-    Button,
-    Drawer,
-    IconButton,
-    List,
-    ListItem,
-    ListItemButton,
-    ListItemIcon,
-    ListItemText,
-    useMediaQuery,
-    useTheme
+  Box,
+  Button,
+  Drawer,
+  IconButton,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Typography,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -41,8 +43,9 @@ export function Sidebar({ onNewClick }: SidebarProps) {
   const pathname = usePathname();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { isCollapsed } = useSidebar();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { storage, formatBytes } = useStorage();
 
   const navItems = [
     { href: '/', label: 'My Drive', icon: Home },
@@ -73,8 +76,8 @@ export function Sidebar({ onNewClick }: SidebarProps) {
   };
 
   const drawerContent = (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ p: { xs: 2, sm: 2.5 }, pb: 1 }}>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <Box sx={{ p: { xs: 2, sm: 2.5 }, pb: 1, overflow: 'hidden' }}>
         {!isCollapsed && (
           <Button
             variant="contained"
@@ -83,11 +86,11 @@ export function Sidebar({ onNewClick }: SidebarProps) {
               onNewClick();
               if (isMobile) setMobileOpen(false);
             }}
+            fullWidth
             sx={{
               borderRadius: 7,
               px: 3,
               py: 1.5,
-              minWidth: { xs: 120, sm: 140 },
               textTransform: 'none',
               backgroundColor: colors.background.default,
               color: colors.secondary.dark,
@@ -133,7 +136,7 @@ export function Sidebar({ onNewClick }: SidebarProps) {
         )}
       </Box>
 
-      <List sx={{ flex: 1, overflowY: 'auto', py: 1, px: { xs: 1.5, sm: 2 } }}>
+      <List sx={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', py: 1, px: { xs: 1.5, sm: 2 } }}>
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
@@ -147,7 +150,7 @@ export function Sidebar({ onNewClick }: SidebarProps) {
                 }}
                 sx={{
                   minHeight: 40,
-                  borderRadius: '0 20px 20px 0',
+                  borderRadius: active ? '20px' : '0 20px 20px 0',
                   px: { xs: 2, sm: 3 },
                   backgroundColor: active ? '#c2e7ff' : 'transparent',
                   color: active ? '#001d35' : colors.text.secondary,
@@ -173,28 +176,70 @@ export function Sidebar({ onNewClick }: SidebarProps) {
         })}
       </List>
 
-      {!isMobile && (
-        <IconButton
-          onClick={() => setIsCollapsed(!isCollapsed)}
+      {!isCollapsed && storage && (
+        <Box
           sx={{
-            position: 'absolute',
-            right: -12,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            width: 24,
-            height: 24,
-            backgroundColor: colors.background.default,
-            border: `1px solid ${colors.border.default}`,
-            boxShadow: colors.shadow.light,
-            '&:hover': {
-              backgroundColor: colors.background.hover,
-            },
-            zIndex: (theme) => theme.zIndex.drawer + 100,
+            px: { xs: 2, sm: 3 },
+            pb: 2,
+            pt: 1,
+            borderTop: `1px solid ${colors.border.default}`,
+            overflow: 'hidden',
           }}
         >
-          {isCollapsed ? <ChevronRight fontSize="small" /> : <ChevronLeft fontSize="small" />}
-        </IconButton>
+          <Box sx={{ mb: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                  color: colors.text.secondary,
+                  fontWeight: 500,
+                }}
+              >
+                Storage
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                  color: colors.text.secondary,
+                }}
+              >
+                {formatBytes(storage.used)} of {formatBytes(storage.limit)}
+              </Typography>
+            </Box>
+            <LinearProgress
+              variant="determinate"
+              value={Math.min(storage.percentage, 100)}
+              sx={{
+                height: 6,
+                borderRadius: 3,
+                backgroundColor: colors.background.hover,
+                '& .MuiLinearProgress-bar': {
+                  backgroundColor:
+                    storage.percentage > 90
+                      ? '#f44336'
+                      : storage.percentage > 75
+                      ? '#ff9800'
+                      : colors.primary.main,
+                  borderRadius: 3,
+                },
+              }}
+            />
+          </Box>
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: { xs: '0.65rem', sm: '0.7rem' },
+              color: colors.text.secondary,
+              display: 'block',
+            }}
+          >
+            {formatBytes(storage.available)} available
+          </Typography>
+        </Box>
       )}
+
     </Box>
   );
 
@@ -233,6 +278,7 @@ export function Sidebar({ onNewClick }: SidebarProps) {
             top: 64,
             height: 'calc(100vh - 64px)',
             transition: 'width 300ms ease',
+            overflow: 'hidden',
           },
         }}
       >

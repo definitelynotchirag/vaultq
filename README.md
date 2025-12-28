@@ -21,6 +21,7 @@ A scalable, production-ready cloud storage solution built with modern web techno
 - **Trash Management** - Soft delete with restore capabilities
 - **Recent Files** - Quick access to recently modified files
 - **File Preview** - In-browser preview for images and PDFs
+- **Storage Limits** - Per-user storage quota (default 100MB) with real-time usage tracking and upload prevention when limit is exceeded
 
 ## Tech Stack
 
@@ -210,9 +211,10 @@ Backend (Node Express)
   |
   v
 MongoDB
-  - users collection: googleId, email, name
+  - users collection: googleId, email, name, storageLimit (default 100MB)
   - files collection: owner, originalName, storageName, size, timestamps, public flag, permissions array
   - text index on originalName for fast searching
+  - storage calculation includes all files (active + trash) until permanent deletion
   |
   v
 S3 Bucket
@@ -256,6 +258,9 @@ S3 Bucket
 - `POST /files/:id/restore` - Restore file from trash
 - `DELETE /files/:id/permanent` - Permanently delete file from S3 and DB
 
+### Storage Management
+- `GET /files/storage` - Get user storage usage, limit, and available space
+
 ### Public/Shared File Access
 - `GET /shared/:fileId` - Get public or shared file details
 - `GET /shared/:fileId/view` - Get view URL for public/shared file
@@ -271,6 +276,7 @@ S3 Bucket
 - **Indexed Search** - Prevents full collection scans for better performance
 - **Rate Limiting** - Shows security awareness and production readiness
 - **Multi-layer Validation** - File size limits at client, server, and S3 levels
+- **Storage Quota Management** - Per-user storage limits with automatic enforcement and real-time usage tracking
 - **Modern Stack** - Latest versions of Next.js, React, and TypeScript
 - **Production Ready** - Dockerized, with proper error handling and health checks
 
