@@ -1,7 +1,13 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import { existsSync } from 'fs';
 
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+// Load .env file only if it exists (for local development)
+// In Docker, environment variables are provided by docker-compose via env_file
+const envPath = path.resolve(__dirname, '../.env');
+if (existsSync(envPath)) {
+  dotenv.config({ path: envPath });
+}
 
 import cors from 'cors';
 import express, { Application } from 'express';
