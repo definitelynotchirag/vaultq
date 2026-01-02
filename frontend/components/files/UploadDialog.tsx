@@ -1,23 +1,25 @@
 'use client';
 
+import { useTheme as useCustomTheme } from '@/contexts/ThemeContext';
+import { useUpload } from '@/hooks/useUpload';
+import { getColors } from '@/lib/colors';
+import { formatFileSize } from '@/lib/utils';
+import { Close, CloudUpload, InsertDriveFile } from '@mui/icons-material';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  IconButton,
   Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
   LinearProgress,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
+  Typography,
 } from '@mui/material';
-import { Close, CloudUpload, InsertDriveFile } from '@mui/icons-material';
-import { useUpload } from '@/hooks/useUpload';
-import { formatFileSize } from '@/lib/utils';
 import { useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 
@@ -28,6 +30,8 @@ interface UploadDialogProps {
 }
 
 export function UploadDialog({ isOpen, onClose, onUploadComplete }: UploadDialogProps) {
+  const { mode } = useCustomTheme();
+  const colors = getColors(mode);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploadFile, uploads, isUploading, clearUploads } = useUpload();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -71,6 +75,7 @@ export function UploadDialog({ isOpen, onClose, onUploadComplete }: UploadDialog
       PaperProps={{
         sx: {
           borderRadius: 2,
+          backgroundColor: colors.background.darkBackground,
         },
       }}
     >
@@ -80,45 +85,46 @@ export function UploadDialog({ isOpen, onClose, onUploadComplete }: UploadDialog
           alignItems: 'center',
           justifyContent: 'space-between',
           pb: 1.5,
-          borderBottom: '1px solid #e5e5e5',
+          borderBottom: `1px solid ${colors.border.default}`,
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 400, color: '#202124' }}>
+        <Typography variant="h6" sx={{ fontWeight: 400, color: colors.text.primary }}>
           Upload Files
         </Typography>
         <IconButton
           onClick={handleClose}
           size="small"
           sx={{
-            color: '#5f6368',
-            '&:hover': { backgroundColor: '#f1f3f4' },
+            color: colors.text.secondary,
+            '&:hover': { backgroundColor: colors.background.hover },
           }}
         >
           <Close />
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ pt: 3 }}>
+      <DialogContent sx={{ pt: 3, backgroundColor: colors.background.default }}>
         <Box
           onClick={() => fileInputRef.current?.click()}
           sx={{
-            border: '2px dashed #dadce0',
+            border: `2px dashed ${colors.border.default}`,
             borderRadius: 2,
             p: { xs: 4, sm: 5 },
             textAlign: 'center',
             cursor: 'pointer',
+            backgroundColor: colors.background.hover,
             '&:hover': {
-              backgroundColor: '#f8f9fa',
-              borderColor: '#1a73e8',
+              backgroundColor: colors.background.selected,
+              borderColor: colors.primary.main,
             },
             transition: 'all 150ms ease',
           }}
         >
-          <CloudUpload sx={{ fontSize: { xs: 40, sm: 48 }, color: '#5f6368', mb: { xs: 1.5, sm: 2 } }} />
-          <Typography variant="body1" sx={{ fontWeight: 500, color: '#202124', mb: 1, fontSize: { xs: '0.875rem', sm: '1rem' } }}>
+          <CloudUpload sx={{ fontSize: { xs: 40, sm: 48 }, color: colors.text.secondary, mb: { xs: 1.5, sm: 2 } }} />
+          <Typography variant="body1" sx={{ fontWeight: 500, color: colors.text.primary, mb: 1, fontSize: { xs: '0.875rem', sm: '1rem' } }}>
             Click to select files
           </Typography>
-          <Typography variant="body2" sx={{ color: '#5f6368', fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+          <Typography variant="body2" sx={{ color: colors.text.secondary, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
             Maximum file size: 100MB
           </Typography>
           <input
@@ -137,13 +143,13 @@ export function UploadDialog({ isOpen, onClose, onUploadComplete }: UploadDialog
                 <ListItem
                   key={index}
                   sx={{
-                    bgcolor: '#f1f3f4',
+                    bgcolor: colors.background.hover,
                     borderRadius: 2,
                     mb: 1,
                   }}
                 >
                   <ListItemIcon>
-                    <InsertDriveFile sx={{ color: '#5f6368' }} />
+                    <InsertDriveFile sx={{ color: colors.text.secondary }} />
                   </ListItemIcon>
                   <ListItemText
                     primary={file.name}
@@ -152,7 +158,7 @@ export function UploadDialog({ isOpen, onClose, onUploadComplete }: UploadDialog
                       sx: {
                         fontSize: { xs: '0.75rem', sm: '0.875rem' },
                         fontWeight: 500,
-                        color: '#202124',
+                        color: colors.text.primary,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
@@ -161,7 +167,7 @@ export function UploadDialog({ isOpen, onClose, onUploadComplete }: UploadDialog
                     secondaryTypographyProps={{
                       sx: {
                         fontSize: { xs: '0.6875rem', sm: '0.75rem' },
-                        color: '#5f6368',
+                        color: colors.text.secondary,
                       },
                     }}
                   />
@@ -178,7 +184,7 @@ export function UploadDialog({ isOpen, onClose, onUploadComplete }: UploadDialog
                 <ListItem
                   key={index}
                   sx={{
-                    bgcolor: '#f1f3f4',
+                    bgcolor: colors.background.hover,
                     borderRadius: 2,
                     mb: 1,
                     flexDirection: 'column',
@@ -191,7 +197,7 @@ export function UploadDialog({ isOpen, onClose, onUploadComplete }: UploadDialog
                       sx={{
                         fontSize: { xs: '0.75rem', sm: '0.875rem' },
                         fontWeight: 500,
-                        color: '#202124',
+                        color: colors.text.primary,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
@@ -205,7 +211,7 @@ export function UploadDialog({ isOpen, onClose, onUploadComplete }: UploadDialog
                       variant="caption"
                       sx={{
                         fontSize: { xs: '0.6875rem', sm: '0.75rem' },
-                        color: '#5f6368',
+                        color: colors.text.secondary,
                       }}
                     >
                       {upload.progress}%
@@ -217,14 +223,15 @@ export function UploadDialog({ isOpen, onClose, onUploadComplete }: UploadDialog
                     sx={{
                       height: 8,
                       borderRadius: 1,
-                      backgroundColor: '#dadce0',
+                      backgroundColor: colors.background.selected,
                       '& .MuiLinearProgress-bar': {
                         backgroundColor:
                           upload.status === 'success'
-                            ? '#0f9d58'
+                            ? colors.success.main
                             : upload.status === 'error'
-                            ? '#ea4335'
-                            : '#1a73e8',
+                            ? colors.error.main
+                            : colors.primary.main,
+                        borderRadius: 1,
                       },
                     }}
                   />
@@ -232,7 +239,7 @@ export function UploadDialog({ isOpen, onClose, onUploadComplete }: UploadDialog
                     <Typography
                       variant="caption"
                       sx={{
-                        color: '#ea4335',
+                        color: colors.error.main,
                         fontSize: { xs: '0.6875rem', sm: '0.75rem' },
                         mt: 1,
                       }}
@@ -247,16 +254,16 @@ export function UploadDialog({ isOpen, onClose, onUploadComplete }: UploadDialog
         )}
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, pb: 2.5, pt: 2, gap: 1.5 }}>
+      <DialogActions sx={{ px: 3, pb: 2.5, pt: 2, gap: 1.5, borderTop: `1px solid ${colors.border.default}` }}>
         <Button
           onClick={handleClose}
           variant="outlined"
           sx={{
-            borderColor: '#dadce0',
-            color: '#202124',
+            borderColor: colors.border.light,
+            color: colors.text.primary,
             '&:hover': {
-              borderColor: '#dadce0',
-              backgroundColor: '#f8f9fa',
+              borderColor: colors.border.light,
+              backgroundColor: colors.background.hover,
             },
             textTransform: 'none',
             flex: 1,
@@ -269,15 +276,17 @@ export function UploadDialog({ isOpen, onClose, onUploadComplete }: UploadDialog
           disabled={selectedFiles.length === 0 || isUploading}
           variant="contained"
           sx={{
-            backgroundColor: '#1a73e8',
+            backgroundColor: colors.primary.main,
+            color: colors.text.white,
             '&:hover': {
-              backgroundColor: '#1765cc',
+              backgroundColor: colors.primary.hover,
             },
             '&:disabled': {
-              backgroundColor: '#dadce0',
+              backgroundColor: colors.background.selected,
+              color: colors.text.disabled,
             },
             textTransform: 'none',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.3)',
+            boxShadow: colors.shadow.card,
             flex: 1,
           }}
         >

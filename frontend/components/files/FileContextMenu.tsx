@@ -2,7 +2,8 @@
 
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
-import { colors } from '@/lib/colors';
+import { useTheme as useCustomTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/lib/colors';
 import { hasWriteAccess } from '@/lib/filePermissions';
 import { File } from '@/types';
 import {
@@ -22,6 +23,8 @@ import {
     ListItemText,
     Menu,
     MenuItem,
+    useMediaQuery,
+    useTheme,
 } from '@mui/material';
 import { useEffect, useRef } from 'react';
 
@@ -56,6 +59,10 @@ export function FileContextMenu({
   onOpen,
   onDelete,
 }: FileContextMenuProps) {
+  const { mode } = useCustomTheme();
+  const colors = getColors(mode);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { user } = useAuth();
   const canWrite = hasWriteAccess(file, user);
   const isStarred = user && file.starredBy?.includes(user._id);
@@ -151,13 +158,13 @@ export function FileContextMenu({
       ref={menuRef}
       PaperProps={{
         sx: {
-          minWidth: 200,
+          minWidth: { xs: 180, sm: 200 },
           boxShadow: colors.shadow.menu,
           border: `1px solid ${colors.border.default}`,
         },
       }}
       MenuListProps={{
-        sx: { py: 0.5 },
+        sx: { py: { xs: 0.25, sm: 0.5 } },
       }}
     >
       {menuItems.map((item, index) => {
@@ -176,23 +183,24 @@ export function FileContextMenu({
               }
             }}
             sx={{
-              minHeight: 40,
-              px: 2,
+              minHeight: { xs: 44, sm: 40 },
+              px: { xs: 1.5, sm: 2 },
+              py: { xs: 0.75, sm: 0.5 },
               '&:hover': {
                 backgroundColor: colors.background.hover,
               },
             }}
           >
             {Icon && (
-              <ListItemIcon sx={{ minWidth: 36, color: colors.text.secondary }}>
-                <Icon fontSize="small" />
+              <ListItemIcon sx={{ minWidth: { xs: 32, sm: 36 }, color: colors.text.secondary }}>
+                <Icon fontSize={isMobile ? 'small' : 'small'} />
               </ListItemIcon>
             )}
             <ListItemText
               primary={item.label}
               primaryTypographyProps={{
                 sx: {
-                  fontSize: '0.875rem',
+                  fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                   color: colors.text.primary,
                 },
               }}

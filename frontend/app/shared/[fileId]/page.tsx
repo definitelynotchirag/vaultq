@@ -1,6 +1,8 @@
 'use client';
 
 import { Box, Typography, Button, CircularProgress } from '@mui/material';
+import { useTheme as useCustomTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/lib/colors';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { FileViewer } from '@/components/files/FileViewer';
@@ -10,6 +12,8 @@ import { File } from '@/types';
 export default function SharedFilePage() {
   const params = useParams();
   const router = useRouter();
+  const { mode } = useCustomTheme();
+  const colors = getColors(mode);
   const fileId = params.fileId as string;
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
@@ -49,16 +53,16 @@ export default function SharedFilePage() {
       <Box
         sx={{
           minHeight: '100vh',
-          backgroundColor: '#ffffff',
-          color: '#202124',
+          backgroundColor: colors.background.default,
+          color: colors.text.primary,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
         <Box sx={{ textAlign: 'center' }}>
-          <CircularProgress sx={{ color: '#1a73e8', mb: 2 }} />
-          <Typography variant="h6">Loading...</Typography>
+          <CircularProgress sx={{ color: colors.primary.main, mb: 2 }} />
+          <Typography variant="h6" sx={{ color: colors.text.primary }}>Loading...</Typography>
         </Box>
       </Box>
     );
@@ -69,15 +73,15 @@ export default function SharedFilePage() {
       <Box
         sx={{
           minHeight: '100vh',
-          backgroundColor: '#ffffff',
-          color: '#202124',
+          backgroundColor: colors.background.default,
+          color: colors.text.primary,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
         <Box sx={{ textAlign: 'center' }}>
-          <Typography variant="h6" sx={{ mb: 2, color: '#ea4335' }}>
+          <Typography variant="h6" sx={{ mb: 2, color: colors.error.main }}>
             {error}
           </Typography>
           {error.includes('log in') && (
@@ -88,8 +92,8 @@ export default function SharedFilePage() {
               }}
               variant="contained"
               sx={{
-                backgroundColor: '#1a73e8',
-                '&:hover': { backgroundColor: '#1765cc' },
+                backgroundColor: colors.primary.main,
+                '&:hover': { backgroundColor: colors.primary.hover },
                 textTransform: 'none',
                 mb: 2,
               }}
@@ -101,11 +105,11 @@ export default function SharedFilePage() {
             onClick={() => router.push('/')}
             variant="outlined"
             sx={{
-              borderColor: '#dadce0',
-              color: '#202124',
+              borderColor: colors.border.light,
+              color: colors.text.primary,
               '&:hover': {
-                borderColor: '#dadce0',
-                backgroundColor: '#f8f9fa',
+                borderColor: colors.border.light,
+                backgroundColor: colors.background.hover,
               },
               textTransform: 'none',
             }}
@@ -122,20 +126,20 @@ export default function SharedFilePage() {
       <Box
         sx={{
           minHeight: '100vh',
-          backgroundColor: '#ffffff',
-          color: '#202124',
+          backgroundColor: colors.background.default,
+          color: colors.text.primary,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        <Typography variant="h6">File not found</Typography>
+        <Typography variant="h6" sx={{ color: colors.text.primary }}>File not found</Typography>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#ffffff' }}>
+    <Box sx={{ minHeight: '100vh', backgroundColor: colors.background.default }}>
       <FileViewer
         isOpen={true}
         file={file}

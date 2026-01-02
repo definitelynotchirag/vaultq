@@ -8,6 +8,8 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
+import { useTheme as useCustomTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/lib/colors';
 import {
   Close,
   Folder,
@@ -29,6 +31,8 @@ interface PreviewPanelProps {
 
 export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
   const theme = useTheme();
+  const { mode } = useCustomTheme();
+  const colors = getColors(mode);
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -39,34 +43,34 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
     const iconSize = isMobile ? 48 : 64;
 
     if (extension === 'folder' || !extension) {
-      return <Folder sx={{ fontSize: iconSize, color: '#5f6368' }} />;
+      return <Folder sx={{ fontSize: iconSize, color: colors.fileType.folder }} />;
     }
 
     if (['pdf'].includes(extension)) {
-      return <PictureAsPdf sx={{ fontSize: iconSize, color: '#ea4335' }} />;
+      return <PictureAsPdf sx={{ fontSize: iconSize, color: colors.fileType.pdf }} />;
     }
 
     if (['doc', 'docx'].includes(extension)) {
-      return <Description sx={{ fontSize: iconSize, color: '#4285f4' }} />;
+      return <Description sx={{ fontSize: iconSize, color: colors.fileType.doc }} />;
     }
 
     if (['xls', 'xlsx'].includes(extension)) {
-      return <TableChart sx={{ fontSize: iconSize, color: '#0f9d58' }} />;
+      return <TableChart sx={{ fontSize: iconSize, color: colors.fileType.sheet }} />;
     }
 
     if (['ppt', 'pptx'].includes(extension)) {
-      return <Slideshow sx={{ fontSize: iconSize, color: '#f4b400' }} />;
+      return <Slideshow sx={{ fontSize: iconSize, color: colors.fileType.slide }} />;
     }
 
     if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension)) {
-      return <ImageIcon sx={{ fontSize: iconSize, color: '#4285f4' }} />;
+      return <ImageIcon sx={{ fontSize: iconSize, color: colors.fileType.image }} />;
     }
 
     if (['mp4', 'mov', 'avi', 'webm'].includes(extension)) {
-      return <VideoFile sx={{ fontSize: iconSize, color: '#ea4335' }} />;
+      return <VideoFile sx={{ fontSize: iconSize, color: colors.fileType.video }} />;
     }
 
-    return <Description sx={{ fontSize: iconSize, color: '#5f6368' }} />;
+    return <Description sx={{ fontSize: iconSize, color: colors.fileType.default }} />;
   };
 
   return (
@@ -82,21 +86,22 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
           width: { xs: '100%', sm: 340, md: 360 },
           top: 64,
           height: 'calc(100vh - 64px)',
-          borderLeft: '1px solid #e5e5e5',
-          boxShadow: { xs: 'none', sm: 'none', md: '0 2px 8px rgba(0,0,0,0.1)' },
+          borderLeft: `1px solid ${colors.border.default}`,
+          backgroundColor: colors.background.paper,
+          boxShadow: { xs: 'none', sm: 'none', md: colors.shadow.light },
         },
       }}
     >
       <Box sx={{ p: { xs: 2, sm: 2.5, md: 3 }, overflowY: 'auto', height: '100%' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: { xs: 2, sm: 2.5, md: 3 } }}>
-          <Typography variant="h6" sx={{ fontWeight: 400, color: '#202124', fontSize: { xs: '1rem', sm: '1.125rem' } }}>
+          <Typography variant="h6" sx={{ fontWeight: 400, color: colors.text.primary, fontSize: { xs: '1rem', sm: '1.125rem' } }}>
             Details
           </Typography>
           <IconButton
             onClick={onClose}
             sx={{
-              color: '#5f6368',
-              '&:hover': { backgroundColor: '#f1f3f4' },
+              color: colors.text.secondary,
+              '&:hover': { backgroundColor: colors.background.hover },
             }}
             size="small"
           >
@@ -108,7 +113,7 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
           sx={{
             width: '100%',
             height: { xs: 160, sm: 180, md: 200 },
-            bgcolor: '#f1f3f4',
+            bgcolor: colors.background.hover,
             borderRadius: 2,
             display: 'flex',
             alignItems: 'center',
@@ -127,7 +132,7 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
             sx={{
               fontSize: '0.6875rem',
               fontWeight: 500,
-              color: '#5f6368',
+              color: colors.text.secondary,
               textTransform: 'uppercase',
               letterSpacing: '0.5px',
               display: 'block',
@@ -136,7 +141,7 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
           >
             Name
           </Typography>
-          <Typography variant="body2" sx={{ color: '#202124', wordBreak: 'break-word' }}>
+          <Typography variant="body2" sx={{ color: colors.text.primary, wordBreak: 'break-word' }}>
             {file.originalName}
           </Typography>
         </Box>
@@ -147,7 +152,7 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
             sx={{
               fontSize: '0.6875rem',
               fontWeight: 500,
-              color: '#5f6368',
+              color: colors.text.secondary,
               textTransform: 'uppercase',
               letterSpacing: '0.5px',
               display: 'block',
@@ -156,7 +161,7 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
           >
             Size
           </Typography>
-          <Typography variant="body2" sx={{ color: '#202124' }}>
+          <Typography variant="body2" sx={{ color: colors.text.primary }}>
             {formatFileSize(file.size)}
           </Typography>
         </Box>
@@ -167,7 +172,7 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
             sx={{
               fontSize: '0.6875rem',
               fontWeight: 500,
-              color: '#5f6368',
+              color: colors.text.secondary,
               textTransform: 'uppercase',
               letterSpacing: '0.5px',
               display: 'block',
@@ -176,7 +181,7 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
           >
             Modified
           </Typography>
-          <Typography variant="body2" sx={{ color: '#202124' }}>
+          <Typography variant="body2" sx={{ color: colors.text.primary }}>
             {formatDate(file.updatedAt)}
           </Typography>
         </Box>
@@ -187,7 +192,7 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
             sx={{
               fontSize: '0.6875rem',
               fontWeight: 500,
-              color: '#5f6368',
+              color: colors.text.secondary,
               textTransform: 'uppercase',
               letterSpacing: '0.5px',
               display: 'block',
@@ -196,7 +201,7 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
           >
             Created
           </Typography>
-          <Typography variant="body2" sx={{ color: '#202124' }}>
+          <Typography variant="body2" sx={{ color: colors.text.primary }}>
             {formatDate(file.createdAt)}
           </Typography>
         </Box>
@@ -207,7 +212,7 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
             sx={{
               fontSize: '0.6875rem',
               fontWeight: 500,
-              color: '#5f6368',
+              color: colors.text.secondary,
               textTransform: 'uppercase',
               letterSpacing: '0.5px',
               display: 'block',
@@ -216,7 +221,7 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
           >
             Owner
           </Typography>
-          <Typography variant="body2" sx={{ color: '#202124' }}>
+          <Typography variant="body2" sx={{ color: colors.text.primary }}>
             You
           </Typography>
         </Box>
@@ -228,7 +233,7 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
               sx={{
                 fontSize: '0.6875rem',
                 fontWeight: 500,
-                color: '#5f6368',
+                color: colors.text.secondary,
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
                 display: 'block',
@@ -237,7 +242,7 @@ export function PreviewPanel({ file, isOpen, onClose }: PreviewPanelProps) {
             >
               Sharing
             </Typography>
-            <Typography variant="body2" sx={{ color: '#202124' }}>
+            <Typography variant="body2" sx={{ color: colors.text.primary }}>
               Anyone with the link can view
             </Typography>
           </Box>

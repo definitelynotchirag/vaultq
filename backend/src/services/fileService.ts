@@ -56,9 +56,9 @@ export const getAccessibleFiles = async (user: IUser, searchQuery?: string) => {
   const accessQuery = {
     $or: [
       { owner: userId },
-      { public: true },
       { 'permissions.userId': userId },
     ],
+    public: { $ne: true },
   };
 
   let query: any = {
@@ -69,7 +69,13 @@ export const getAccessibleFiles = async (user: IUser, searchQuery?: string) => {
   if (searchQuery) {
     query = {
       $and: [
-        accessQuery,
+        {
+          $or: [
+            { owner: userId },
+            { 'permissions.userId': userId },
+          ],
+        },
+        { public: { $ne: true } },
         { originalName: { $regex: searchQuery, $options: 'i' } },
         { deleted: { $ne: true } },
       ],
@@ -120,9 +126,9 @@ export const getStarredFiles = async (user: IUser, searchQuery?: string) => {
   const accessQuery = {
     $or: [
       { owner: userId },
-      { public: true },
       { 'permissions.userId': userId },
     ],
+    public: { $ne: true },
     starredBy: userId,
   };
 
@@ -134,7 +140,14 @@ export const getStarredFiles = async (user: IUser, searchQuery?: string) => {
   if (searchQuery) {
     query = {
       $and: [
-        accessQuery,
+        {
+          $or: [
+            { owner: userId },
+            { 'permissions.userId': userId },
+          ],
+        },
+        { public: { $ne: true } },
+        { starredBy: userId },
         { originalName: { $regex: searchQuery, $options: 'i' } },
         { deleted: { $ne: true } },
       ],

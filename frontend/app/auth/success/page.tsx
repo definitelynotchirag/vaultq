@@ -1,6 +1,8 @@
 'use client';
 
 import { Box, Typography, CircularProgress } from '@mui/material';
+import { useTheme as useCustomTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/lib/colors';
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -8,6 +10,8 @@ import { useAuth } from '@/hooks/useAuth';
 export default function AuthSuccessPage() {
   const router = useRouter();
   const { refreshUser, user, loading } = useAuth();
+  const { mode } = useCustomTheme();
+  const colors = getColors(mode);
   const hasRedirected = useRef(false);
 
   useEffect(() => {
@@ -53,16 +57,16 @@ export default function AuthSuccessPage() {
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: '100vh',
-        backgroundColor: '#ffffff',
-        color: '#202124',
+        backgroundColor: colors.background.default,
+        color: colors.text.primary,
       }}
     >
       <Box sx={{ textAlign: 'center' }}>
-        <CircularProgress sx={{ color: '#1a73e8', mb: 2 }} />
-        <Typography variant="h6" sx={{ fontWeight: 400, mb: 1 }}>
+        <CircularProgress sx={{ color: colors.primary.main, mb: 2 }} />
+        <Typography variant="h6" sx={{ fontWeight: 400, mb: 1, color: colors.text.primary }}>
           Authentication successful!
         </Typography>
-        <Typography variant="body2" sx={{ color: '#5f6368' }}>
+        <Typography variant="body2" sx={{ color: colors.text.secondary }}>
           Redirecting to Drive...
         </Typography>
       </Box>

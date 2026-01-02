@@ -1,38 +1,41 @@
 'use client';
 
+import { useTheme as useCustomTheme } from '@/contexts/ThemeContext';
 import { api } from '@/lib/api';
-import { colors } from '@/lib/colors';
+import { getColors } from '@/lib/colors';
 import { File } from '@/types';
 import {
-    Check,
-    Close,
-    ContentCopy,
-    Link as LinkIcon,
-    Lock,
-    LockOpen,
-    Mail,
-    OpenInNew,
+  Check,
+  Close,
+  ContentCopy,
+  Link as LinkIcon,
+  Lock,
+  LockOpen,
+  Mail,
+  OpenInNew,
 } from '@mui/icons-material';
 import {
-    Avatar,
-    Box,
-    Button,
-    CircularProgress,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    FormControl,
-    IconButton,
-    InputLabel,
-    List,
-    ListItem,
-    ListItemAvatar,
-    ListItemText,
-    MenuItem,
-    Select,
-    TextField,
-    Typography,
+  Avatar,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  IconButton,
+  InputLabel,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
@@ -45,6 +48,10 @@ interface ShareDialogProps {
 }
 
 export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDialogProps) {
+  const { mode } = useCustomTheme();
+  const colors = getColors(mode);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [currentFile, setCurrentFile] = useState<File | null>(file);
   const [isPublic, setIsPublic] = useState(file?.public || false);
   const [isSaving, setIsSaving] = useState(false);
@@ -58,7 +65,7 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
       setIsLoading(true);
       api.files.getFile(file._id)
         .then((response) => {
-          if (response.success && response.file) {
+          if (response.success  && response.file) {
             setCurrentFile(response.file);
             setIsPublic(response.file.public || false);
           }
@@ -184,6 +191,7 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
           maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
+          backgroundColor: colors.background.darkBackground,
         },
       }}
     >
@@ -192,8 +200,9 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          pb: 1.5,
-          // borderBottom: `1px solid ${colors.border.default}`,
+          pb: { xs: 1, sm: 1.5 },
+          px: { xs: 2, sm: 3 },
+          pt: { xs: 2, sm: 3 },
           flexShrink: 0,
         }}
       >
@@ -205,8 +214,8 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
-            pr: 2,
-            fontSize: { xs: '1rem', md: '1.375rem' },
+            pr: { xs: 1, sm: 2 },
+            fontSize: { xs: '0.9375rem', sm: '1.125rem', md: '1.375rem' },
           }}
           >
           Share "{currentFile.originalName}"
@@ -223,10 +232,10 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ flex: 1, overflowY: 'auto', pt: 3 }}>
+      <DialogContent sx={{ flex: 1, overflowY: 'auto', pt: { xs: 2, sm: 3 }, px: { xs: 2, sm: 3 } }}>
         {isLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
-            <CircularProgress />
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: { xs: 150, sm: 200 } }}>
+            <CircularProgress size={isMobile ? 32 : 40} />
           </Box>
         ) : (
           <>
@@ -234,21 +243,22 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 2,
-                p: 2,
-                bgcolor: colors.background.light,
+                gap: { xs: 1.5, sm: 2 },
+                p: { xs: 1.5, sm: 2 },
+                bgcolor: colors.background.hover,
                 borderRadius: 2,
-                mb: 3,
+                mb: { xs: 2, sm: 3 },
+                flexDirection: { xs: 'column', sm: 'row' },
               }}
             >
-          <Avatar sx={{ bgcolor: colors.primary.main, width: 40, height: 40 }}>
-            <LinkIcon />
+          <Avatar sx={{ bgcolor: colors.primary.main, width: { xs: 36, sm: 40 }, height: { xs: 36, sm: 40 } }}>
+            <LinkIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
           </Avatar>
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="body2" sx={{ fontWeight: 500, color: '#202124' }}>
+          <Box sx={{ flex: 1, minWidth: 0, width: { xs: '100%', sm: 'auto' } }}>
+            <Typography variant="body2" sx={{ fontWeight: 500, color: colors.text.primary, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
               Anyone with the link
             </Typography>
-            <Typography variant="caption" sx={{ color: '#5f6368' }}>
+            <Typography variant="caption" sx={{ color: colors.text.secondary, fontSize: { xs: '0.6875rem', sm: '0.75rem' } }}>
               {isPublic ? 'Can view' : 'No access'}
             </Typography>
           </Box>
@@ -256,24 +266,27 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
             onClick={handleTogglePublic}
             disabled={isSaving}
             variant={isPublic ? 'contained' : 'outlined'}
-            startIcon={isPublic ? <LockOpen /> : <Lock />}
+            startIcon={isPublic ? <LockOpen sx={{ fontSize: { xs: 16, sm: 18 } }} /> : <Lock sx={{ fontSize: { xs: 16, sm: 18 } }} />}
+            fullWidth={isMobile}
             sx={{
               backgroundColor: isPublic ? colors.primary.main : 'transparent',
               borderColor: isPublic ? 'transparent' : colors.border.light,
               color: isPublic ? colors.text.white : colors.text.primary,
               '&:hover': {
-                backgroundColor: isPublic ? colors.primary.hover : colors.background.light,
+                backgroundColor: isPublic ? colors.primary.hover : colors.background.hover,
               },
               textTransform: 'none',
               boxShadow: isPublic ? colors.shadow.card : 'none',
+              fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+              py: { xs: 0.75, sm: 1 },
             }}
           >
             {isPublic ? 'Public' : 'Private'}
           </Button>
         </Box>
 
-        <Box sx={{ borderTop: '1px solid #e5e5e5', pt: 3, mb: 3 }}>
-          <Typography variant="body2" sx={{ fontWeight: 500, color: '#202124', mb: 2 }}>
+        <Box sx={{ borderTop: `1px solid ${colors.border.default}`, pt: { xs: 2, sm: 3 }, mb: { xs: 2, sm: 3 } }}>
+          <Typography variant="body2" sx={{ fontWeight: 500, color: colors.text.primary, mb: { xs: 1.5, sm: 2 }, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
             Copy link
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
@@ -287,7 +300,7 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
               sx={{
                 flex: 1,
                 '& .MuiOutlinedInput-root': {
-                  bgcolor: colors.background.light,
+                  bgcolor: colors.background.hover,
                   borderRadius: 2,
                 },
               }}
@@ -295,7 +308,7 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
             <Button
               onClick={handleCopyLink}
               variant="contained"
-              startIcon={copied ? <Check /> : <ContentCopy />}
+              startIcon={copied ? <Check sx={{ fontSize: { xs: 16, sm: 18 } }} /> : <ContentCopy sx={{ fontSize: { xs: 16, sm: 18 } }} />}
               sx={{
                 backgroundColor: copied ? colors.success.main : colors.primary.main,
                 '&:hover': {
@@ -304,6 +317,8 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
                 textTransform: 'none',
                 boxShadow: colors.shadow.card,
                 minWidth: { xs: '100%', sm: 'auto' },
+                fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                py: { xs: 0.75, sm: 1 },
               }}
             >
               {copied ? 'Copied' : 'Copy'}
@@ -311,16 +326,18 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
             <Button
               onClick={handleOpenInNewTab}
               variant="outlined"
-              startIcon={<OpenInNew />}
+              startIcon={<OpenInNew sx={{ fontSize: { xs: 16, sm: 18 } }} />}
               sx={{
                 borderColor: colors.border.light,
                 color: colors.text.primary,
                 '&:hover': {
-                  backgroundColor: colors.background.light,
+                  backgroundColor: colors.background.selected,
                   borderColor: colors.border.light,
                 },
                 textTransform: 'none',
                 minWidth: { xs: '100%', sm: 'auto' },
+                fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                py: { xs: 0.75, sm: 1 },
               }}
             >
               Open in new tab
@@ -328,12 +345,12 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
           </Box>
         </Box>
 
-        <Box sx={{ borderTop: '1px solid #e5e5e5', pt: 3, mb: 3 }}>
-          <Typography variant="body2" sx={{ fontWeight: 500, color: '#202124', mb: 2 }}>
+        <Box sx={{ borderTop: `1px solid ${colors.border.default}`, pt: { xs: 2, sm: 3 }, mb: { xs: 2, sm: 3 } }}>
+          <Typography variant="body2" sx={{ fontWeight: 500, color: colors.text.primary, mb: { xs: 1.5, sm: 2 }, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
             Share with specific people
           </Typography>
           <form onSubmit={handleShareWithUser}>
-            <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' }, mb: 2 }}>
+            <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' }, mb: { xs: 1.5, sm: 2 } }}>
               <TextField
                 type="email"
                 value={email}
@@ -342,27 +359,29 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
                 fullWidth
                 variant="outlined"
                 InputProps={{
-                  startAdornment: <Mail sx={{ color: colors.text.secondary, mr: 1 }} />,
+                  startAdornment: <Mail sx={{ color: colors.text.secondary, mr: 1, fontSize: { xs: 18, sm: 20 } }} />,
                 }}
                 sx={{
                   flex: 1,
                   '& .MuiOutlinedInput-root': {
                     borderRadius: 2,
+                    fontSize: { xs: '0.875rem', sm: '1rem' },
                   },
                 }}
               />
               <FormControl sx={{ minWidth: { xs: '100%', sm: 140 } }}>
-                <InputLabel>Permission</InputLabel>
+                <InputLabel sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>Permission</InputLabel>
                 <Select
                   value={permissionLevel}
                   onChange={(e) => setPermissionLevel(e.target.value as 'read' | 'write')}
                   label="Permission"
                   sx={{
                     borderRadius: 2,
+                    fontSize: { xs: '0.875rem', sm: '1rem' },
                   }}
                 >
-                  <MenuItem value="read">Can view</MenuItem>
-                  <MenuItem value="write">Can edit</MenuItem>
+                  <MenuItem value="read" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>Can view</MenuItem>
+                  <MenuItem value="write" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>Can edit</MenuItem>
                 </Select>
               </FormControl>
               <Button
@@ -380,6 +399,8 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
                   textTransform: 'none',
                   boxShadow: colors.shadow.card,
                   minWidth: { xs: '100%', sm: 'auto' },
+                  fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                  py: { xs: 0.75, sm: 1 },
                 }}
               >
                 Share
@@ -389,8 +410,8 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
         </Box>
 
         {currentFile.permissions && currentFile.permissions.length > 0 && (
-          <Box sx={{ borderTop: '1px solid #e5e5e5', pt: 3 }}>
-            <Typography variant="body2" sx={{ fontWeight: 500, color: '#202124', mb: 2 }}>
+          <Box sx={{ borderTop: `1px solid ${colors.border.default}`, pt: { xs: 2, sm: 3 } }}>
+            <Typography variant="body2" sx={{ fontWeight: 500, color: colors.text.primary, mb: { xs: 1.5, sm: 2 }, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
               People with access
             </Typography>
             <List>
@@ -406,40 +427,48 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
                   <ListItem
                     key={index}
                     sx={{
-                      bgcolor: colors.background.light,
+                      bgcolor: colors.background.hover,
                       borderRadius: 2,
                       mb: 1,
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 2,
+                      gap: { xs: 1, sm: 2 },
+                      px: { xs: 1.5, sm: 2 },
+                      py: { xs: 1, sm: 1.5 },
+                      flexDirection: { xs: 'column', sm: 'row' },
                     }}
                   >
-                    <ListItemAvatar>
-                      <Avatar sx={{ bgcolor: colors.secondary.main, width: 40, height: 40 }}>
-                        {userName.charAt(0).toUpperCase()}
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={userName}
-                      secondary={
-                        <Typography variant="caption" sx={{ display: 'block', color: colors.text.secondary }}>
-                          {userEmail}
-                        </Typography>
-                      }
-                      primaryTypographyProps={{
-                        sx: {
-                          fontWeight: 500,
-                          color: colors.text.primary,
-                        },
-                      }}
-                      sx={{ flex: 1 }}
-                    />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 }, width: { xs: '100%', sm: 'auto' }, flex: { xs: '0 0 auto', sm: 1 } }}>
+                      <ListItemAvatar>
+                        <Avatar sx={{ bgcolor: colors.secondary.main, width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 } }}>
+                          {userName.charAt(0).toUpperCase()}
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={userName}
+                        secondary={
+                          <Typography variant="caption" sx={{ display: 'block', color: colors.text.secondary, fontSize: { xs: '0.6875rem', sm: '0.75rem' } }}>
+                            {userEmail}
+                          </Typography>
+                        }
+                        primaryTypographyProps={{
+                          sx: {
+                            fontWeight: 500,
+                            color: colors.text.primary,
+                            fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                          },
+                        }}
+                        sx={{ flex: 1 }}
+                      />
+                    </Box>
                     <FormControl 
                       size="small" 
                       sx={{ 
-                        minWidth: { xs: 120, sm: 140 },
+                        minWidth: { xs: '100%', sm: 140 },
+                        width: { xs: '100%', sm: 'auto' },
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 2,
+                          fontSize: { xs: '0.875rem', sm: '1rem' },
                         },
                       }}
                     >
@@ -451,8 +480,8 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
                           bgcolor: colors.background.default,
                         }}
                       >
-                        <MenuItem value="read">Can view</MenuItem>
-                        <MenuItem value="write">Can edit</MenuItem>
+                        <MenuItem value="read" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>Can view</MenuItem>
+                        <MenuItem value="write" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>Can edit</MenuItem>
                       </Select>
                     </FormControl>
                   </ListItem>
@@ -465,10 +494,11 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
         )}
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, pb: 2.5, pt: 2, borderTop: '1px solid #e5e5e5', flexShrink: 0 }}>
+      <DialogActions sx={{ px: { xs: 2, sm: 3 }, pb: { xs: 2, sm: 2.5 }, pt: { xs: 1.5, sm: 2 }, borderTop: `1px solid ${colors.border.default}`, flexShrink: 0 }}>
         <Button
           onClick={onClose}
           variant="contained"
+          fullWidth={isMobile}
           sx={{
             backgroundColor: colors.primary.main,
             '&:hover': {
@@ -476,6 +506,8 @@ export function ShareDialog({ isOpen, file, onClose, onShareComplete }: ShareDia
             },
             textTransform: 'none',
             boxShadow: colors.shadow.card,
+            fontSize: { xs: '0.875rem', sm: '1rem' },
+            py: { xs: 1, sm: 1.25 },
           }}
         >
           Done

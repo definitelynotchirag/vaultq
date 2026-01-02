@@ -1,31 +1,33 @@
 'use client';
 
+import { useTheme as useCustomTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/lib/colors';
+import { formatFileSize } from '@/lib/utils';
+import { File } from '@/types';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  IconButton,
-  Box,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-} from '@mui/material';
-import {
-  Close,
-  Person,
   CalendarToday,
-  Storage,
+  Close,
   Lock,
   LockOpen,
-  Share,
+  Person,
+  Share
 } from '@mui/icons-material';
-import { File } from '@/types';
-import { formatFileSize } from '@/lib/utils';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  Typography,
+  useMediaQuery,
+  useTheme
+} from '@mui/material';
 
 interface FileInfoDialogProps {
   isOpen: boolean;
@@ -34,6 +36,11 @@ interface FileInfoDialogProps {
 }
 
 export function FileInfoDialog({ isOpen, file, onClose }: FileInfoDialogProps) {
+  const { mode } = useCustomTheme();
+  const colors = getColors(mode);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
   if (!isOpen || !file) return null;
 
   const formatDate = (dateString: string) => {
@@ -72,6 +79,7 @@ export function FileInfoDialog({ isOpen, file, onClose }: FileInfoDialogProps) {
           maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
+          backgroundColor: colors.background.darkBackground,
         },
       }}
     >
@@ -80,122 +88,123 @@ export function FileInfoDialog({ isOpen, file, onClose }: FileInfoDialogProps) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          pb: 1.5,
-          // borderBottom: '1px solid #e5e5e5',
+          pb: { xs: 1, sm: 1.5 },
+          px: { xs: 2, sm: 3 },
+          pt: { xs: 2, sm: 3 },
           flexShrink: 0,
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 400, color: '#202124' }}>
+        <Typography variant="h6" sx={{ fontWeight: 400, color: colors.text.primary, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
           File information
         </Typography>
         <IconButton
           onClick={onClose}
           size="small"
           sx={{
-            color: '#5f6368',
-            '&:hover': { backgroundColor: '#f1f3f4' },
+            color: colors.text.secondary,
+            '&:hover': { backgroundColor: colors.background.hover },
           }}
         >
           <Close />
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ flex: 1, overflowY: 'auto', pt: 3 }}>
-        <Box sx={{ mb: 3 }}>
+      <DialogContent sx={{ flex: 1, overflowY: 'auto', pt: { xs: 2, sm: 3 }, px: { xs: 2, sm: 3 } }}>
+        <Box sx={{ mb: { xs: 2, sm: 3 } }}>
           <Typography
             variant="caption"
             sx={{
-              fontSize: '0.6875rem',
+              fontSize: { xs: '0.625rem', sm: '0.6875rem' },
               fontWeight: 500,
-              color: '#5f6368',
+              color: colors.text.secondary,
               textTransform: 'uppercase',
               letterSpacing: '0.5px',
               display: 'block',
-              mb: 1.5,
+              mb: { xs: 1, sm: 1.5 },
             }}
           >
             General
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Typography variant="body2" sx={{ color: '#5f6368', minWidth: 120 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1, sm: 1.5 } }}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 0.5, sm: 2 } }}>
+              <Typography variant="body2" sx={{ color: colors.text.secondary, minWidth: { xs: 'auto', sm: 120 }, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
                 Name
               </Typography>
-              <Typography variant="body2" sx={{ color: '#202124', wordBreak: 'break-word', flex: 1 }}>
+              <Typography variant="body2" sx={{ color: colors.text.primary, wordBreak: 'break-word', flex: 1, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
                 {file.originalName}
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Typography variant="body2" sx={{ color: '#5f6368', minWidth: 120 }}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 0.5, sm: 2 } }}>
+              <Typography variant="body2" sx={{ color: colors.text.secondary, minWidth: { xs: 'auto', sm: 120 }, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
                 Type
               </Typography>
-              <Typography variant="body2" sx={{ color: '#202124' }}>
+              <Typography variant="body2" sx={{ color: colors.text.primary, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
                 {getFileType(file.originalName)}
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Typography variant="body2" sx={{ color: '#5f6368', minWidth: 120 }}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 0.5, sm: 2 } }}>
+              <Typography variant="body2" sx={{ color: colors.text.secondary, minWidth: { xs: 'auto', sm: 120 }, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
                 Size
               </Typography>
-              <Typography variant="body2" sx={{ color: '#202124' }}>
+              <Typography variant="body2" sx={{ color: colors.text.primary, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
                 {formatFileSize(file.size)}
               </Typography>
             </Box>
           </Box>
         </Box>
 
-        <Divider sx={{ my: 3 }} />
+        <Divider sx={{ my: { xs: 2, sm: 3 }, borderColor: colors.border.default }} />
 
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: { xs: 2, sm: 3 } }}>
           <Typography
             variant="caption"
             sx={{
-              fontSize: '0.6875rem',
+              fontSize: { xs: '0.625rem', sm: '0.6875rem' },
               fontWeight: 500,
-              color: '#5f6368',
+              color: colors.text.secondary,
               textTransform: 'uppercase',
               letterSpacing: '0.5px',
               display: 'block',
-              mb: 1.5,
+              mb: { xs: 1, sm: 1.5 },
             }}
           >
             Details
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Person sx={{ color: '#5f6368', mt: 0.5 }} />
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1, sm: 1.5 } }}>
+            <Box sx={{ display: 'flex', gap: { xs: 1, sm: 2 } }}>
+              <Person sx={{ color: colors.text.secondary, mt: 0.5, fontSize: { xs: 18, sm: 20 } }} />
               <Box sx={{ flex: 1 }}>
-                <Typography variant="caption" sx={{ color: '#5f6368', display: 'block', mb: 0.5 }}>
+                <Typography variant="caption" sx={{ color: colors.text.secondary, display: 'block', mb: 0.5, fontSize: { xs: '0.6875rem', sm: '0.75rem' } }}>
                   Owner
                 </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 500, color: '#202124' }}>
+                <Typography variant="body2" sx={{ fontWeight: 500, color: colors.text.primary, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
                   {ownerName}
                 </Typography>
                 {ownerEmail && (
-                  <Typography variant="caption" sx={{ color: '#5f6368' }}>
+                  <Typography variant="caption" sx={{ color: colors.text.secondary, fontSize: { xs: '0.6875rem', sm: '0.75rem' } }}>
                     {ownerEmail}
                   </Typography>
                 )}
               </Box>
             </Box>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <CalendarToday sx={{ color: '#5f6368', mt: 0.5 }} />
+            <Box sx={{ display: 'flex', gap: { xs: 1, sm: 2 } }}>
+              <CalendarToday sx={{ color: colors.text.secondary, mt: 0.5, fontSize: { xs: 18, sm: 20 } }} />
               <Box sx={{ flex: 1 }}>
-                <Typography variant="caption" sx={{ color: '#5f6368', display: 'block', mb: 0.5 }}>
+                <Typography variant="caption" sx={{ color: colors.text.secondary, display: 'block', mb: 0.5, fontSize: { xs: '0.6875rem', sm: '0.75rem' } }}>
                   Created
                 </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 500, color: '#202124' }}>
+                <Typography variant="body2" sx={{ fontWeight: 500, color: colors.text.primary, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
                   {formatDate(file.createdAt)}
                 </Typography>
               </Box>
             </Box>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <CalendarToday sx={{ color: '#5f6368', mt: 0.5 }} />
+            <Box sx={{ display: 'flex', gap: { xs: 1, sm: 2 } }}>
+              <CalendarToday sx={{ color: colors.text.secondary, mt: 0.5, fontSize: { xs: 18, sm: 20 } }} />
               <Box sx={{ flex: 1 }}>
-                <Typography variant="caption" sx={{ color: '#5f6368', display: 'block', mb: 0.5 }}>
+                <Typography variant="caption" sx={{ color: colors.text.secondary, display: 'block', mb: 0.5, fontSize: { xs: '0.6875rem', sm: '0.75rem' } }}>
                   Modified
                 </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 500, color: '#202124' }}>
+                <Typography variant="body2" sx={{ fontWeight: 500, color: colors.text.primary, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
                   {formatDate(file.updatedAt)}
                 </Typography>
               </Box>
@@ -203,44 +212,44 @@ export function FileInfoDialog({ isOpen, file, onClose }: FileInfoDialogProps) {
           </Box>
         </Box>
 
-        <Divider sx={{ my: 3 }} />
+        <Divider sx={{ my: { xs: 2, sm: 3 }, borderColor: colors.border.default }} />
 
         <Box>
           <Typography
             variant="caption"
             sx={{
-              fontSize: '0.6875rem',
+              fontSize: { xs: '0.625rem', sm: '0.6875rem' },
               fontWeight: 500,
-              color: '#5f6368',
+              color: colors.text.secondary,
               textTransform: 'uppercase',
               letterSpacing: '0.5px',
               display: 'block',
-              mb: 1.5,
+              mb: { xs: 1, sm: 1.5 },
             }}
           >
             Sharing
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 }, mb: { xs: 1.5, sm: 2 } }}>
             {file.public ? (
               <>
-                <LockOpen sx={{ color: '#0f9d58' }} />
+                <LockOpen sx={{ color: colors.success.main, fontSize: { xs: 18, sm: 20 } }} />
                 <Box sx={{ flex: 1 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 500, color: '#202124' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 500, color: colors.text.primary, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
                     Anyone with the link can view
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#5f6368' }}>
+                  <Typography variant="caption" sx={{ color: colors.text.secondary, fontSize: { xs: '0.6875rem', sm: '0.75rem' } }}>
                     Public
                   </Typography>
                 </Box>
               </>
             ) : (
               <>
-                <Lock sx={{ color: '#5f6368' }} />
+                <Lock sx={{ color: colors.text.secondary, fontSize: { xs: 18, sm: 20 } }} />
                 <Box sx={{ flex: 1 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 500, color: '#202124' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 500, color: colors.text.primary, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
                     Private
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#5f6368' }}>
+                  <Typography variant="caption" sx={{ color: colors.text.secondary, fontSize: { xs: '0.6875rem', sm: '0.75rem' } }}>
                     Only people with access can view
                   </Typography>
                 </Box>
@@ -249,10 +258,10 @@ export function FileInfoDialog({ isOpen, file, onClose }: FileInfoDialogProps) {
           </Box>
 
           {file.permissions && file.permissions.length > 0 && (
-            <Box sx={{ mt: 2 }}>
+            <Box sx={{ mt: { xs: 1.5, sm: 2 } }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Share sx={{ fontSize: 14, color: '#5f6368' }} />
-                <Typography variant="caption" sx={{ fontWeight: 500, color: '#5f6368' }}>
+                <Share sx={{ fontSize: { xs: 12, sm: 14 }, color: colors.text.secondary }} />
+                <Typography variant="caption" sx={{ fontWeight: 500, color: colors.text.secondary, fontSize: { xs: '0.6875rem', sm: '0.75rem' } }}>
                   Shared with ({file.permissions.length})
                 </Typography>
               </Box>
@@ -268,9 +277,11 @@ export function FileInfoDialog({ isOpen, file, onClose }: FileInfoDialogProps) {
                     <ListItem
                       key={index}
                       sx={{
-                        bgcolor: '#f8f9fa',
+                        bgcolor: colors.background.hover,
                         borderRadius: 2,
                         mb: 1,
+                        px: { xs: 1.5, sm: 2 },
+                        py: { xs: 1, sm: 1.5 },
                       }}
                     >
                       <ListItemText
@@ -279,16 +290,18 @@ export function FileInfoDialog({ isOpen, file, onClose }: FileInfoDialogProps) {
                         primaryTypographyProps={{
                           sx: {
                             fontWeight: 500,
-                            color: '#202124',
+                            color: colors.text.primary,
+                            fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                           },
                         }}
                         secondaryTypographyProps={{
                           sx: {
-                            color: '#5f6368',
+                            color: colors.text.secondary,
+                            fontSize: { xs: '0.6875rem', sm: '0.75rem' },
                           },
                         }}
                       />
-                      <Typography variant="caption" sx={{ color: '#5f6368' }}>
+                      <Typography variant="caption" sx={{ color: colors.text.secondary, fontSize: { xs: '0.6875rem', sm: '0.75rem' } }}>
                         {perm.level === 'read' ? 'Can view' : 'Can edit'}
                       </Typography>
                     </ListItem>
@@ -300,17 +313,20 @@ export function FileInfoDialog({ isOpen, file, onClose }: FileInfoDialogProps) {
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, pb: 2.5, pt: 2, borderTop: '1px solid #e5e5e5', flexShrink: 0 }}>
+      <DialogActions sx={{ px: { xs: 2, sm: 3 }, pb: { xs: 2, sm: 2.5 }, pt: { xs: 1.5, sm: 2 }, borderTop: `1px solid ${colors.border.default}`, flexShrink: 0 }}>
         <Button
           onClick={onClose}
           variant="contained"
+          fullWidth={isMobile}
           sx={{
-            backgroundColor: '#1a73e8',
+            backgroundColor: colors.primary.main,
             '&:hover': {
-              backgroundColor: '#1765cc',
+              backgroundColor: colors.primary.hover,
             },
             textTransform: 'none',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.3)',
+            boxShadow: colors.shadow.card,
+            fontSize: { xs: '0.875rem', sm: '1rem' },
+            py: { xs: 1, sm: 1.25 },
           }}
         >
           Close

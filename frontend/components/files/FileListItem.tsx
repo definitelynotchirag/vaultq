@@ -1,7 +1,8 @@
 'use client';
 
 import { useAuth } from '@/hooks/useAuth';
-import { colors } from '@/lib/colors';
+import { useTheme as useCustomTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/lib/colors';
 import { formatDate, formatFileSize } from '@/lib/utils';
 import { File as FileType } from '@/types';
 import {
@@ -25,7 +26,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 interface FileListItemProps {
   file: FileType;
@@ -45,11 +46,17 @@ export function FileListItem({
   const [hovered, setHovered] = useState(false);
   const { user } = useAuth();
   const theme = useTheme();
+  const { mode } = useCustomTheme();
+  const colors = getColors(mode);
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isStarred = user && file.starredBy?.includes(user._id);
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const longPressTriggered = useRef(false);
 
   const handleClick = (e: React.MouseEvent) => {
-    if (e.detail === 2 && onDoubleClick) {
+    if (isMobile && onDoubleClick) {
+      onDoubleClick(file);
+    } else if (e.detail === 2 && onDoubleClick) {
       onDoubleClick(file);
     } else if (onClick) {
       onClick(file);
@@ -68,6 +75,46 @@ export function FileListItem({
     if (onStar) {
       onStar(file);
     }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!isMobile || !onMenuClick) return;
+    
+    longPressTriggered.current = false;
+    longPressTimer.current = setTimeout(() => {
+      longPressTriggered.current = true;
+      const touch = e.touches[0];
+      const syntheticEvent = {
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+        preventDefault: () => {},
+        stopPropagation: () => {},
+      } as React.MouseEvent;
+      
+      if (onMenuClick) {
+        onMenuClick(file, syntheticEvent);
+      }
+    }, 500);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    
+    if (longPressTriggered.current) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
+  const handleTouchCancel = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    longPressTriggered.current = false;
   };
 
   const getFileIcon = () => {
@@ -111,6 +158,9 @@ export function FileListItem({
       onMouseLeave={() => setHovered(false)}
       onClick={handleClick}
       onDoubleClick={() => onDoubleClick && onDoubleClick(file)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchCancel}
       sx={{
         cursor: 'pointer',
         '&:hover': {

@@ -1,7 +1,8 @@
 'use client';
 
 import { api } from '@/lib/api';
-import { colors } from '@/lib/colors';
+import { useTheme as useCustomTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/lib/colors';
 import { triggerDownload } from '@/lib/utils';
 import { File } from '@/types';
 import {
@@ -38,6 +39,8 @@ export function FileViewer({ isOpen, file, onClose, isSharedView = false }: File
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const theme = useTheme();
+  const { mode } = useCustomTheme();
+  const colors = getColors(mode);
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {

@@ -2,6 +2,8 @@
 
 import { Box, Button, Typography, CircularProgress, Container } from '@mui/material';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme as useCustomTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/lib/colors';
 import { api } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -9,6 +11,8 @@ import { useEffect } from 'react';
 export default function SignInPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
+  const { mode } = useCustomTheme();
+  const colors = getColors(mode);
 
   useEffect(() => {
     if (!loading && user) {
@@ -28,12 +32,12 @@ export default function SignInPage() {
           alignItems: 'center',
           justifyContent: 'center',
           minHeight: '100vh',
-          backgroundColor: '#ffffff',
+          backgroundColor: colors.background.default,
         }}
       >
         <Box sx={{ textAlign: 'center' }}>
-          <CircularProgress sx={{ color: '#1a73e8', mb: 2 }} />
-          <Typography variant="body2" sx={{ color: '#5f6368' }}>
+          <CircularProgress sx={{ color: colors.primary.main, mb: 2 }} />
+          <Typography variant="body2" sx={{ color: colors.text.secondary }}>
             Loading...
           </Typography>
         </Box>
@@ -52,32 +56,32 @@ export default function SignInPage() {
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: '100vh',
-        backgroundColor: '#ffffff',
+        backgroundColor: colors.background.default,
       }}
     >
       <Container maxWidth="sm" sx={{ px: { xs: 3, sm: 4 } }}>
         <Box sx={{ textAlign: 'center', mb: 4 }}>
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
             <svg width="80" height="80" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 12C8 10.8954 8.89543 10 10 10H16.1716C16.702 10 17.2107 10.2107 17.5858 10.5858L21.4142 14.4142C21.7893 14.7893 22.298 15 22.8284 15H30C31.1046 15 32 15.8954 32 17V28C32 29.1046 31.1046 30 30 30H10C8.89543 30 8 29.1046 8 28V12Z" fill="#4285F4"/>
-              <path d="M20 10V15C20 16.1046 20.8954 17 22 17H27L20 10Z" fill="#AECBFA"/>
+              <path d="M8 12C8 10.8954 8.89543 10 10 10H16.1716C16.702 10 17.2107 10.2107 17.5858 10.5858L21.4142 14.4142C21.7893 14.7893 22.298 15 22.8284 15H30C31.1046 15 32 15.8954 32 17V28C32 29.1046 31.1046 30 30 30H10C8.89543 30 8 29.1046 8 28V12Z" fill={colors.primary.light}/>
+              <path d="M20 10V15C20 16.1046 20.8954 17 22 17H27L20 10Z" fill={mode === 'dark' ? colors.primary.main : '#AECBFA'}/>
             </svg>
           </Box>
-          <Typography variant="h4" sx={{ fontWeight: 400, color: '#202124', mb: 1 }}>
+          <Typography variant="h4" sx={{ fontWeight: 400, color: colors.text.primary, mb: 1 }}>
             Welcome to VaultQ
           </Typography>
-          <Typography variant="body1" sx={{ color: '#5f6368' }}>
+          <Typography variant="body1" sx={{ color: colors.text.secondary }}>
             Your secure cloud storage solution
           </Typography>
         </Box>
 
         <Box
           sx={{
-            backgroundColor: '#ffffff',
-            border: '1px solid #dadce0',
+            backgroundColor: colors.background.paper,
+            border: `1px solid ${colors.border.light}`,
             borderRadius: 2,
             p: 3,
-            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+            boxShadow: colors.shadow.light,
           }}
         >
           <Button
@@ -86,19 +90,19 @@ export default function SignInPage() {
             variant="outlined"
             sx={{
               height: 48,
-              borderColor: '#dadce0',
-              color: '#202124',
-              backgroundColor: '#ffffff',
+              borderColor: colors.border.light,
+              color: colors.text.primary,
+              backgroundColor: colors.background.paper,
               textTransform: 'none',
               fontSize: '0.875rem',
               fontWeight: 500,
               '&:hover': {
-                borderColor: '#dadce0',
-                backgroundColor: '#f8f9fa',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                borderColor: colors.border.light,
+                backgroundColor: colors.background.hover,
+                boxShadow: colors.shadow.light,
               },
               '&:focus': {
-                outline: '2px solid #1a73e8',
+                outline: `2px solid ${colors.primary.main}`,
                 outlineOffset: 2,
               },
             }}
@@ -128,7 +132,7 @@ export default function SignInPage() {
         </Box>
 
         <Box sx={{ mt: 3, textAlign: 'center' }}>
-          <Typography variant="caption" sx={{ color: '#5f6368', fontSize: '0.75rem' }}>
+          <Typography variant="caption" sx={{ color: colors.text.secondary, fontSize: '0.75rem' }}>
             By signing in, you agree to our Terms of Service and Privacy Policy
           </Typography>
         </Box>

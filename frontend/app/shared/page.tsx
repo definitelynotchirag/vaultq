@@ -12,15 +12,18 @@ import { FileGrid } from '@/components/layout/FileGrid';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme as useCustomTheme } from '@/contexts/ThemeContext';
 import { useFiles } from '@/hooks/useFiles';
 import { api } from '@/lib/api';
-import { colors } from '@/lib/colors';
+import { getColors } from '@/lib/colors';
 import { File } from '@/types';
 import { Box, Container, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 export default function SharedPage() {
+  const { mode } = useCustomTheme();
+  const colors = getColors(mode);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [showUploadDialog, setShowUploadDialog] = useState(false);
@@ -134,9 +137,10 @@ export default function SharedPage() {
                 flex: 1,
                 overflowY: 'auto',
                 width: '100%',
+                backgroundColor: colors.background.default,
               }}
             >
-              <Container maxWidth={false} sx={{ pl: { xs: 2, sm: 1, md: 0.5 }, pr: { xs: 2, sm: 3, md: 4 }, py: { xs: 3, sm: 4, md: 4 } }}>
+              <Container maxWidth={false} sx={{ pl: { xs: 2, sm: 1, md: 0.5 }, pr: { xs: 2, sm: 3, md: 4 }, py: { xs: 3, sm: 4, md: 4 }, backgroundColor: colors.background.default }}>
                 <Box sx={{ mb: { xs: 2, sm: 3, md: 3 } }}>
                   <Typography
                     variant="h5"

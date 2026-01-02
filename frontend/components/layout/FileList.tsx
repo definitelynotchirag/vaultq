@@ -1,7 +1,8 @@
 'use client';
 
 import { FileListItem } from '@/components/files/FileListItem';
-import { colors } from '@/lib/colors';
+import { useTheme as useCustomTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/lib/colors';
 import { File } from '@/types';
 import {
     Box,
@@ -36,6 +37,8 @@ export function FileList({
   loading = false,
 }: FileListProps) {
   const theme = useTheme();
+  const { mode } = useCustomTheme();
+  const colors = getColors(mode);
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   if (loading) {
@@ -169,6 +172,8 @@ export function FileList({
     </TableContainer>
   );
 }
+
+
 
 
 

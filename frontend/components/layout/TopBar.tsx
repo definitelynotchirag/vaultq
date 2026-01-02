@@ -1,9 +1,10 @@
 'use client';
 
 import { useSidebar } from '@/contexts/SidebarContext';
+import { useTheme as useCustomTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/hooks/useAuth';
-import { colors } from '@/lib/colors';
-import { Close, Menu as MenuIcon, Search as SearchIcon } from '@mui/icons-material';
+import { getColors } from '@/lib/colors';
+import { Close, DarkMode, LightMode, Menu as MenuIcon, Search as SearchIcon } from '@mui/icons-material';
 import { AppBar, Avatar, Box, IconButton, InputBase, Menu, MenuItem, Toolbar, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -15,7 +16,8 @@ interface TopBarProps {
 
 export function TopBar({ onSearch, searchQuery }: TopBarProps) {
   const { user, logout } = useAuth();
-  const { toggleCollapse } = useSidebar();
+  const { toggleCollapse, toggleMobile } = useSidebar();
+  const { mode, toggleMode } = useCustomTheme();
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -24,6 +26,7 @@ export function TopBar({ onSearch, searchQuery }: TopBarProps) {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const colors = getColors(mode);
 
   useEffect(() => {
     setSearchValue(searchQuery);
@@ -53,15 +56,30 @@ export function TopBar({ onSearch, searchQuery }: TopBarProps) {
     <AppBar
       position="fixed"
       sx={{
-        zIndex: (theme) => theme.zIndex.drawer + 1,
-        backgroundColor: colors.background.default,
+        zIndex: (theme) => theme.zIndex.drawer + 3,
+        backgroundColor: mode === 'dark' ? '#151515' : colors.background.default,
         color: colors.text.primary,
         boxShadow: colors.shadow.light,
+        borderBottom: mode === 'dark' ? `1px solid ${colors.border.default}` : 'none',
       }}
     >
-      <Toolbar sx={{ px: { xs: 1.5, sm: 2, md: 3 }, gap: { xs: 1, sm: 1.5, md: 3 } }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 1, md: 1.25 }, minWidth: { md: 200 } }}>
-          {!isMobile && (
+      <Toolbar sx={{ px: { xs: 1.5, sm: 2, md: 3 }, gap: { xs: 1, sm: 1.5, md: 3 }, justifyContent: 'space-between' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 1, md: 1.25 }, minWidth: { md: 200 }, flex: { xs: 1, md: 'none' } }}>
+          {isMobile ? (
+            <IconButton
+              onClick={toggleMobile}
+              sx={{
+                width: { xs: 36, sm: 40 },
+                height: { xs: 36, sm: 40 },
+                color: colors.text.secondary,
+                '&:hover': {
+                  backgroundColor: colors.background.hover,
+                },
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+          ) : (
             <IconButton
               onClick={toggleCollapse}
               sx={{
@@ -83,7 +101,7 @@ export function TopBar({ onSearch, searchQuery }: TopBarProps) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              ml: { xs: 5, md: 0 },
+              ml: { xs: 0, md: 0 },
             }}
           >
             <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -183,7 +201,21 @@ export function TopBar({ onSearch, searchQuery }: TopBarProps) {
           </Box>
         </Box>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1, md: 1.5 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1, md: 1.5 }, ml: { xs: 'auto', md: 0 } }}>
+          <IconButton
+            onClick={toggleMode}
+            sx={{
+              width: { xs: 32, sm: 36, md: 40 },
+              height: { xs: 32, sm: 36, md: 40 },
+              color: colors.text.secondary,
+              '&:hover': {
+                backgroundColor: colors.background.hover,
+              },
+            }}
+            aria-label="Toggle dark mode"
+          >
+            {mode === 'dark' ? <LightMode /> : <DarkMode />}
+          </IconButton>
           <Box ref={userMenuRef} sx={{ position: 'relative', ml: { xs: 0.5, sm: 1, md: 1.5 } }}>
             <IconButton
               onClick={(e) => {

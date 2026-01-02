@@ -1,4 +1,5 @@
-:root {
+:root,
+[data-theme='light'] {
   --color-background-default: #ffffff;
   --color-background-paper: #ffffff;
   --color-background-hover: #f1f3f4;
@@ -60,6 +61,68 @@
   --overlay-black-04: rgba(0, 0, 0, 0.04);
 }
 
+[data-theme='dark'] {
+  --color-background-default: #1a1a1a;
+  --color-background-paper: #1a1a1a;
+  --color-background-hover: #1f1f1f;
+  --color-background-selected: #252525;
+  --color-background-light: #1d1d1d;
+  --color-background-dark: #1a1a1a;
+  --color-background-dark-secondary: #1f1f1f;
+  --color-background-dark-tertiary: #252525;
+  
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #b0b0b0;
+  --color-text-disabled: #80868b;
+  --color-text-white: #ffffff;
+  
+  --color-border-default: #2f2f2f;
+  --color-border-light: #333333;
+  --color-border-dark: #2f2f2f;
+  
+  --color-primary-main: #4285f4;
+  --color-primary-light: #5a95f5;
+  --color-primary-dark: #1a73e8;
+  --color-primary-hover: #5a95f5;
+  --color-primary-contrast: #ffffff;
+  
+  --color-secondary-main: #80868b;
+  --color-secondary-light: #9aa0a6;
+  --color-secondary-dark: #5f6368;
+  --color-secondary-contrast: #ffffff;
+  
+  --color-error-main: #ea4335;
+  --color-error-light: rgba(234, 67, 53, 0.2);
+  
+  --color-warning-main: #f4b400;
+  --color-warning-light: rgba(244, 180, 0, 0.2);
+  --color-warning-lighter: rgba(244, 180, 0, 0.3);
+  
+  --color-success-main: #0f9d58;
+  
+  --color-info-main: #4285f4;
+  
+  --color-filetype-pdf: #ea4335;
+  --color-filetype-doc: #4285f4;
+  --color-filetype-sheet: #0f9d58;
+  --color-filetype-slide: #f4b400;
+  --color-filetype-image: #4285f4;
+  --color-filetype-video: #ea4335;
+  --color-filetype-folder: #80868b;
+  --color-filetype-default: #80868b;
+  
+  --shadow-light: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-medium: 0 1px 3px rgba(0, 0, 0, 0.5), 0 4px 8px 3px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 3px 1px rgba(0, 0, 0, 0.3);
+  --shadow-menu: 0 2px 6px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-heavy: 0 8px 16px rgba(0, 0, 0, 0.6);
+  
+  --overlay-white-10: rgba(255, 255, 255, 0.1);
+  --overlay-white-05: rgba(255, 255, 255, 0.05);
+  --overlay-white-02: rgba(255, 255, 255, 0.2);
+  --overlay-black-04: rgba(0, 0, 0, 0.1);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -69,6 +132,12 @@
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-background-default);
+  color: var(--color-text-primary);
+}
+
+html {
+  background-color: var(--color-background-default);
 }
 
 .custom-toast {

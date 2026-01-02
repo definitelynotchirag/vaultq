@@ -1,17 +1,16 @@
 'use client';
 
 import { useSidebar } from '@/contexts/SidebarContext';
+import { useTheme as useCustomTheme } from '@/contexts/ThemeContext';
 import { useStorage } from '@/hooks/useStorage';
-import { colors } from '@/lib/colors';
+import { getColors } from '@/lib/colors';
 import {
   AccessTime,
   Add,
-  Close,
   Delete,
   Home,
-  Menu as MenuIcon,
   People,
-  Star,
+  Star
 } from '@mui/icons-material';
 import {
   Box,
@@ -30,7 +29,7 @@ import {
 } from '@mui/material';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 interface SidebarProps {
   onNewClick: () => void;
@@ -42,9 +41,10 @@ const collapsedWidth = 72;
 export function Sidebar({ onNewClick }: SidebarProps) {
   const pathname = usePathname();
   const theme = useTheme();
+  const { mode } = useCustomTheme();
+  const colors = getColors(mode);
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const { isCollapsed } = useSidebar();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const { isCollapsed, mobileOpen, setMobileOpen } = useSidebar();
   const { storage, formatBytes, loading } = useStorage();
 
   const navItems = [
@@ -103,6 +103,7 @@ export function Sidebar({ onNewClick }: SidebarProps) {
               '&:active': {
                 backgroundColor: colors.background.hover,
               },
+              textColor: colors.text.white,
             }}
           >
             New
@@ -293,25 +294,6 @@ export function Sidebar({ onNewClick }: SidebarProps) {
 
   return (
     <>
-      {isMobile && (
-        <IconButton
-          onClick={handleDrawerToggle}
-          sx={{
-            position: 'fixed',
-            top: 18,
-            left: 16,
-            zIndex: (theme) => theme.zIndex.drawer + 2,
-            backgroundColor: colors.background.default,
-            border: `1px solid ${colors.border.default}`,
-            boxShadow: colors.shadow.light,
-            '&:hover': {
-              backgroundColor: colors.background.hover,
-            },
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-      )}
       <Drawer
         variant={isMobile ? 'temporary' : 'persistent'}
         open={isMobile ? mobileOpen : true}
@@ -323,36 +305,23 @@ export function Sidebar({ onNewClick }: SidebarProps) {
             width: isCollapsed && !isMobile ? collapsedWidth : drawerWidth,
             boxSizing: 'border-box',
             borderRight: `1px solid ${colors.border.default}`,
-            top: 64,
-            height: 'calc(100vh - 64px)',
+            backgroundColor: isMobile 
+              ? (mode === 'dark' ? '#151515' : colors.background.default)
+              : colors.background.default,
+            top: isMobile ? 56 : 64,
+            height: isMobile ? 'calc(100vh - 56px)' : 'calc(100vh - 64px)',
             transition: 'width 300ms ease',
             overflow: 'hidden',
+            zIndex: (theme) => theme.zIndex.drawer + 2,
+          },
+          '& .MuiBackdrop-root': {
+            backgroundColor: mode === 'dark' ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.05)',
+            zIndex: (theme) => theme.zIndex.drawer + 1,
           },
         }}
       >
-        {isMobile && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
-            <IconButton onClick={handleDrawerToggle} size="small">
-              <Close />
-            </IconButton>
-          </Box>
-        )}
         {drawerContent}
       </Drawer>
-      {isMobile && mobileOpen && (
-        <Box
-          onClick={handleDrawerToggle}
-          sx={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            zIndex: (theme) => theme.zIndex.drawer + 1,
-          }}
-        />
-      )}
     </>
   );
 }

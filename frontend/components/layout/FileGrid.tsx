@@ -1,7 +1,8 @@
 'use client';
 
 import { FileCard } from '@/components/files/FileCard';
-import { colors } from '@/lib/colors';
+import { useTheme as useCustomTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/lib/colors';
 import { File } from '@/types';
 import { Box, Grid, Skeleton, Typography, useMediaQuery, useTheme } from '@mui/material';
 
@@ -23,6 +24,8 @@ export function FileGrid({
   loading = false,
 }: FileGridProps) {
   const theme = useTheme();
+  const { mode } = useCustomTheme();
+  const colors = getColors(mode);
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
