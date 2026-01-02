@@ -26,6 +26,11 @@ const userSchema = new Schema<IUser>(
       default: 100 * 1024 * 1024,
       min: 0,
     },
+    storageUsed: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   {
     timestamps: true,

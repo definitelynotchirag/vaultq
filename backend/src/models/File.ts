@@ -1,21 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { IFile, IPermission } from '../types';
-
-const permissionSchema = new Schema<IPermission>(
-  {
-    userId: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    level: {
-      type: String,
-      enum: ['read', 'write'],
-      required: true,
-    },
-  },
-  { _id: false }
-);
+import { IFile } from '../types';
 
 const fileSchema = new Schema<IFile>(
   {
@@ -44,29 +28,32 @@ const fileSchema = new Schema<IFile>(
       required: true,
       min: 0,
     },
+    mimeType: {
+      type: String,
+      required: true,
+    },
     public: {
       type: Boolean,
       default: false,
       index: true,
     },
-    permissions: {
-      type: [permissionSchema],
-      default: [],
-    },
-    starredBy: {
-      type: [Schema.Types.ObjectId],
-      ref: 'User',
-      default: [],
-      index: true,
-    },
     deleted: {
       type: Boolean,
       default: false,
-      index: true,
     },
     deletedAt: {
       type: Date,
       default: null,
+    },
+    starCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    shareCount: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
   },
   {
@@ -75,7 +62,15 @@ const fileSchema = new Schema<IFile>(
 );
 
 fileSchema.index({ originalName: 'text' });
-fileSchema.index({ 'permissions.userId': 1 });
+fileSchema.index({ owner: 1, deleted: 1 });
+fileSchema.index({ owner: 1, createdAt: -1 });
+fileSchema.index(
+  { deletedAt: 1 },
+  {
+    expireAfterSeconds: 30 * 24 * 60 * 60,
+    partialFilterExpression: { deleted: true },
+  }
+);
 
 export const File = mongoose.model<IFile>('File', fileSchema);
 

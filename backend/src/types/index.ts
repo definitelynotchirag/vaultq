@@ -7,13 +7,26 @@ export interface IUser extends Document<ObjectId, any, any> {
   email: string;
   name: string;
   storageLimit: number;
+  storageUsed: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface IPermission {
+export interface IPermission extends Document<ObjectId, any, any> {
+  _id: ObjectId;
+  fileId: ObjectId;
   userId: ObjectId;
   level: 'read' | 'write';
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IStar extends Document<ObjectId, any, any> {
+  _id: ObjectId;
+  fileId: ObjectId;
+  userId: ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface IFile extends Document<ObjectId, any, any> {
@@ -23,11 +36,12 @@ export interface IFile extends Document<ObjectId, any, any> {
   storageName: string;
   url: string;
   size: number;
+  mimeType: string;
   public: boolean;
-  permissions: IPermission[];
-  starredBy: ObjectId[];
   deleted: boolean;
   deletedAt: Date | null;
+  starCount: number;
+  shareCount: number;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -4,11 +4,13 @@ import { requireAuth } from '../middleware/auth';
 import { createError } from '../middleware/errorHandler';
 import { validateFileSize } from '../middleware/fileValidation';
 import { File } from '../models/File';
+import { Permission } from '../models/Permission';
+import { Star } from '../models/Star';
 import { User } from '../models/User';
 import { checkFileAccess, getAccessibleFiles, getStarredFiles, getTrashFiles } from '../services/fileService';
-import { deleteFile as deleteS3File, generateDownloadUrl, generateUploadUrl, generateViewUrl } from '../services/s3Service';
+import { deleteFile as deleteS3File, generateDownloadUrl, generateUploadUrl, generateViewUrl, getContentType } from '../services/s3Service';
 import { IUser } from '../types';
-import { calculateUserStorageUsed } from '../utils/helpers';
+import { calculateUserStorageUsed, updateStorageUsed } from '../utils/helpers';
 
 const router = Router();
 
@@ -76,15 +78,21 @@ router.post(
         throw createError('Authentication required', 401);
       }
       const user = req.user as IUser;
+      const mimeType = getContentType(originalName);
+      
       const file = await File.create({
         owner: user._id,
         originalName,
         storageName,
         url,
         size,
+        mimeType,
         public: false,
-        permissions: [],
+        starCount: 0,
+        shareCount: 0,
       });
+
+      await updateStorageUsed(user._id, size);
 
       res.status(201).json({
         success: true,
@@ -94,6 +102,7 @@ router.post(
           storageName: file.storageName,
           url: file.url,
           size: file.size,
+          mimeType: file.mimeType,
           public: file.public,
           createdAt: file.createdAt,
         },
@@ -120,24 +129,23 @@ router.get(
 
       const populatedFiles = await Promise.all(
         files.map(async (file) => {
-          const populatedPermissions = await Promise.all(
-            file.permissions.map(async (perm: any) => {
-              const user = await User.findById(perm.userId).select('name email');
-              return {
-                userId: user ? { _id: user._id, name: user.name, email: user.email } : perm.userId,
-                level: perm.level,
-              };
-            })
-          );
+          const permissions = await Permission.find({ fileId: file._id }).populate('userId', 'name email');
+          const isStarred = await Star.exists({ fileId: file._id, userId: user._id });
 
           return {
             _id: file._id,
             originalName: file.originalName,
             size: file.size,
+            mimeType: file.mimeType,
             public: file.public,
             owner: file.owner,
-            permissions: populatedPermissions,
-            starredBy: file.starredBy,
+            permissions: permissions.map((p) => ({
+              userId: p.userId,
+              level: p.level,
+            })),
+            isStarred: !!isStarred,
+            starCount: file.starCount,
+            shareCount: file.shareCount,
             createdAt: file.createdAt,
             updatedAt: file.updatedAt,
           };
@@ -190,24 +198,23 @@ router.get(
 
       const populatedFiles = await Promise.all(
         files.map(async (file) => {
-          const populatedPermissions = await Promise.all(
-            file.permissions.map(async (perm: any) => {
-              const user = await User.findById(perm.userId).select('name email');
-              return {
-                userId: user ? { _id: user._id, name: user.name, email: user.email } : perm.userId,
-                level: perm.level,
-              };
-            })
-          );
+          const permissions = await Permission.find({ fileId: file._id }).populate('userId', 'name email');
+          const isStarred = await Star.exists({ fileId: file._id, userId: user._id });
 
           return {
             _id: file._id,
             originalName: file.originalName,
             size: file.size,
+            mimeType: file.mimeType,
             public: file.public,
             owner: file.owner,
-            permissions: populatedPermissions,
-            starredBy: file.starredBy,
+            permissions: permissions.map((p) => ({
+              userId: p.userId,
+              level: p.level,
+            })),
+            isStarred: !!isStarred,
+            starCount: file.starCount,
+            shareCount: file.shareCount,
             deleted: file.deleted,
             deletedAt: file.deletedAt,
             createdAt: file.createdAt,
@@ -239,24 +246,23 @@ router.get(
 
       const populatedFiles = await Promise.all(
         files.map(async (file) => {
-          const populatedPermissions = await Promise.all(
-            file.permissions.map(async (perm: any) => {
-              const user = await User.findById(perm.userId).select('name email');
-              return {
-                userId: user ? { _id: user._id, name: user.name, email: user.email } : perm.userId,
-                level: perm.level,
-              };
-            })
-          );
+          const permissions = await Permission.find({ fileId: file._id }).populate('userId', 'name email');
+          const isStarred = await Star.exists({ fileId: file._id, userId: user._id });
 
           return {
             _id: file._id,
             originalName: file.originalName,
             size: file.size,
+            mimeType: file.mimeType,
             public: file.public,
             owner: file.owner,
-            permissions: populatedPermissions,
-            starredBy: file.starredBy,
+            permissions: permissions.map((p) => ({
+              userId: p.userId,
+              level: p.level,
+            })),
+            isStarred: !!isStarred,
+            starCount: file.starCount,
+            shareCount: file.shareCount,
             createdAt: file.createdAt,
             updatedAt: file.updatedAt,
           };
@@ -287,15 +293,8 @@ router.get(
       const user = req.user as IUser;
       const file = await checkFileAccess(id, user, 'read');
 
-      const populatedPermissions = await Promise.all(
-        file.permissions.map(async (perm: any) => {
-          const permUser = await User.findById(perm.userId).select('name email');
-          return {
-            userId: permUser ? { _id: permUser._id, name: permUser.name, email: permUser.email } : perm.userId,
-            level: perm.level,
-          };
-        })
-      );
+      const permissions = await Permission.find({ fileId: file._id }).populate('userId', 'name email');
+      const isStarred = await Star.exists({ fileId: file._id, userId: user._id });
 
       res.json({
         success: true,
@@ -303,10 +302,16 @@ router.get(
           _id: file._id,
           originalName: file.originalName,
           size: file.size,
+          mimeType: file.mimeType,
           public: file.public,
           owner: file.owner,
-          permissions: populatedPermissions,
-          starredBy: file.starredBy,
+          permissions: permissions.map((p) => ({
+            userId: p.userId,
+            level: p.level,
+          })),
+          isStarred: !!isStarred,
+          starCount: file.starCount,
+          shareCount: file.shareCount,
           createdAt: file.createdAt,
           updatedAt: file.updatedAt,
         },
@@ -380,6 +385,8 @@ router.delete(
       file.deletedAt = new Date();
       await file.save();
 
+      await updateStorageUsed(user._id, -file.size);
+
       res.json({
         success: true,
         message: 'File moved to trash successfully',
@@ -421,24 +428,35 @@ router.post(
         throw createError('User not found', 404);
       }
 
-      const existingPermissionIndex = file.permissions.findIndex(
-        (perm: { userId: any; level: string }) => perm.userId.toString() === userId
-      );
+      const existingPermission = await Permission.findOne({
+        fileId: file._id,
+        userId: targetUser._id,
+      });
 
-      if (existingPermissionIndex >= 0) {
-        file.permissions[existingPermissionIndex].level = level;
+      if (existingPermission) {
+        existingPermission.level = level;
+        await existingPermission.save();
       } else {
-        file.permissions.push({ userId: targetUser._id, level });
+        await Permission.create({
+          fileId: file._id,
+          userId: targetUser._id,
+          level,
+        });
+        file.shareCount += 1;
+        await file.save();
       }
 
-      await file.save();
+      const permissions = await Permission.find({ fileId: file._id }).populate('userId', 'name email');
 
       res.json({
         success: true,
         file: {
           _id: file._id,
           originalName: file.originalName,
-          permissions: file.permissions,
+          permissions: permissions.map((p) => ({
+            userId: p.userId,
+            level: p.level,
+          })),
         },
       });
     } catch (error: any) {
@@ -614,6 +632,8 @@ router.post(
       file.deletedAt = null;
       await file.save();
 
+      await updateStorageUsed(user._id, file.size);
+
       res.json({
         success: true,
         file: {
@@ -702,24 +722,35 @@ router.post(
         throw createError('Cannot share file with yourself', 400);
       }
 
-      const existingPermissionIndex = file.permissions.findIndex(
-        (perm: { userId: any; level: string }) => perm.userId.toString() === targetUser._id.toString()
-      );
+      const existingPermission = await Permission.findOne({
+        fileId: file._id,
+        userId: targetUser._id,
+      });
 
-      if (existingPermissionIndex >= 0) {
-        file.permissions[existingPermissionIndex].level = level;
+      if (existingPermission) {
+        existingPermission.level = level;
+        await existingPermission.save();
       } else {
-        file.permissions.push({ userId: targetUser._id, level });
+        await Permission.create({
+          fileId: file._id,
+          userId: targetUser._id,
+          level,
+        });
+        file.shareCount += 1;
+        await file.save();
       }
 
-      await file.save();
+      const permissions = await Permission.find({ fileId: file._id }).populate('userId', 'name email');
 
       res.json({
         success: true,
         file: {
           _id: file._id,
           originalName: file.originalName,
-          permissions: file.permissions,
+          permissions: permissions.map((p) => ({
+            userId: p.userId,
+            level: p.level,
+          })),
         },
       });
     } catch (error: any) {
@@ -743,12 +774,17 @@ router.post(
       const file = await checkFileAccess(id, user, 'read');
 
       const userId = user._id;
-      const isStarred = file.starredBy.some(
-        (starredUserId) => starredUserId.toString() === userId.toString()
-      );
+      const existingStar = await Star.findOne({
+        fileId: file._id,
+        userId,
+      });
 
-      if (!isStarred) {
-        file.starredBy.push(userId);
+      if (!existingStar) {
+        await Star.create({
+          fileId: file._id,
+          userId,
+        });
+        file.starCount += 1;
         await file.save();
       }
 
@@ -757,7 +793,7 @@ router.post(
         file: {
           _id: file._id,
           originalName: file.originalName,
-          starredBy: file.starredBy,
+          starCount: file.starCount,
         },
       });
     } catch (error: any) {
@@ -781,17 +817,22 @@ router.delete(
       const file = await checkFileAccess(id, user, 'read');
 
       const userId = user._id;
-      file.starredBy = file.starredBy.filter(
-        (starredUserId) => starredUserId.toString() !== userId.toString()
-      );
-      await file.save();
+      const star = await Star.findOneAndDelete({
+        fileId: file._id,
+        userId,
+      });
+
+      if (star && file.starCount > 0) {
+        file.starCount -= 1;
+        await file.save();
+      }
 
       res.json({
         success: true,
         file: {
           _id: file._id,
           originalName: file.originalName,
-          starredBy: file.starredBy,
+          starCount: file.starCount,
         },
       });
     } catch (error: any) {

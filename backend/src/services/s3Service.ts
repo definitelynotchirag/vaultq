@@ -4,7 +4,7 @@ import { generateStorageName } from '../utils/helpers';
 const MAX_FILE_SIZE = 100 * 1024 * 1024;
 const PRESIGNED_URL_EXPIRY = 15 * 60;
 
-const getContentType = (fileName: string): string => {
+export const getContentType = (fileName: string): string => {
   const ext = fileName.split('.').pop()?.toLowerCase() || '';
   const mimeTypes: Record<string, string> = {
     pdf: 'application/pdf',

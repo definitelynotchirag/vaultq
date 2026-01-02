@@ -3,25 +3,30 @@ export interface User {
   googleId: string;
   email: string;
   name: string;
+  storageLimit?: number;
+  storageUsed?: number;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface Permission {
-  userId: string;
+  userId: string | { _id: string; name: string; email: string };
   level: 'read' | 'write';
 }
 
 export interface File {
   _id: string;
-  owner: string;
+  owner: string | { _id: string; name: string; email: string };
   originalName: string;
   storageName: string;
   url: string;
   size: number;
+  mimeType: string;
   public: boolean;
   permissions: Permission[];
-  starredBy?: string[];
+  isStarred?: boolean;
+  starCount?: number;
+  shareCount?: number;
   deleted?: boolean;
   deletedAt?: string | null;
   createdAt: string;

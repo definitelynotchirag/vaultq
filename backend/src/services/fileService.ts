@@ -1,5 +1,7 @@
 import { createError } from '../middleware/errorHandler';
 import { File } from '../models/File';
+import { Permission } from '../models/Permission';
+import { Star } from '../models/Star';
 import { IFile, IUser } from '../types';
 
 export const checkFileAccess = async (
@@ -31,16 +33,21 @@ export const checkFileAccess = async (
     return file;
   }
 
-  const hasPermission = file.permissions.some((perm) => {
-    if (perm.userId.toString() !== userId) return false;
-    if (requiredLevel === 'read') {
-      return perm.level === 'read' || perm.level === 'write';
-    }
-    return perm.level === 'write';
+  const permission = await Permission.findOne({
+    fileId: file._id,
+    userId: user._id,
   });
 
-  if (hasPermission) {
-    return file;
+  if (permission) {
+    if (requiredLevel === 'read') {
+      if (permission.level === 'read' || permission.level === 'write') {
+        return file;
+      }
+    } else {
+      if (permission.level === 'write') {
+        return file;
+      }
+    }
   }
 
   if (file.public && requiredLevel === 'write') {
@@ -53,16 +60,15 @@ export const checkFileAccess = async (
 export const getAccessibleFiles = async (user: IUser, searchQuery?: string) => {
   const userId = user._id;
 
-  const accessQuery = {
-    $or: [
-      { owner: userId },
-      { 'permissions.userId': userId },
-    ],
-    public: { $ne: true },
-  };
+  const userPermissions = await Permission.find({ userId }).select('fileId');
+  const accessibleFileIds = userPermissions.map((p) => p.fileId);
 
   let query: any = {
-    ...accessQuery,
+    $or: [
+      { owner: userId },
+      { _id: { $in: accessibleFileIds } },
+    ],
+    public: { $ne: true },
     deleted: { $ne: true },
   };
 
@@ -72,7 +78,7 @@ export const getAccessibleFiles = async (user: IUser, searchQuery?: string) => {
         {
           $or: [
             { owner: userId },
-            { 'permissions.userId': userId },
+            { _id: { $in: accessibleFileIds } },
           ],
         },
         { public: { $ne: true } },
@@ -88,10 +94,13 @@ export const getAccessibleFiles = async (user: IUser, searchQuery?: string) => {
 export const getTrashFiles = async (user: IUser) => {
   const userId = user._id;
 
+  const userPermissions = await Permission.find({ userId }).select('fileId');
+  const accessibleFileIds = userPermissions.map((p) => p.fileId);
+
   const query = {
     $or: [
       { owner: userId },
-      { 'permissions.userId': userId },
+      { _id: { $in: accessibleFileIds } },
     ],
     deleted: true,
   };
@@ -123,17 +132,19 @@ export const getSharedFile = async (fileId: string, user?: IUser): Promise<IFile
 export const getStarredFiles = async (user: IUser, searchQuery?: string) => {
   const userId = user._id;
 
-  const accessQuery = {
-    $or: [
-      { owner: userId },
-      { 'permissions.userId': userId },
-    ],
-    public: { $ne: true },
-    starredBy: userId,
-  };
+  const userStars = await Star.find({ userId }).select('fileId');
+  const starredFileIds = userStars.map((s) => s.fileId);
+
+  const userPermissions = await Permission.find({ userId }).select('fileId');
+  const accessibleFileIds = userPermissions.map((p) => p.fileId);
 
   let query: any = {
-    ...accessQuery,
+    $or: [
+      { owner: userId },
+      { _id: { $in: accessibleFileIds } },
+    ],
+    _id: { $in: starredFileIds },
+    public: { $ne: true },
     deleted: { $ne: true },
   };
 
@@ -143,11 +154,11 @@ export const getStarredFiles = async (user: IUser, searchQuery?: string) => {
         {
           $or: [
             { owner: userId },
-            { 'permissions.userId': userId },
+            { _id: { $in: accessibleFileIds } },
           ],
         },
+        { _id: { $in: starredFileIds } },
         { public: { $ne: true } },
-        { starredBy: userId },
         { originalName: { $regex: searchQuery, $options: 'i' } },
         { deleted: { $ne: true } },
       ],

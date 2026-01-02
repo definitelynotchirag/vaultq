@@ -1,5 +1,7 @@
+import mongoose from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import { File } from '../models/File';
+import { User } from '../models/User';
 import { IUser } from '../types';
 
 export const generateStorageName = (originalName: string): string => {
@@ -12,10 +14,15 @@ export const generateStorageName = (originalName: string): string => {
 };
 
 export const calculateUserStorageUsed = async (user: IUser): Promise<number> => {
+  if (user.storageUsed !== undefined) {
+    return user.storageUsed;
+  }
+
   const result = await File.aggregate([
     {
       $match: {
         owner: user._id,
+        deleted: { $ne: true },
       },
     },
     {
@@ -27,6 +34,29 @@ export const calculateUserStorageUsed = async (user: IUser): Promise<number> => 
   ]);
 
   return result.length > 0 ? result[0].totalSize : 0;
+};
+
+export const updateStorageUsed = async (
+  userId: mongoose.Types.ObjectId | mongoose.Schema.Types.ObjectId,
+  sizeDelta: number
+): Promise<void> => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    await User.findByIdAndUpdate(
+      userId,
+      { $inc: { storageUsed: sizeDelta } },
+      { session }
+    );
+
+    await session.commitTransaction();
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
+  }
 };
 
 

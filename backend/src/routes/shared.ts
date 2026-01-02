@@ -3,7 +3,8 @@ import { fileRateLimiter } from '../config/rateLimiter';
 import { getSharedFile } from '../services/fileService';
 import { createError } from '../middleware/errorHandler';
 import { IUser } from '../types';
-import { User } from '../models/User';
+import { Permission } from '../models/Permission';
+import { Star } from '../models/Star';
 import { generateDownloadUrl, generateViewUrl } from '../services/s3Service';
 
 const router = Router();
@@ -18,15 +19,8 @@ router.get(
       const user = req.user as IUser | undefined;
       const file = await getSharedFile(fileId, user || undefined);
 
-      const populatedPermissions = await Promise.all(
-        file.permissions.map(async (perm: any) => {
-          const user = await User.findById(perm.userId).select('name email');
-          return {
-            userId: user ? { _id: user._id, name: user.name, email: user.email } : perm.userId,
-            level: perm.level,
-          };
-        })
-      );
+      const permissions = await Permission.find({ fileId: file._id }).populate('userId', 'name email');
+      const isStarred = user ? await Star.exists({ fileId: file._id, userId: user._id }) : false;
 
       res.json({
         success: true,
@@ -34,10 +28,16 @@ router.get(
           _id: file._id,
           originalName: file.originalName,
           size: file.size,
+          mimeType: file.mimeType,
           public: file.public,
           owner: file.owner,
-          permissions: populatedPermissions,
-          starredBy: file.starredBy,
+          permissions: permissions.map((p) => ({
+            userId: p.userId,
+            level: p.level,
+          })),
+          isStarred: !!isStarred,
+          starCount: file.starCount,
+          shareCount: file.shareCount,
           createdAt: file.createdAt,
           updatedAt: file.updatedAt,
         },

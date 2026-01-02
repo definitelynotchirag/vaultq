@@ -9,6 +9,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "setup:s3-cors": "ts-node scripts/setup-s3-cors.ts"
+    
   },
   "keywords": [],
   "author": "",
