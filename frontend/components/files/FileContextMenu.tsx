@@ -65,7 +65,7 @@ export function FileContextMenu({
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { user } = useAuth();
   const canWrite = hasWriteAccess(file, user);
-  const isStarred = user && file.starredBy?.includes(user._id);
+  const isStarred = !!file.isStarred;
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

@@ -12,7 +12,6 @@ import { FileGrid } from '@/components/layout/FileGrid';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
 import { useTheme as useCustomTheme } from '@/contexts/ThemeContext';
-import { useAuth } from '@/hooks/useAuth';
 import { useFiles } from '@/hooks/useFiles';
 import { api } from '@/lib/api';
 import { getColors } from '@/lib/colors';
@@ -36,7 +35,6 @@ export default function SharedPage() {
   const [shareFile, setShareFile] = useState<File | null>(null);
   const [viewFile, setViewFile] = useState<File | null>(null);
   const [infoFile, setInfoFile] = useState<File | null>(null);
-  const { user } = useAuth();
 
   const { files, isLoading, renameFile: renameFileApi, deleteFile: deleteFileApi, downloadFile, refetch } = useFiles(debouncedSearch);
 
@@ -85,7 +83,7 @@ export default function SharedPage() {
   };
 
   const handleStar = async (file: File) => {
-    const isStarred = user && file.starredBy?.includes(user._id);
+    const isStarred = !!file.isStarred;
     try {
       if (isStarred) {
         await api.files.unstarFile(file._id);

@@ -12,7 +12,6 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useTheme as useCustomTheme } from '@/contexts/ThemeContext';
-import { useAuth } from '@/hooks/useAuth';
 import { useStarredFiles } from '@/hooks/useStarredFiles';
 import { api } from '@/lib/api';
 import { getColors } from '@/lib/colors';
@@ -36,7 +35,6 @@ export default function StarredPage() {
   const [shareFile, setShareFile] = useState<File | null>(null);
   const [viewFile, setViewFile] = useState<File | null>(null);
   const [infoFile, setInfoFile] = useState<File | null>(null);
-  const { user } = useAuth();
 
   const { files, isLoading, renameFile: renameFileApi, deleteFile: deleteFileApi, downloadFile, toggleStar, refetch } = useStarredFiles(debouncedSearch);
 
@@ -79,7 +77,7 @@ export default function StarredPage() {
   };
 
   const handleStar = async (file: File) => {
-    const isStarred = user && file.starredBy?.includes(user._id);
+    const isStarred = !!file.isStarred;
     await toggleStar(file._id, !!isStarred);
     refetch();
   };

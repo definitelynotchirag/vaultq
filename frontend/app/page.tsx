@@ -14,7 +14,6 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useTheme as useCustomTheme } from '@/contexts/ThemeContext';
-import { useAuth } from '@/hooks/useAuth';
 import { useFiles } from '@/hooks/useFiles';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { api } from '@/lib/api';
@@ -41,7 +40,6 @@ export default function HomePage() {
   const [previewFile, setPreviewFile] = useState<File | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const searchInputRef = useRef<HTMLInputElement | null>(null);
-  const { user } = useAuth();
   const theme = useTheme();
   const { mode } = useCustomTheme();
   const colors = getColors(mode);
@@ -104,7 +102,7 @@ export default function HomePage() {
   };
 
   const handleStar = async (file: File) => {
-    const isStarred = user && file.starredBy?.includes(user._id);
+    const isStarred = !!file.isStarred;
     try {
       if (isStarred) {
         await api.files.unstarFile(file._id);

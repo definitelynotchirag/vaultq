@@ -1,6 +1,5 @@
 'use client';
 
-import { useAuth } from '@/hooks/useAuth';
 import { useTheme as useCustomTheme } from '@/contexts/ThemeContext';
 import { getColors } from '@/lib/colors';
 import { formatDate, formatFileSize } from '@/lib/utils';
@@ -44,12 +43,11 @@ export function FileListItem({
   onStar,
 }: FileListItemProps) {
   const [hovered, setHovered] = useState(false);
-  const { user } = useAuth();
   const theme = useTheme();
   const { mode } = useCustomTheme();
   const colors = getColors(mode);
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isStarred = user && file.starredBy?.includes(user._id);
+  const isStarred = !!file.isStarred;
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const longPressTriggered = useRef(false);
 
