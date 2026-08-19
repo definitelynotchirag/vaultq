@@ -19,14 +19,14 @@ export const metadata: Metadata = {
   authors: [{ name: "VaultQ" }],
   creator: "VaultQ",
   publisher: "VaultQ",
-  metadataBase: new URL("https://vaultq.chiragx.me"),
+  metadataBase: new URL("https://vaultq.vercel.app"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://vaultq.chiragx.me",
+    url: "https://vaultq.vercel.app",
     siteName: "VaultQ",
     title: "VaultQ - Secure Cloud Storage",
     description: "VaultQ is a secure, scalable cloud storage solution. Store, organize, and share your files with ease.",

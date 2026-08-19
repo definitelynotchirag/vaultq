@@ -20,8 +20,8 @@ if (!BUCKET_NAME) {
 
 const allowedOrigins = [
   FRONTEND_URL,
-  'https://vaultq.chiragx.me',
-  'https://api.vaultq.chiragx.me',
+  'https://vaultq.vercel.app',
+  'https://vaultq-et2t.onrender.com',
   'http://localhost:3001',
   'http://localhost:3000',
 ].filter((origin, index, self) => self.indexOf(origin) === index);
